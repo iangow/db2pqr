@@ -42,9 +42,10 @@ The following string names are recognised:
 \code{"utf8"}      \tab \code{arrow::utf8()}      \cr
 \code{"large_string"} \tab \code{arrow::large_utf8()} \cr
 \code{"large_utf8"}   \tab \code{arrow::large_utf8()} \cr
-\code{"date"}      \tab \code{arrow::date32()}    \cr
-\code{"date32"}    \tab \code{arrow::date32()}    \cr
-\code{"date64"}    \tab \code{arrow::date64()}
+\code{"date"}         \tab \code{arrow::date32()}                          \cr
+\code{"date32"}       \tab \code{arrow::date32()}                          \cr
+\code{"timestamp"}    \tab \code{arrow::timestamp("us")}                   \cr
+\code{"timestamptz"}  \tab \code{arrow::timestamp("us", timezone = "UTC")}
 }
 }
 \examples{

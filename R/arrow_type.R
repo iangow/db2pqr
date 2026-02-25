@@ -27,7 +27,9 @@
   # Dates
   date   = arrow::date32(),
   date32 = arrow::date32(),
-  date64 = arrow::date64()
+  # Timestamps (microsecond resolution, matching PostgreSQL)
+  timestamp   = arrow::timestamp("us"),
+  timestamptz = arrow::timestamp("us", timezone = "UTC")
 )
 
 #' Resolve an Arrow data type from a string or pass through an existing type
@@ -59,9 +61,10 @@
 #'   \code{"utf8"}      \tab \code{arrow::utf8()}      \cr
 #'   \code{"large_string"} \tab \code{arrow::large_utf8()} \cr
 #'   \code{"large_utf8"}   \tab \code{arrow::large_utf8()} \cr
-#'   \code{"date"}      \tab \code{arrow::date32()}    \cr
-#'   \code{"date32"}    \tab \code{arrow::date32()}    \cr
-#'   \code{"date64"}    \tab \code{arrow::date64()}
+#'   \code{"date"}         \tab \code{arrow::date32()}                          \cr
+#'   \code{"date32"}       \tab \code{arrow::date32()}                          \cr
+#'   \code{"timestamp"}    \tab \code{arrow::timestamp("us")}                   \cr
+#'   \code{"timestamptz"}  \tab \code{arrow::timestamp("us", timezone = "UTC")}
 #' }
 #'
 #' @param x A string naming an Arrow type (see table above), or an Arrow

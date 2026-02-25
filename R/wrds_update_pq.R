@@ -104,7 +104,5 @@ wrds_update_pq <- function(
   val <- meta[["last_modified"]]
   if (is.null(val) || is.na(val)) return(NULL)
 
-  # Parse whichever format is present (date-only or datetime)
-  d <- tryCatch(as.Date(val), error = function(e) NULL)
-  d
+  .parse_wrds_date(val)
 }

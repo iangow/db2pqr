@@ -25,6 +25,10 @@
 #'   names match at least one pattern are retained. Applied after \code{drop}.
 #' @param drop Optional character vector of regex patterns. Columns whose names
 #'   match at least one pattern are removed. Applied before \code{keep}.
+#' @param col_types Optional named list of Arrow type objects specifying column
+#'   type overrides. Only columns that need to differ from their inferred types
+#'   need to be supplied. For example,
+#'   \code{col_types = list(permno = arrow::int32(), ret = arrow::float32())}.
 #' @param alt_table_name Optional. Alternative basename for the output Parquet
 #'   file, used when the file should have a different name from \code{table_name}.
 #' @param chunk_size Number of rows fetched and written per chunk. Default is
@@ -58,7 +62,8 @@ wrds_update_pq <- function(
     keep = NULL,
     drop = NULL,
     alt_table_name = NULL,
-    chunk_size = 100000L) {
+    chunk_size = 100000L,
+    col_types = NULL) {
 
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name
   if (is.null(out_file)) {
@@ -109,7 +114,8 @@ wrds_update_pq <- function(
     alt_table_name = alt_table_name,
     chunk_size  = chunk_size,
     con         = con,
-    metadata    = pq_metadata
+    metadata    = pq_metadata,
+    col_types   = col_types
   )
 
   message("Completed file download at ", format(Sys.time(), tz = "UTC", usetz = TRUE), ".")

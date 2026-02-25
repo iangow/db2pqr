@@ -1,4 +1,13 @@
-sql_to_pq <- function(con, sql, out_file, chunk_size = 100000, metadata = NULL) {
+sql_to_pq <- function(con, sql, out_file, chunk_size = 100000, metadata = NULL,
+                      col_types = NULL) {
+  if (!is.null(col_types)) {
+    unknown <- setdiff(names(col_types), character(0))  # validated later per-chunk
+    if (!is.list(col_types) || is.null(names(col_types))) {
+      stop("`col_types` must be a named list of Arrow type objects, ",
+           "e.g. list(permno = arrow::int32()).")
+    }
+  }
+
   res  <- DBI::dbSendQuery(con, sql)
   sink <- arrow::FileOutputStream$create(out_file)
   writer <- NULL
@@ -12,6 +21,15 @@ sql_to_pq <- function(con, sql, out_file, chunk_size = 100000, metadata = NULL) 
       n_total <- n_total + nrow(chunk)
 
       tab <- arrow::Table$create(chunk)
+
+      # Apply column type casts
+      if (!is.null(col_types)) {
+        for (col in intersect(names(col_types), tab$schema$names)) {
+          idx <- match(col, tab$schema$names) - 1L  # 0-indexed
+          tab <- tab$SetColumn(idx, arrow::field(col, col_types[[col]]),
+                               tab$column(idx)$cast(col_types[[col]]))
+        }
+      }
 
       if (is.null(writer)) {
         schema <- tab$schema

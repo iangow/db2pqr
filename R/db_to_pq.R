@@ -15,7 +15,8 @@ db_to_pq <- function(
     alt_table_name = NULL,
     chunk_size = 100000L,
     con = NULL,
-    metadata = NULL) {
+    metadata = NULL,
+    col_types = NULL) {
 
   # Build output path: <data_dir>/<schema>/<table>.parquet
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name
@@ -67,5 +68,6 @@ db_to_pq <- function(
     sql <- paste(sql, "LIMIT", as.integer(obs))
   }
 
-  sql_to_pq(con, sql, out_file, chunk_size = chunk_size, metadata = metadata)
+  sql_to_pq(con, sql, out_file, chunk_size = chunk_size, metadata = metadata,
+            col_types = col_types)
 }

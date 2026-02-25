@@ -15,7 +15,8 @@ wrds_update_pq(
   keep = NULL,
   drop = NULL,
   alt_table_name = NULL,
-  chunk_size = 100000L
+  chunk_size = 100000L,
+  col_types = NULL
 )
 }
 \arguments{
@@ -52,6 +53,11 @@ file, used when the file should have a different name from \code{table_name}.}
 
 \item{chunk_size}{Number of rows fetched and written per chunk. Default is
 \code{100000}.}
+
+\item{col_types}{Optional named list of Arrow type objects specifying column
+type overrides. Only columns that need to differ from their inferred types
+need to be supplied. For example,
+\code{col_types = list(permno = arrow::int32(), ret = arrow::float32())}.}
 }
 \value{
 Invisibly returns the path to the Parquet file if written, or

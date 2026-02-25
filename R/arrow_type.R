@@ -1,40 +1,41 @@
-# Lookup table: user-friendly string -> Arrow type object.
-# Used by arrow_type() and referenced in col_types documentation.
 # Returns TRUE if an Arrow DataType is a timestamp type.
 .is_arrow_timestamp <- function(type) {
   inherits(type, "Timestamp")
 }
 
+# Lookup table: user-friendly string -> zero-argument constructor function.
+# Stored as functions so Arrow objects are created on demand, avoiding
+# invalid external pointer issues with pre-built objects.
 .ARROW_TYPE_MAP <- list(
   # Signed integers
-  int8    = arrow::int8(),
-  int16   = arrow::int16(),
-  int32   = arrow::int32(),
-  int64   = arrow::int64(),
+  int8    = arrow::int8,
+  int16   = arrow::int16,
+  int32   = arrow::int32,
+  int64   = arrow::int64,
   # Unsigned integers
-  uint8   = arrow::uint8(),
-  uint16  = arrow::uint16(),
-  uint32  = arrow::uint32(),
-  uint64  = arrow::uint64(),
+  uint8   = arrow::uint8,
+  uint16  = arrow::uint16,
+  uint32  = arrow::uint32,
+  uint64  = arrow::uint64,
   # Floating point
-  float16 = arrow::float16(),
-  float32 = arrow::float32(),
-  float64 = arrow::float64(),
-  double  = arrow::float64(),   # common alias
+  float16 = arrow::float16,
+  float32 = arrow::float32,
+  float64 = arrow::float64,
+  double  = arrow::float64,    # common alias
   # Boolean
-  bool    = arrow::boolean(),
-  boolean = arrow::boolean(),
+  bool    = arrow::boolean,
+  boolean = arrow::boolean,
   # Strings
-  string        = arrow::utf8(),
-  utf8          = arrow::utf8(),
-  large_string  = arrow::large_utf8(),
-  large_utf8    = arrow::large_utf8(),
+  string       = arrow::utf8,
+  utf8         = arrow::utf8,
+  large_string = arrow::large_utf8,
+  large_utf8   = arrow::large_utf8,
   # Dates
-  date   = arrow::date32(),
-  date32 = arrow::date32(),
+  date   = arrow::date32,
+  date32 = arrow::date32,
   # Timestamps (microsecond resolution, matching PostgreSQL)
-  timestamp   = arrow::timestamp("us"),
-  timestamptz = arrow::timestamp("us", timezone = "UTC")
+  timestamp   = function() arrow::timestamp("us"),
+  timestamptz = function() arrow::timestamp("us", timezone = "UTC")
 )
 
 #' Resolve an Arrow data type from a string or pass through an existing type
@@ -78,12 +79,14 @@
 #' @return An Arrow \code{DataType} object.
 #'
 #' @examples
+#' \dontrun{
 #' arrow_type("int32")$ToString()    # "int32"
 #' arrow_type("double")$ToString()   # "double"
 #' arrow_type("date")$ToString()     # "date32"
 #'
 #' # Passing an already-resolved type is a no-op
 #' arrow_type(arrow::float32())$ToString()
+#' }
 #'
 #' @export
 arrow_type <- function(x) {
@@ -91,10 +94,10 @@ arrow_type <- function(x) {
   if (!is.character(x) || length(x) != 1L) {
     stop("`col_types` values must be a string type name or an Arrow DataType object.")
   }
-  resolved <- .ARROW_TYPE_MAP[[x]]
-  if (is.null(resolved)) {
+  constructor <- .ARROW_TYPE_MAP[[x]]
+  if (is.null(constructor)) {
     stop("Unknown Arrow type name: \"", x, "\". ",
          "See ?arrow_type for supported names.")
   }
-  resolved
+  constructor()
 }

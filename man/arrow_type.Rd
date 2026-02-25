@@ -49,11 +49,13 @@ The following string names are recognised:
 }
 }
 \examples{
+\dontrun{
 arrow_type("int32")$ToString()    # "int32"
 arrow_type("double")$ToString()   # "double"
 arrow_type("date")$ToString()     # "date32"
 
 # Passing an already-resolved type is a no-op
 arrow_type(arrow::float32())$ToString()
+}
 
 }

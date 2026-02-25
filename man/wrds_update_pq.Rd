@@ -16,7 +16,8 @@ wrds_update_pq(
   drop = NULL,
   alt_table_name = NULL,
   chunk_size = 100000L,
-  col_types = NULL
+  col_types = NULL,
+  tz = "UTC"
 )
 }
 \arguments{
@@ -60,6 +61,12 @@ may be string type names (e.g. \code{"int32"}, \code{"float32"},
 differ from their inferred types need to be supplied. See
 \code{\link{arrow_type}} for supported names. For example,
 \code{col_types = list(permno = "int32", ret = "float32")}.}
+
+\item{tz}{Time zone used to interpret \code{TIMESTAMP WITHOUT TIME ZONE}
+columns. Such columns are cast to \code{TIMESTAMPTZ} in the SQL query using
+\code{AT TIME ZONE}, so they are written as UTC-normalised timestamps in the
+Parquet file. Defaults to \code{"UTC"}. Set to \code{NULL} to leave naive
+timestamps as-is.}
 }
 \value{
 Invisibly returns the path to the Parquet file if written, or

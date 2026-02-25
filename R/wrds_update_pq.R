@@ -31,6 +31,11 @@
 #'   differ from their inferred types need to be supplied. See
 #'   \code{\link{arrow_type}} for supported names. For example,
 #'   \code{col_types = list(permno = "int32", ret = "float32")}.
+#' @param tz Time zone used to interpret \code{TIMESTAMP WITHOUT TIME ZONE}
+#'   columns. Such columns are cast to \code{TIMESTAMPTZ} in the SQL query using
+#'   \code{AT TIME ZONE}, so they are written as UTC-normalised timestamps in the
+#'   Parquet file. Defaults to \code{"UTC"}. Set to \code{NULL} to leave naive
+#'   timestamps as-is.
 #' @param alt_table_name Optional. Alternative basename for the output Parquet
 #'   file, used when the file should have a different name from \code{table_name}.
 #' @param chunk_size Number of rows fetched and written per chunk. Default is
@@ -65,7 +70,8 @@ wrds_update_pq <- function(
     drop = NULL,
     alt_table_name = NULL,
     chunk_size = 100000L,
-    col_types = NULL) {
+    col_types = NULL,
+    tz = "UTC") {
 
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name
   if (is.null(out_file)) {
@@ -117,7 +123,8 @@ wrds_update_pq <- function(
     chunk_size  = chunk_size,
     con         = con,
     metadata    = pq_metadata,
-    col_types   = col_types
+    col_types   = col_types,
+    tz          = tz
   )
 
   message("Completed file download at ", format(Sys.time(), tz = "UTC", usetz = TRUE), ".")

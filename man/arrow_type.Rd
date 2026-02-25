@@ -49,11 +49,11 @@ The following string names are recognised:
 }
 }
 \examples{
-arrow_type("int32")    # arrow::int32()
-arrow_type("double")   # arrow::float64()
-arrow_type("date")     # arrow::date32()
+arrow_type("int32")$ToString()    # "int32"
+arrow_type("double")$ToString()   # "double"
+arrow_type("date")$ToString()     # "date32"
 
 # Passing an already-resolved type is a no-op
-arrow_type(arrow::float32())
+arrow_type(arrow::float32())$ToString()
 
 }

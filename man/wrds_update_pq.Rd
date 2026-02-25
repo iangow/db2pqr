@@ -103,5 +103,5 @@ wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
 
 }
 \seealso{
-\code{\link{db_to_pq}}, \code{\link{wrds_schema_to_pq}}
+\code{\link{pq_last_modified}}, \code{\link{pq_archive}}, \code{\link{pq_restore}}
 }

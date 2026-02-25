@@ -1,7 +1,7 @@
 Package: db2pq
 Type: Package
 Title: Export Database Tables to Parquet
-Version: 0.0.0.9000
+Version: 0.0.1
 Description: Tools for exporting PostgreSQL tables to Parquet files, with
     support for chunked writes, column type overrides, and timezone-aware
     timestamp handling. Includes functions for maintaining a local Parquet

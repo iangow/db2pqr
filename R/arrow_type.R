@@ -81,6 +81,11 @@
 #' arrow_type(arrow::float32())
 #'
 #' @export
+# Returns TRUE if an Arrow DataType is a timestamp type.
+.is_arrow_timestamp <- function(type) {
+  inherits(type, "Timestamp")
+}
+
 arrow_type <- function(x) {
   if (inherits(x, "DataType")) return(x)
   if (!is.character(x) || length(x) != 1L) {

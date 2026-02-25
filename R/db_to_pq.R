@@ -54,19 +54,37 @@ db_to_pq <- function(
     stop("No columns selected after applying keep/drop filters.")
   }
 
-  # Build SELECT expressions, wrapping naive timestamp columns with AT TIME ZONE
+  # Resolve col_types up front so we can inspect types during SQL building
+  resolved_col_types <- if (!is.null(col_types)) lapply(col_types, arrow_type) else list()
+
+  # Build SELECT expressions, wrapping timestamp columns with AT TIME ZONE
   if (!is.null(tz)) {
     naive_ts <- .naive_timestamp_cols(con, schema, table_name, nms)
-    if (length(naive_ts) > 0) {
-      message("Applying tz='", tz, "' to ", length(naive_ts),
-              " timestamp without time zone column(s): ",
-              paste(naive_ts, collapse = ", "), ".")
-    }
-    col_exprs <- ifelse(
-      nms %in% naive_ts,
-      sprintf('("%s" AT TIME ZONE \'%s\')', nms, tz),
-      sprintf('"%s"', nms)
+
+    # Columns requested as timestamp via col_types but not natively timestamp in PG
+    cast_ts <- intersect(
+      names(resolved_col_types)[vapply(resolved_col_types, .is_arrow_timestamp, logical(1))],
+      setdiff(nms, naive_ts)
     )
+
+    ts_cols <- union(naive_ts, cast_ts)
+    if (length(ts_cols) > 0) {
+      message("Applying tz='", tz, "' to ", length(ts_cols),
+              " timestamp column(s): ", paste(ts_cols, collapse = ", "), ".")
+    }
+
+    col_exprs <- vapply(nms, function(col) {
+      if (col %in% naive_ts) {
+        sprintf('("%s" AT TIME ZONE \'%s\')', col, tz)
+      } else if (col %in% cast_ts) {
+        sprintf('(CAST("%s" AS TIMESTAMP) AT TIME ZONE \'%s\')', col, tz)
+      } else {
+        sprintf('"%s"', col)
+      }
+    }, character(1))
+
+    # Remove cast_ts cols from col_types - PG now returns them as timestamptz
+    resolved_col_types <- resolved_col_types[setdiff(names(resolved_col_types), cast_ts)]
   } else {
     col_exprs <- sprintf('"%s"', nms)
   }
@@ -83,8 +101,9 @@ db_to_pq <- function(
     sql <- paste(sql, "LIMIT", as.integer(obs))
   }
 
+  col_types_final <- if (length(resolved_col_types) > 0) resolved_col_types else NULL
   sql_to_pq(con, sql, out_file, chunk_size = chunk_size, metadata = metadata,
-            col_types = col_types)
+            col_types = col_types_final)
 }
 
 # Return the names of columns in `nms` whose PostgreSQL type is

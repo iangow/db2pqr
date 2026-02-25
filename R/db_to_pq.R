@@ -75,9 +75,9 @@ db_to_pq <- function(
 
     col_exprs <- vapply(nms, function(col) {
       if (col %in% naive_ts) {
-        sprintf('("%s" AT TIME ZONE \'%s\')', col, tz)
+        sprintf('("%s" AT TIME ZONE \'%s\') AS "%s"', col, tz, col)
       } else if (col %in% cast_ts) {
-        sprintf('(CAST("%s" AS TIMESTAMP) AT TIME ZONE \'%s\')', col, tz)
+        sprintf('(CAST("%s" AS TIMESTAMP) AT TIME ZONE \'%s\') AS "%s"', col, tz, col)
       } else {
         sprintf('"%s"', col)
       }

@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(db2pqr)
+library(db2pq)
 
-test_check("db2pqr")
+test_check("db2pq")

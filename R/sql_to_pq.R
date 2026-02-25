@@ -1,11 +1,11 @@
 sql_to_pq <- function(con, sql, out_file, chunk_size = 100000, metadata = NULL,
                       col_types = NULL) {
   if (!is.null(col_types)) {
-    unknown <- setdiff(names(col_types), character(0))  # validated later per-chunk
     if (!is.list(col_types) || is.null(names(col_types))) {
-      stop("`col_types` must be a named list of Arrow type objects, ",
-           "e.g. list(permno = arrow::int32()).")
+      stop("`col_types` must be a named list, ",
+           "e.g. list(permno = \"int32\") or list(permno = arrow::int32()).")
     }
+    col_types <- lapply(col_types, arrow_type)
   }
 
   res  <- DBI::dbSendQuery(con, sql)

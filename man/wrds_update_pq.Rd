@@ -54,10 +54,12 @@ file, used when the file should have a different name from \code{table_name}.}
 \item{chunk_size}{Number of rows fetched and written per chunk. Default is
 \code{100000}.}
 
-\item{col_types}{Optional named list of Arrow type objects specifying column
-type overrides. Only columns that need to differ from their inferred types
-need to be supplied. For example,
-\code{col_types = list(permno = arrow::int32(), ret = arrow::float32())}.}
+\item{col_types}{Optional named list specifying column type overrides. Values
+may be string type names (e.g. \code{"int32"}, \code{"float32"},
+\code{"date"}) or Arrow \code{DataType} objects. Only columns that need to
+differ from their inferred types need to be supplied. See
+\code{\link{arrow_type}} for supported names. For example,
+\code{col_types = list(permno = "int32", ret = "float32")}.}
 }
 \value{
 Invisibly returns the path to the Parquet file if written, or

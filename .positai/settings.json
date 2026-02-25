@@ -1,0 +1,7 @@
+{
+  "permission": {
+    "read": {
+      "/Users/igow/git/db2pq/db2pq/postgres/*": "allow"
+    }
+  }
+}

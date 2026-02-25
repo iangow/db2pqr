@@ -96,20 +96,29 @@ wrds_update_pq <- function(
     params = list(paste0(schema, ".", table_name))
   )$comment[[1]]
 
+  tbl_label <- paste0(schema, ".", out_name)
+
+  if (is.null(wrds_comment) || is.na(wrds_comment)) {
+    message("No comment found for ", tbl_label, ".")
+  }
+
   wrds_date <- .parse_wrds_date(wrds_comment)
 
   if (!force) {
     pq_date <- .get_pq_date(out_file)
-    tbl_label <- paste0(schema, ".", out_name)
 
-    if (!is.null(wrds_date) && !is.null(pq_date) && wrds_date <= pq_date) {
+    # Conservative: if we can't establish a source date, don't update
+    if (is.null(wrds_date)) {
       message(tbl_label, " already up to date.")
       return(invisible(NULL))
     }
 
-    if (!is.null(wrds_date)) {
-      message("Updated ", tbl_label, " is available.")
+    if (!is.null(pq_date) && wrds_date <= pq_date) {
+      message(tbl_label, " already up to date.")
+      return(invisible(NULL))
     }
+
+    message("Updated ", tbl_label, " is available.")
   } else {
     message("Forcing update based on user request.")
   }

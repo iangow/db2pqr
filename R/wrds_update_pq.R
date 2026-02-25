@@ -1,3 +1,52 @@
+#' Export a WRDS table to Parquet, skipping if already up to date
+#'
+#' Exports a table from the WRDS PostgreSQL database to a Parquet file. Before
+#' downloading, the WRDS table comment is compared against the \code{last_modified}
+#' metadata embedded in any existing local Parquet file. The download is skipped
+#' if the local file is already up to date, making this function safe to call
+#' repeatedly as part of a scheduled data refresh.
+#'
+#' @param table_name Name of the table in the WRDS PostgreSQL database.
+#' @param schema Name of the database schema (e.g. \code{"crsp"}, \code{"comp"}).
+#' @param data_dir Root directory of the local Parquet data repository. Defaults
+#'   to the \code{DATA_DIR} environment variable, or \code{"."} if unset. The
+#'   output file is written to \code{<data_dir>/<schema>/<table_name>.parquet}.
+#' @param out_file Optional. Full path for the output Parquet file. Overrides
+#'   the path derived from \code{data_dir}, \code{schema}, and \code{table_name}.
+#' @param force If \code{TRUE}, download proceeds regardless of the date
+#'   comparison result.
+#' @param where Optional SQL \code{WHERE} clause (without the \code{WHERE}
+#'   keyword) to filter rows before export. For example,
+#'   \code{where = "date > '2020-01-01'"}.
+#' @param obs Optional integer. Limits the number of rows imported using SQL
+#'   \code{LIMIT}. Useful for testing with large tables
+#'   (e.g. \code{obs = 1000}).
+#' @param keep Optional character vector of regex patterns. Only columns whose
+#'   names match at least one pattern are retained. Applied after \code{drop}.
+#' @param drop Optional character vector of regex patterns. Columns whose names
+#'   match at least one pattern are removed. Applied before \code{keep}.
+#' @param alt_table_name Optional. Alternative basename for the output Parquet
+#'   file, used when the file should have a different name from \code{table_name}.
+#' @param chunk_size Number of rows fetched and written per chunk. Default is
+#'   \code{100000}.
+#'
+#' @return Invisibly returns the path to the Parquet file if written, or
+#'   \code{NULL} if the update was skipped.
+#'
+#' @examples
+#' \dontrun{
+#' wrds_update_pq("dsi", "crsp")
+#' wrds_update_pq("feed21_bankruptcy_notification", "audit")
+#'
+#' # Force re-download even if local file is current
+#' wrds_update_pq("dsi", "crsp", force = TRUE)
+#'
+#' # Limit columns and rows (useful for testing)
+#' wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
+#' }
+#'
+#' @seealso \code{\link{db_to_pq}}, \code{\link{wrds_schema_to_pq}}
+#' @export
 wrds_update_pq <- function(
     table_name,
     schema,

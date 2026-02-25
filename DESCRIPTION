@@ -1,14 +1,33 @@
 Package: db2pq
-Title: What the Package Does (One Line, Title Case)
+Type: Package
+Title: Export Database Tables to Parquet
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Description: Tools for exporting PostgreSQL tables to Parquet files, with
+    support for chunked writes, column type overrides, and timezone-aware
+    timestamp handling. Includes functions for maintaining a local Parquet
+    data library sourced from WRDS (Wharton Research Data Services), with
+    update-checking based on table metadata, and archive management utilities
+    for versioning local data files.
+Authors@R: c(
+    person(
+      "Ian", "Gow",
+      email = "iandgow@gmail.com",
+      role = c("aut", "cre")
+    )
+  )
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.1.0)
+Imports:
+    arrow,
+    DBI,
+    RPostgres,
+    tibble,
+    tools,
+    wrds
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

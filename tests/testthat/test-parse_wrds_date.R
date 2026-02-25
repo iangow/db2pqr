@@ -1,4 +1,4 @@
-source(test_path("../../R/wrds_update_pq.R"))
+.parse_wrds_date <- db2pq:::.parse_wrds_date
 
 # --- Format 1: "Last modified: MM/DD/YYYY HH:MM:SS" ---
 

@@ -17,7 +17,9 @@ wrds_update_pq(
   alt_table_name = NULL,
   chunk_size = 100000L,
   col_types = NULL,
-  tz = "UTC"
+  tz = "UTC",
+  archive = FALSE,
+  archive_dir = "archive"
 )
 }
 \arguments{
@@ -67,6 +69,14 @@ columns. Such columns are cast to \code{TIMESTAMPTZ} in the SQL query using
 \code{AT TIME ZONE}, so they are written as UTC-normalised timestamps in the
 Parquet file. Defaults to \code{"UTC"}. Set to \code{NULL} to leave naive
 timestamps as-is.}
+
+\item{archive}{If \code{TRUE}, the existing local Parquet file (if any) is
+moved to the archive subdirectory before being replaced. The archived
+filename is \code{<table>_<YYYYMMDDTHHMMSSz>.parquet}, where the timestamp
+suffix is derived from the WRDS table comment.}
+
+\item{archive_dir}{Name of the archive subdirectory relative to the schema
+directory. Defaults to \code{"archive"}.}
 }
 \value{
 Invisibly returns the path to the Parquet file if written, or

@@ -36,6 +36,12 @@
 #'   \code{AT TIME ZONE}, so they are written as UTC-normalised timestamps in the
 #'   Parquet file. Defaults to \code{"UTC"}. Set to \code{NULL} to leave naive
 #'   timestamps as-is.
+#' @param archive If \code{TRUE}, the existing local Parquet file (if any) is
+#'   moved to the archive subdirectory before being replaced. The archived
+#'   filename is \code{<table>_<YYYYMMDDTHHMMSSz>.parquet}, where the timestamp
+#'   suffix is derived from the WRDS table comment.
+#' @param archive_dir Name of the archive subdirectory relative to the schema
+#'   directory. Defaults to \code{"archive"}.
 #' @param alt_table_name Optional. Alternative basename for the output Parquet
 #'   file, used when the file should have a different name from \code{table_name}.
 #' @param chunk_size Number of rows fetched and written per chunk. Default is
@@ -71,7 +77,9 @@ wrds_update_pq <- function(
     alt_table_name = NULL,
     chunk_size = 100000L,
     col_types = NULL,
-    tz = "UTC") {
+    tz = "UTC",
+    archive = FALSE,
+    archive_dir = "archive") {
 
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name
   if (is.null(out_file)) {
@@ -108,6 +116,10 @@ wrds_update_pq <- function(
 
   message("Beginning file download at ", format(Sys.time(), tz = "UTC", usetz = TRUE), ".")
 
+  if (archive && file.exists(out_file)) {
+    .archive_pq(out_file, out_name, wrds_comment, archive_dir)
+  }
+
   pq_metadata <- if (!is.null(wrds_comment)) list(last_modified = wrds_comment) else NULL
 
   out_file <- db_to_pq(
@@ -130,6 +142,58 @@ wrds_update_pq <- function(
   message("Completed file download at ", format(Sys.time(), tz = "UTC", usetz = TRUE), ".")
 
   invisible(out_file)
+}
+
+# Move an existing Parquet file into the archive subdirectory before replacement.
+# The archived filename is <table>_<suffix>.parquet, where suffix is derived from
+# the WRDS comment (formatted as YYYYMMDDTHHMMSSz), or "unknown" if unparseable.
+.archive_pq <- function(out_file, table_name, wrds_comment, archive_dir) {
+  archive_path <- file.path(dirname(out_file), archive_dir)
+  dir.create(archive_path, recursive = TRUE, showWarnings = FALSE)
+
+  wrds_dttm <- .parse_wrds_datetime(wrds_comment)
+  suffix <- if (!is.null(wrds_dttm)) {
+    format(wrds_dttm, "%Y%m%dT%H%M%SZ", tz = "UTC")
+  } else {
+    "unknown"
+  }
+
+  dest <- file.path(archive_path, paste0(table_name, "_", suffix, ".parquet"))
+  file.rename(out_file, dest)
+  message("Archived existing file to: ", dest)
+  invisible(dest)
+}
+
+# Parse a UTC POSIXct from a WRDS table comment string.
+# Format 1 ("Last modified: MM/DD/YYYY HH:MM:SS") is interpreted as America/New_York.
+# Format 2 ("(Updated YYYY-MM-DD)") is interpreted as 02:00 America/New_York,
+# matching the Python package convention.
+# Returns a POSIXct in UTC, or NULL if no datetime can be parsed.
+.parse_wrds_datetime <- function(comment) {
+  if (is.null(comment) || is.na(comment)) return(NULL)
+
+  ny <- "America/New_York"
+
+  # Format 1: "Last modified: MM/DD/YYYY HH:MM:SS" (Eastern time)
+  if (startsWith(trimws(comment), "Last modified:")) {
+    m <- regmatches(comment,
+      regexpr("\\d{2}/\\d{2}/\\d{4}\\s+\\d{2}:\\d{2}:\\d{2}", comment, perl = TRUE))
+    if (length(m) == 1) {
+      dttm <- as.POSIXct(m, format = "%m/%d/%Y %H:%M:%S", tz = ny)
+      return(as.POSIXct(format(dttm, tz = "UTC"), tz = "UTC"))
+    }
+  }
+
+  # Format 2: "(Updated YYYY-MM-DD)" — treat as 02:00 America/New_York
+  m <- regmatches(comment,
+    regexpr("\\(Updated\\s+(\\d{4}-\\d{2}-\\d{2})\\)\\s*$", comment, perl = TRUE))
+  if (length(m) == 1) {
+    d <- regmatches(m, regexpr("\\d{4}-\\d{2}-\\d{2}", m, perl = TRUE))
+    dttm <- as.POSIXct(paste(d, "02:00:00"), format = "%Y-%m-%d %H:%M:%S", tz = ny)
+    return(as.POSIXct(format(dttm, tz = "UTC"), tz = "UTC"))
+  }
+
+  NULL
 }
 
 # Parse a date from a WRDS table comment string.

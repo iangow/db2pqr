@@ -237,7 +237,7 @@ wrds_update_pq <- function(
   if (!file.exists(path)) return(NULL)
 
   meta <- tryCatch(
-    arrow::read_parquet(path, as_data_frame = FALSE)$schema$metadata,
+    arrow::open_dataset(path)$schema$metadata,
     error = function(e) NULL
   )
 

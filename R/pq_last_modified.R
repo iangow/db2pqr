@@ -102,10 +102,11 @@ pq_last_modified <- function(
 }
 
 # Read the raw last_modified string from a Parquet file's metadata.
+# Uses open_dataset() to read only the footer, avoiding loading row data.
 .get_pq_raw <- function(path) {
   if (!file.exists(path)) return("")
   meta <- tryCatch(
-    arrow::read_parquet(path, as_data_frame = FALSE)$schema$metadata,
+    arrow::open_dataset(path)$schema$metadata,
     error = function(e) NULL
   )
   val <- meta[["last_modified"]]

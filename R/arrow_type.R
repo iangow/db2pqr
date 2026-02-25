@@ -1,5 +1,10 @@
 # Lookup table: user-friendly string -> Arrow type object.
 # Used by arrow_type() and referenced in col_types documentation.
+# Returns TRUE if an Arrow DataType is a timestamp type.
+.is_arrow_timestamp <- function(type) {
+  inherits(type, "Timestamp")
+}
+
 .ARROW_TYPE_MAP <- list(
   # Signed integers
   int8    = arrow::int8(),
@@ -81,11 +86,6 @@
 #' arrow_type(arrow::float32())
 #'
 #' @export
-# Returns TRUE if an Arrow DataType is a timestamp type.
-.is_arrow_timestamp <- function(type) {
-  inherits(type, "Timestamp")
-}
-
 arrow_type <- function(x) {
   if (inherits(x, "DataType")) return(x)
   if (!is.character(x) || length(x) != 1L) {

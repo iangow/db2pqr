@@ -12,8 +12,8 @@ test_that("parses 'Last modified' timestamp at start of month", {
   expect_equal(result, as.Date("2020-01-01"))
 })
 
-test_that("parses 'Last modified' timestamp embedded in longer comment", {
-  result <- .parse_wrds_date("CRSP Daily Stock. Last modified: 11/30/2023 02:00:00. Source: CRSP.")
+test_that("parses 'Last modified' with leading whitespace", {
+  result <- .parse_wrds_date("  Last modified: 11/30/2023 02:00:00")
   expect_equal(result, as.Date("2023-11-30"))
 })
 
@@ -24,9 +24,8 @@ test_that("parses 'Updated' ISO date format", {
   expect_equal(result, as.Date("2024-06-01"))
 })
 
-test_that("parses bare ISO date string", {
-  result <- .parse_wrds_date("2023-12-31")
-  expect_equal(result, as.Date("2023-12-31"))
+test_that("returns NULL for bare ISO date not wrapped in (Updated ...)", {
+  expect_null(.parse_wrds_date("2023-12-31"))
 })
 
 # --- Edge cases ---
@@ -47,8 +46,12 @@ test_that("returns NULL for unrecognised string", {
   expect_null(.parse_wrds_date("No date information available"))
 })
 
+test_that("returns NULL for (Updated ...) not at end of string", {
+  expect_null(.parse_wrds_date("(Updated 2024-06-01) extra text"))
+})
+
 test_that("returns NULL for partial/malformed date", {
-  expect_null(.parse_wrds_date("Updated 2024-99"))
+  expect_null(.parse_wrds_date("(Updated 2024-99)"))
 })
 
 # --- Format precedence: MM/DD/YYYY wins when both patterns present ---

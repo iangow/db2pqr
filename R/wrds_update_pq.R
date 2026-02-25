@@ -76,16 +76,19 @@ wrds_update_pq <- function(
 .parse_wrds_date <- function(comment) {
   if (is.null(comment) || is.na(comment)) return(NULL)
 
-  # Format 1: "Last modified: MM/DD/YYYY HH:MM:SS"
-  m <- regmatches(comment, regexpr("(\\d{2})/(\\d{2})/(\\d{4})", comment, perl = TRUE))
-  if (length(m) == 1) {
-    return(as.Date(m, format = "%m/%d/%Y"))
+  # Format 1: starts with "Last modified: MM/DD/YYYY HH:MM:SS"
+  if (startsWith(trimws(comment), "Last modified:")) {
+    m <- regmatches(comment, regexpr("(\\d{2})/(\\d{2})/(\\d{4})", comment, perl = TRUE))
+    if (length(m) == 1) {
+      return(as.Date(m, format = "%m/%d/%Y"))
+    }
   }
 
-  # Format 2: "(Updated YYYY-MM-DD)"
-  m <- regmatches(comment, regexpr("\\d{4}-\\d{2}-\\d{2}", comment, perl = TRUE))
+  # Format 2: "... (Updated YYYY-MM-DD)" anchored at end of string
+  m <- regmatches(comment, regexpr("\\(Updated\\s+(\\d{4}-\\d{2}-\\d{2})\\)\\s*$", comment, perl = TRUE))
   if (length(m) == 1) {
-    return(as.Date(m))
+    d <- regmatches(m, regexpr("\\d{4}-\\d{2}-\\d{2}", m, perl = TRUE))
+    return(as.Date(d))
   }
 
   NULL

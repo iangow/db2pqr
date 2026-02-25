@@ -13,7 +13,9 @@ db_to_pq <- function(
     keep = NULL,
     drop = NULL,
     alt_table_name = NULL,
-    chunk_size = 100000L) {
+    chunk_size = 100000L,
+    con = NULL,
+    metadata = NULL) {
 
   # Build output path: <data_dir>/<schema>/<table>.parquet
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name
@@ -22,16 +24,18 @@ db_to_pq <- function(
   }
   dir.create(dirname(out_file), recursive = TRUE, showWarnings = FALSE)
 
-  # Connect first so we can resolve column names if keep/drop are specified
-  con <- DBI::dbConnect(
-    RPostgres::Postgres(),
-    host     = host,
-    dbname   = database,
-    user     = user,
-    password = password,
-    port     = port
-  )
-  on.exit(DBI::dbDisconnect(con), add = TRUE)
+  # Open a connection if one wasn't supplied; close it on exit if we own it
+  if (is.null(con)) {
+    con <- DBI::dbConnect(
+      RPostgres::Postgres(),
+      host     = host,
+      dbname   = database,
+      user     = user,
+      password = password,
+      port     = port
+    )
+    on.exit(DBI::dbDisconnect(con), add = TRUE)
+  }
 
   # Resolve column list: apply drop then keep (OR logic within each)
   col_select <- "*"
@@ -63,5 +67,5 @@ db_to_pq <- function(
     sql <- paste(sql, "LIMIT", as.integer(obs))
   }
 
-  sql_to_pq(con, sql, out_file, chunk_size = chunk_size)
+  sql_to_pq(con, sql, out_file, chunk_size = chunk_size, metadata = metadata)
 }

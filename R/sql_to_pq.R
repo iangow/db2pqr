@@ -1,4 +1,4 @@
-sql_to_pq <- function(con, sql, out_file, chunk_size = 100000) {
+sql_to_pq <- function(con, sql, out_file, chunk_size = 100000, metadata = NULL) {
   res  <- DBI::dbSendQuery(con, sql)
   sink <- arrow::FileOutputStream$create(out_file)
   writer <- NULL
@@ -14,11 +14,16 @@ sql_to_pq <- function(con, sql, out_file, chunk_size = 100000) {
       tab <- arrow::Table$create(chunk)
 
       if (is.null(writer)) {
+        schema <- tab$schema
+        if (!is.null(metadata)) {
+          existing <- if (is.null(schema$metadata)) list() else schema$metadata
+          schema <- schema$WithMetadata(c(existing, metadata))
+        }
         props <- arrow::ParquetWriterProperties$create(
-          column_names = tab$schema$names
+          column_names = schema$names
         )
         writer <- arrow::ParquetFileWriter$create(
-          schema = tab$schema,
+          schema = schema,
           sink = sink,
           properties = props
         )

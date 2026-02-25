@@ -39,7 +39,9 @@
 #' @param archive If \code{TRUE}, the existing local Parquet file (if any) is
 #'   moved to the archive subdirectory before being replaced. The archived
 #'   filename is \code{<table>_<YYYYMMDDTHHMMSSz>.parquet}, where the timestamp
-#'   suffix is derived from the WRDS table comment.
+#'   suffix is derived from the \code{last_modified} metadata embedded in the
+#'   existing file (i.e. the date it was last downloaded, not the incoming
+#'   WRDS table comment).
 #' @param archive_dir Name of the archive subdirectory relative to the schema
 #'   directory. Defaults to \code{"archive"}.
 #' @param alt_table_name Optional. Alternative basename for the output Parquet
@@ -126,7 +128,11 @@ wrds_update_pq <- function(
   message("Beginning file download at ", format(Sys.time(), tz = "UTC", usetz = TRUE), ".")
 
   if (archive && file.exists(out_file)) {
-    .archive_pq(out_file, out_name, wrds_comment, archive_dir)
+    existing_comment <- tryCatch(
+      arrow::open_dataset(out_file)$schema$metadata[["last_modified"]],
+      error = function(e) NULL
+    )
+    .archive_pq(out_file, out_name, existing_comment, archive_dir)
   }
 
   pq_metadata <- if (!is.null(wrds_comment)) list(last_modified = wrds_comment) else NULL
@@ -155,7 +161,8 @@ wrds_update_pq <- function(
 
 # Move an existing Parquet file into the archive subdirectory before replacement.
 # The archived filename is <table>_<suffix>.parquet, where suffix is derived from
-# the WRDS comment (formatted as YYYYMMDDTHHMMSSz), or "unknown" if unparseable.
+# the existing file's last_modified metadata (formatted as YYYYMMDDTHHMMSSz),
+# or "unknown" if unparseable or absent.
 .archive_pq <- function(out_file, table_name, wrds_comment, archive_dir) {
   archive_path <- file.path(dirname(out_file), archive_dir)
   dir.create(archive_path, recursive = TRUE, showWarnings = FALSE)

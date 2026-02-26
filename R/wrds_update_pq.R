@@ -48,6 +48,17 @@
 #'   file, used when the file should have a different name from \code{table_name}.
 #' @param chunk_size Number of rows fetched and written per chunk. Default is
 #'   \code{100000}.
+#' @param use_sas If \code{TRUE}, the last-modified date is obtained by running
+#'   \code{PROC CONTENTS} on the SAS dataset via SSH, rather than reading the
+#'   PostgreSQL table comment. Requires the \pkg{ssh} package and SSH key
+#'   access to \code{wrds-cloud-sshkey.wharton.upenn.edu}.
+#' @param sas_schema SAS library name to use when \code{use_sas = TRUE}.
+#'   Defaults to \code{schema}.
+#' @param encoding Character encoding passed to \code{PROC CONTENTS} when
+#'   \code{use_sas = TRUE}. Default is \code{"utf-8"}.
+#' @param wrds_id WRDS user ID used for the SSH connection when
+#'   \code{use_sas = TRUE}. Defaults to the \code{WRDS_ID} environment
+#'   variable.
 #'
 #' @return Invisibly returns the path to the Parquet file if written, or
 #'   \code{NULL} if the update was skipped.
@@ -81,7 +92,11 @@ wrds_update_pq <- function(
     col_types = NULL,
     tz = "UTC",
     archive = FALSE,
-    archive_dir = "archive") {
+    archive_dir = "archive",
+    use_sas = FALSE,
+    sas_schema = NULL,
+    encoding = "utf-8",
+    wrds_id = NULL) {
 
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name
   if (is.null(out_file)) {
@@ -91,12 +106,23 @@ wrds_update_pq <- function(
   con <- wrds::wrds_connect()
   on.exit(DBI::dbDisconnect(con), add = TRUE)
 
-  # Fetch the WRDS table comment, which encodes the last-modified date
-  wrds_comment <- DBI::dbGetQuery(
-    con,
-    "SELECT obj_description(to_regclass($1), 'pg_class') AS comment",
-    params = list(paste0(schema, ".", table_name))
-  )$comment[[1]]
+  # Fetch the WRDS table comment, which encodes the last-modified date.
+  # When use_sas = TRUE, run PROC CONTENTS via SSH instead of querying
+  # the PostgreSQL table comment.
+  if (use_sas) {
+    wrds_comment <- .get_modified_str_sas(
+      table_name = table_name,
+      sas_schema = if (!is.null(sas_schema)) sas_schema else schema,
+      wrds_id    = wrds_id,
+      encoding   = encoding
+    )
+  } else {
+    wrds_comment <- DBI::dbGetQuery(
+      con,
+      "SELECT obj_description(to_regclass($1), 'pg_class') AS comment",
+      params = list(paste0(schema, ".", table_name))
+    )$comment[[1]]
+  }
 
   tbl_label <- paste0(schema, ".", out_name)
 

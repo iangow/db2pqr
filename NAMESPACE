@@ -3,5 +3,6 @@
 export(arrow_type)
 export(pq_archive)
 export(pq_last_modified)
+export(pq_remove)
 export(pq_restore)
 export(wrds_update_pq)

@@ -1,3 +1,75 @@
+#' Remove a Parquet file from active or archive storage
+#'
+#' Deletes a Parquet file. By default the active file (in the schema directory)
+#' is removed. Set \code{archive = TRUE} to remove a file from the archive
+#' subdirectory instead.
+#'
+#' Either \code{file_name} or both \code{table_name} and \code{schema} must be
+#' provided.
+#'
+#' @param table_name Name of the table. Required if \code{file_name} is not
+#'   provided.
+#' @param schema Schema name. Required if \code{file_name} is not provided.
+#' @param data_dir Root directory of the Parquet data repository. Defaults to
+#'   the \code{DATA_DIR} environment variable, or \code{"."} if unset.
+#' @param file_name Full path to the Parquet file to remove. If provided,
+#'   \code{table_name}, \code{schema}, \code{data_dir}, and \code{archive} are
+#'   ignored.
+#' @param archive If \code{TRUE}, resolve the file from the archive
+#'   subdirectory rather than the active schema directory.
+#' @param archive_dir Name of the archive subdirectory relative to the schema
+#'   directory. Defaults to \code{"archive"}.
+#'
+#' @return Invisibly returns the path of the removed file, or \code{NULL} if
+#'   the file was not found or could not be deleted.
+#'
+#' @examples
+#' \dontrun{
+#' pq_remove("company", "comp")
+#' pq_remove("company_20251109T072042Z", "comp", archive = TRUE)
+#' pq_remove(file_name = "~/pq_data/comp/company.parquet")
+#' }
+#'
+#' @seealso \code{\link{pq_archive}}, \code{\link{pq_restore}}
+#' @export
+pq_remove <- function(table_name = NULL,
+                      schema = NULL,
+                      data_dir = Sys.getenv("DATA_DIR", "."),
+                      file_name = NULL,
+                      archive = FALSE,
+                      archive_dir = "archive") {
+  if (!is.null(file_name)) {
+    pq_file <- normalizePath(file_name, mustWork = FALSE)
+  } else {
+    if (is.null(table_name) || is.null(schema)) {
+      stop("table_name and schema are required when file_name is not provided.")
+    }
+    fname <- paste0(table_name, ".parquet")
+    if (archive) {
+      pq_file <- file.path(data_dir, schema, archive_dir, fname)
+    } else {
+      pq_file <- file.path(data_dir, schema, fname)
+    }
+  }
+
+  if (!file.exists(pq_file)) {
+    message("Parquet file not found: ", pq_file)
+    return(invisible(NULL))
+  }
+
+  ok <- tryCatch({
+    file.remove(pq_file)
+  }, error = function(e) {
+    message("Could not remove Parquet file: ", conditionMessage(e))
+    FALSE
+  })
+
+  if (!ok) return(invisible(NULL))
+  message("Removed: ", pq_file)
+  invisible(pq_file)
+}
+
+
 #' Archive a Parquet file into the archive subdirectory
 #'
 #' Moves a Parquet file into an archive subdirectory, appending a timestamp

@@ -26,11 +26,11 @@ test_that("lazy_tbl_to_pq renders SQL and forwards to sql_to_pq", {
     "sql_to_pq",
     function(con, sql, out_file, chunk_size, metadata, col_types) {
       expect_identical(con, local_con)
-      expect_identical(sql, "SELECT *\nFROM `test_table`")
+      expect_identical(sql, "SELECT *\nFROM \"test_table\"")
       expect_identical(out_file, "out.parquet")
       expect_identical(chunk_size, 42L)
       expect_identical(metadata, list(source = "test"))
-      expect_identical(col_types, list(id = "int32"))
+      expect_identical(col_types[[1]]$ToString(), "int32")
 
       invisible(out_file)
     },

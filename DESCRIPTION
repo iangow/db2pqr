@@ -30,7 +30,12 @@ Imports:
     tools,
     wrds
 Suggests: 
+    adbcpostgresql,
+    adbi,
+    dplyr,
     dbplyr,
+    parquetize,
+    peakRAM,
     processx,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

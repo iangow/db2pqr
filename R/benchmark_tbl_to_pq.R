@@ -1,3 +1,35 @@
+#' Export a lazy `dbplyr` table to Parquet via `parquetize`
+#'
+#' Renders a lazy `dbplyr` query to SQL, retrieves the backing DBI connection,
+#' and writes the result through [parquetize::dbi_to_parquet()].
+#'
+#' @param tbl A lazy table backed by `dbplyr`.
+#' @param out_path Directory where the Parquet dataset should be written.
+#' @param max_rows Maximum number of rows per fetched chunk.
+#'
+#' @return Invisibly returns `out_path`.
+#' @export
+tbl_to_pq_parquetize <- function(tbl, out_path, max_rows = 100000L) {
+  if (!requireNamespace("dbplyr", quietly = TRUE)) {
+    stop("Package `dbplyr` must be installed to use `tbl_to_pq_parquetize()`.")
+  }
+  if (!requireNamespace("parquetize", quietly = TRUE)) {
+    stop("Package `parquetize` must be installed to use `tbl_to_pq_parquetize()`.")
+  }
+
+  sql <- as.character(dbplyr::sql_render(tbl))
+  con <- dbplyr::remote_con(tbl)
+
+  parquetize::dbi_to_parquet(
+    conn = con,
+    sql_query = sql,
+    path_to_parquet = out_path,
+    max_rows = max_rows
+  )
+
+  invisible(out_path)
+}
+
 #' Benchmark Parquet export paths for a lazy `dbplyr` table
 #'
 #' Runs one or more table-to-Parquet export methods serially on the same lazy
@@ -35,8 +67,6 @@ benchmark_tbl_to_pq <- function(tbl,
                                 col_types = NULL) {
   .require_benchmark_packages(methods)
 
-  sql <- as.character(dbplyr::sql_render(tbl))
-  con <- dbplyr::remote_con(tbl)
   methods <- match.arg(methods, c("lazy_tbl_to_pq", "tbl_to_pq", "parquetize"), several.ok = TRUE)
 
   do.call(rbind, lapply(methods, function(method) {
@@ -56,8 +86,7 @@ benchmark_tbl_to_pq <- function(tbl,
         col_types = col_types
       ),
       parquetize = .benchmark_parquetize(
-        con = con,
-        sql = sql,
+        tbl = tbl,
         out_dir = out_dir,
         max_rows = parquetize_max_rows
       )
@@ -111,15 +140,14 @@ benchmark_tbl_to_pq <- function(tbl,
   .benchmark_result("tbl_to_pq", out_file, pr)
 }
 
-.benchmark_parquetize <- function(con, sql, out_dir, max_rows) {
+.benchmark_parquetize <- function(tbl, out_dir, max_rows) {
   out_path <- tempfile(pattern = "parquetize_", tmpdir = out_dir)
   dir.create(out_path, showWarnings = FALSE, recursive = TRUE)
 
   pr <- peakRAM::peakRAM(
-    parquetize::dbi_to_parquet(
-      conn = con,
-      sql_query = sql,
-      path_to_parquet = out_path,
+    tbl_to_pq_parquetize(
+      tbl = tbl,
+      out_path = out_path,
       max_rows = max_rows
     )
   )

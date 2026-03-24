@@ -67,10 +67,9 @@ test_that("benchmark_tbl_to_pq benchmarks selected methods serially", {
 
   restore_parquetize <- local_rebind(
     ".benchmark_parquetize",
-    function(con, sql, out_dir, max_rows) {
+    function(tbl, out_dir, max_rows) {
       calls <<- c(calls, "parquetize")
-      expect_identical(con, local_con)
-      expect_identical(sql, "SELECT *\nFROM \"test_table\"")
+      expect_identical(tbl, lazy_tbl)
       expect_identical(max_rows, 250L)
       data.frame(
         path = "parquetize",
@@ -117,5 +116,51 @@ test_that("benchmark_tbl_to_pq checks required packages", {
   expect_error(
     db2pq:::.require_benchmark_packages(c("lazy_tbl_to_pq")),
     "peakRAM"
+  )
+})
+
+test_that("tbl_to_pq_parquetize renders SQL and forwards to parquetize", {
+  skip_if_not_installed("dbplyr")
+
+  local_con <- dbplyr::simulate_dbi()
+  lazy_tbl <- dbplyr::lazy_frame(
+    x = 1,
+    y = 2,
+    con = local_con,
+    .name = "test_table"
+  )
+
+  restore_require_namespace <- local_rebind(
+    "requireNamespace",
+    function(package, quietly = TRUE) {
+      if (package %in% c("dbplyr", "parquetize")) {
+        return(TRUE)
+      }
+      base::requireNamespace(package, quietly = quietly)
+    },
+    env = baseenv()
+  )
+  on.exit(restore_require_namespace(), add = TRUE)
+
+  restore_parquetize <- local_rebind(
+    "dbi_to_parquet",
+    function(conn, sql_query, path_to_parquet, max_rows, ...) {
+      expect_identical(conn, local_con)
+      expect_identical(sql_query, "SELECT *\nFROM \"test_table\"")
+      expect_identical(path_to_parquet, "out_dir")
+      expect_identical(max_rows, 250L)
+      invisible(TRUE)
+    },
+    env = asNamespace("parquetize")
+  )
+  on.exit(restore_parquetize(), add = TRUE)
+
+  expect_identical(
+    db2pq::tbl_to_pq_parquetize(
+      tbl = lazy_tbl,
+      out_path = "out_dir",
+      max_rows = 250L
+    ),
+    "out_dir"
   )
 })

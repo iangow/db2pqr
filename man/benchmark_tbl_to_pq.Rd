@@ -11,7 +11,11 @@ benchmark_tbl_to_pq(
   chunk_size = 100000L,
   parquetize_max_rows = chunk_size,
   metadata = NULL,
-  col_types = NULL
+  col_types = NULL,
+  workload = NA_character_,
+  label = NA_character_,
+  query_year = NA_integer_,
+  repetition = NA_integer_
 )
 }
 \arguments{
@@ -32,6 +36,14 @@ Defaults to \code{chunk_size}.}
 
 \item{col_types}{Optional named list of Arrow type overrides passed to
 \code{\link[=lazy_tbl_to_pq]{lazy_tbl_to_pq()}} and \code{\link[=tbl_to_pq]{tbl_to_pq()}}.}
+
+\item{workload}{Optional workload name recorded in the benchmark result.}
+
+\item{label}{Optional descriptive label recorded in the benchmark result.}
+
+\item{query_year}{Optional year recorded in the benchmark result.}
+
+\item{repetition}{Optional repetition index recorded in the benchmark result.}
 }
 \value{
 A data frame with one row per benchmarked method.

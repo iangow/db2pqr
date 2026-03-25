@@ -2,6 +2,8 @@
 
 export(arrow_type)
 export(benchmark_tbl_to_pq)
+export(benchmark_workload_set)
+export(build_benchmark_workloads)
 export(con_to_adbi)
 export(lazy_tbl_to_pq)
 export(pq_archive)

@@ -15,7 +15,7 @@ wrds_update_pq(
   keep = NULL,
   drop = NULL,
   alt_table_name = NULL,
-  chunk_size = 100000L,
+  chunk_size = NULL,
   col_types = NULL,
   tz = "UTC",
   archive = FALSE,
@@ -23,7 +23,9 @@ wrds_update_pq(
   use_sas = FALSE,
   sas_schema = NULL,
   encoding = "utf-8",
-  wrds_id = NULL
+  wrds_id = NULL,
+  transfer_method = c("dbi", "adbc"),
+  numeric_mode = c("float64", "raw")
 )
 }
 \arguments{
@@ -58,8 +60,9 @@ match at least one pattern are removed. Applied before \code{keep}.}
 \item{alt_table_name}{Optional. Alternative basename for the output Parquet
 file, used when the file should have a different name from \code{table_name}.}
 
-\item{chunk_size}{Number of rows fetched and written per chunk. Default is
-\code{100000}.}
+\item{chunk_size}{Number of rows fetched and written per chunk. If omitted,
+defaults to \code{100000} for \code{transfer_method = "dbi"} and
+\code{250000} for \code{transfer_method = "adbc"}.}
 
 \item{col_types}{Optional named list specifying column type overrides. Values
 may be string type names (e.g. \code{"int32"}, \code{"float32"},
@@ -98,6 +101,16 @@ Defaults to \code{schema}.}
 \item{wrds_id}{WRDS user ID used for the SSH connection when
 \code{use_sas = TRUE}. Defaults to the \code{WRDS_ID} environment
 variable.}
+
+\item{transfer_method}{Transfer backend used for the SQL-to-Parquet step.
+Use \code{"dbi"} for the existing DBI/data-frame path or \code{"adbc"}
+for the experimental ADBC/Arrow path.}
+
+\item{numeric_mode}{Numeric handling mode for the ADBC path. Use
+\code{"float64"} to cast PostgreSQL \code{numeric} columns to
+\code{DOUBLE PRECISION} before fetching, or \code{"raw"} to keep the
+driver default representation. Ignored when
+\code{transfer_method = "dbi"}.}
 }
 \value{
 Invisibly returns the path to the Parquet file if written, or

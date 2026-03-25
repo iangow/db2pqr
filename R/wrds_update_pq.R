@@ -46,8 +46,9 @@
 #'   directory. Defaults to \code{"archive"}.
 #' @param alt_table_name Optional. Alternative basename for the output Parquet
 #'   file, used when the file should have a different name from \code{table_name}.
-#' @param chunk_size Number of rows fetched and written per chunk. Default is
-#'   \code{100000}.
+#' @param chunk_size Number of rows fetched and written per chunk. If omitted,
+#'   defaults to \code{100000} for \code{transfer_method = "dbi"} and
+#'   \code{250000} for \code{transfer_method = "adbc"}.
 #' @param use_sas If \code{TRUE}, the last-modified date is obtained by running
 #'   \code{PROC CONTENTS} on the SAS dataset via SSH, rather than reading the
 #'   PostgreSQL table comment. Requires the \pkg{ssh} package and SSH key
@@ -59,6 +60,14 @@
 #' @param wrds_id WRDS user ID used for the SSH connection when
 #'   \code{use_sas = TRUE}. Defaults to the \code{WRDS_ID} environment
 #'   variable.
+#' @param transfer_method Transfer backend used for the SQL-to-Parquet step.
+#'   Use \code{"dbi"} for the existing DBI/data-frame path or \code{"adbc"}
+#'   for the experimental ADBC/Arrow path.
+#' @param numeric_mode Numeric handling mode for the ADBC path. Use
+#'   \code{"float64"} to cast PostgreSQL \code{numeric} columns to
+#'   \code{DOUBLE PRECISION} before fetching, or \code{"raw"} to keep the
+#'   driver default representation. Ignored when
+#'   \code{transfer_method = "dbi"}.
 #'
 #' @return Invisibly returns the path to the Parquet file if written, or
 #'   \code{NULL} if the update was skipped.
@@ -88,7 +97,7 @@ wrds_update_pq <- function(
     keep = NULL,
     drop = NULL,
     alt_table_name = NULL,
-    chunk_size = 100000L,
+    chunk_size = NULL,
     col_types = NULL,
     tz = "UTC",
     archive = FALSE,
@@ -96,14 +105,23 @@ wrds_update_pq <- function(
     use_sas = FALSE,
     sas_schema = NULL,
     encoding = "utf-8",
-    wrds_id = NULL) {
+    wrds_id = NULL,
+    transfer_method = c("dbi", "adbc"),
+    numeric_mode = c("float64", "raw")) {
+  transfer_method <- match.arg(transfer_method)
+  numeric_mode <- match.arg(numeric_mode)
+  chunk_size <- .resolve_wrds_chunk_size(chunk_size, transfer_method)
 
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name
   if (is.null(out_file)) {
     out_file <- file.path(data_dir, schema, paste0(out_name, ".parquet"))
   }
 
-  con <- wrds::wrds_connect()
+  con <- if (identical(transfer_method, "adbc")) {
+    wrds_connect_adbc(wrds_id = wrds_id)
+  } else {
+    wrds::wrds_connect()
+  }
   on.exit(DBI::dbDisconnect(con), add = TRUE)
 
   # Fetch the WRDS table comment, which encodes the last-modified date.
@@ -174,6 +192,8 @@ wrds_update_pq <- function(
     drop        = drop,
     alt_table_name = alt_table_name,
     chunk_size  = chunk_size,
+    transfer_method = transfer_method,
+    numeric_mode = numeric_mode,
     con         = con,
     metadata    = pq_metadata,
     col_types   = col_types,
@@ -183,6 +203,22 @@ wrds_update_pq <- function(
   message("Completed file download at ", format(Sys.time(), tz = "UTC", usetz = TRUE), ".")
 
   invisible(out_file)
+}
+
+.resolve_wrds_chunk_size <- function(chunk_size, transfer_method) {
+  if (is.null(chunk_size)) {
+    if (identical(transfer_method, "adbc")) {
+      return(250000L)
+    }
+    return(100000L)
+  }
+
+  if (length(chunk_size) != 1L || is.na(chunk_size) || chunk_size < 1L ||
+      trunc(chunk_size) != chunk_size) {
+    stop("`chunk_size` must be a positive whole number.", call. = FALSE)
+  }
+
+  as.integer(chunk_size)
 }
 
 # Move an existing Parquet file into the archive subdirectory before replacement.
@@ -278,4 +314,20 @@ wrds_update_pq <- function(
   if (is.null(val) || is.na(val)) return(NULL)
 
   .parse_wrds_date(val)
+}
+
+wrds_connect_adbc <- function(wrds_id = NULL) {
+  wrds_user <- .get_wrds_id(wrds_id)
+  password <- Sys.getenv("PGPASSWORD", unset = "")
+
+  uri <- .postgres_host_uri(
+    dbname = "wrds",
+    host = "wrds-pgdata.wharton.upenn.edu",
+    port = "9737",
+    user = wrds_user,
+    password = password,
+    sslmode = "require"
+  )
+
+  .connect_adbc_postgres(uri)
 }

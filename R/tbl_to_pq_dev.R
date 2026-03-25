@@ -63,17 +63,29 @@ con_to_adbi <- function(con) {
   }
 
   uri <- .con_to_adbi_uri(con)
-  DBI::dbConnect(adbi::adbi("adbcpostgresql"), uri = uri)
+  .connect_adbc_postgres(uri)
 }
 
 sql_to_pq_dev <- function(con, sql, out_file, chunk_size = 100000, metadata = NULL,
                           col_types = NULL) {
-  col_types <- .normalize_arrow_col_types(col_types)
-
   adbi_con <- con_to_adbi(con)
   on.exit(DBI::dbDisconnect(adbi_con), add = TRUE)
 
-  res <- DBI::dbSendQueryArrow(adbi_con, sql)
+  sql_to_pq_adbc(
+    con = adbi_con,
+    sql = sql,
+    out_file = out_file,
+    chunk_size = chunk_size,
+    metadata = metadata,
+    col_types = col_types
+  )
+}
+
+sql_to_pq_adbc <- function(con, sql, out_file, chunk_size = 100000, metadata = NULL,
+                           col_types = NULL) {
+  col_types <- .normalize_arrow_col_types(col_types)
+
+  res <- DBI::dbSendQueryArrow(con, sql)
   sink <- arrow::FileOutputStream$create(out_file)
   writer <- NULL
   data_schema <- NULL
@@ -395,13 +407,14 @@ sql_to_pq_dev_debug <- function(con, sql, max_chunks = Inf) {
   user <- .optional_info(info, "user")
   port <- .optional_info(info, "port")
   password <- Sys.getenv("PGPASSWORD", unset = "")
+  sslmode <- .optional_info(info, "sslmode")
 
   if (startsWith(host, "/")) {
     .postgres_socket_uri(dbname = dbname, host = host, port = port,
-                         user = user, password = password)
+                         user = user, password = password, sslmode = sslmode)
   } else {
     .postgres_host_uri(dbname = dbname, host = host, port = port,
-                       user = user, password = password)
+                       user = user, password = password, sslmode = sslmode)
   }
 }
 
@@ -418,7 +431,21 @@ sql_to_pq_dev_debug <- function(con, sql, max_chunks = Inf) {
   if (is.null(value) || length(value) == 0L || is.na(value)) "" else as.character(value[[1]])
 }
 
-.postgres_uri_query <- function(user = "", password = "", host = "", port = "") {
+.connect_adbc_postgres <- function(uri) {
+  if (!requireNamespace("adbi", quietly = TRUE) ||
+      !requireNamespace("adbcpostgresql", quietly = TRUE)) {
+    stop("Packages `adbi` and `adbcpostgresql` must be installed to use the ADBC PostgreSQL path.")
+  }
+
+  DBI::dbConnect(adbi::adbi("adbcpostgresql"), uri = uri)
+}
+
+.is_adbi_connection <- function(con) {
+  inherits(con, "AdbiConnection")
+}
+
+.postgres_uri_query <- function(user = "", password = "", host = "", port = "",
+                                sslmode = "") {
   query <- c()
 
   if (nzchar(host)) {
@@ -433,12 +460,20 @@ sql_to_pq_dev_debug <- function(con, sql, max_chunks = Inf) {
   if (nzchar(password)) {
     query <- c(query, paste0("password=", utils::URLencode(password, reserved = TRUE)))
   }
+  if (nzchar(sslmode)) {
+    query <- c(query, paste0("sslmode=", utils::URLencode(sslmode, reserved = TRUE)))
+  }
 
   query
 }
 
-.postgres_host_uri <- function(dbname, host, port = "", user = "", password = "") {
-  query <- .postgres_uri_query(user = user, password = password)
+.postgres_host_uri <- function(dbname, host, port = "", user = "", password = "",
+                               sslmode = "") {
+  query <- .postgres_uri_query(
+    user = user,
+    password = password,
+    sslmode = sslmode
+  )
   uri <- paste0(
     "postgresql://",
     host,
@@ -454,12 +489,14 @@ sql_to_pq_dev_debug <- function(con, sql, max_chunks = Inf) {
   uri
 }
 
-.postgres_socket_uri <- function(dbname, host, port = "", user = "", password = "") {
+.postgres_socket_uri <- function(dbname, host, port = "", user = "", password = "",
+                                 sslmode = "") {
   query <- .postgres_uri_query(
     host = host,
     port = port,
     user = user,
-    password = password
+    password = password,
+    sslmode = sslmode
   )
 
   uri <- paste0(

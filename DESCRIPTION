@@ -22,6 +22,8 @@ RoxygenNote: 7.3.3
 Depends:
     R (>= 4.1.0)
 Imports:
+    adbcpostgresql,
+    adbi,
     arrow,
     DBI,
     keyring,
@@ -30,12 +32,8 @@ Imports:
     tools,
     wrds
 Suggests: 
-    adbcpostgresql,
-    adbi,
     dplyr,
     dbplyr,
-    parquetize,
-    peakRAM,
     processx,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

@@ -20,9 +20,9 @@ and then the credential store used by the \code{wrds} package.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/iandgow/db2pqr}
-  \item \url{https://iandgow.github.io/db2pqr/}
-  \item Report bugs at \url{https://github.com/iandgow/db2pqr/issues}
+  \item \url{https://github.com/iangow/db2pqr}
+  \item \url{https://iangow.github.io/db2pqr/}
+  \item Report bugs at \url{https://github.com/iangow/db2pqr/issues}
 }
 
 }

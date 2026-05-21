@@ -1,7 +1,7 @@
 # Get last-modified metadata for Parquet data files
 
 Retrieves the `last_modified` metadata embedded in Parquet files by
-[`wrds_update_pq`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md).
+[`wrds_update_pq`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md).
 
 ## Usage
 
@@ -69,7 +69,7 @@ Behaviour depends on the arguments supplied:
 
 ## See also
 
-[`wrds_update_pq`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md)
+[`wrds_update_pq`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md)
 
 ## Examples
 

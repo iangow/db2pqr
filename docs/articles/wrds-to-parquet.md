@@ -1,6 +1,6 @@
 # WRDS to Parquet
 
-[`wrds_update_pq()`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md)
+[`wrds_update_pq()`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md)
 exports a WRDS PostgreSQL table to a local Parquet file and skips the
 download when existing metadata indicate that the local file is current.
 
@@ -14,7 +14,7 @@ wrds_update_pq("company", "comp", rename = c(conm = "company_name"))
 ```
 
 Use
-[`wrds_schema_to_pq()`](https://iandgow.github.io/db2pqr/reference/wrds_schema_to_pq.md)
+[`wrds_schema_to_pq()`](https://iangow.github.io/db2pqr/reference/wrds_schema_to_pq.md)
 for schema-wide refreshes and
-[`wrds_sql_to_pq()`](https://iandgow.github.io/db2pqr/reference/wrds_sql_to_pq.md)
+[`wrds_sql_to_pq()`](https://iangow.github.io/db2pqr/reference/wrds_sql_to_pq.md)
 for custom WRDS SQL queries.

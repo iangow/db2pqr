@@ -15,7 +15,7 @@ It is designed for both general PostgreSQL sources and the WRDS PostgreSQL servi
 
 ```r
 # install.packages("pak")
-pak::pak("iandgow/db2pqr")
+pak::pak("iangow/db2pqr")
 ```
 
 ## WRDS credentials setup

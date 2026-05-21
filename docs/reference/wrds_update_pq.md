@@ -104,7 +104,7 @@ wrds_update_pq(
   string type names (e.g. `"int32"`, `"float32"`, `"date"`) or Arrow
   `DataType` objects. Only columns that need to differ from their
   inferred types need to be supplied. See
-  [`arrow_type`](https://iandgow.github.io/db2pqr/reference/arrow_type.md)
+  [`arrow_type`](https://iangow.github.io/db2pqr/reference/arrow_type.md)
   for supported names. For example,
   `col_types = list(permno = "int32", ret = "float32")`.
 
@@ -171,9 +171,9 @@ the update was skipped.
 
 ## See also
 
-[`pq_last_modified`](https://iandgow.github.io/db2pqr/reference/pq_last_modified.md),
-[`pq_archive`](https://iandgow.github.io/db2pqr/reference/pq_archive.md),
-[`pq_restore`](https://iandgow.github.io/db2pqr/reference/pq_restore.md)
+[`pq_last_modified`](https://iangow.github.io/db2pqr/reference/pq_last_modified.md),
+[`pq_archive`](https://iangow.github.io/db2pqr/reference/pq_archive.md),
+[`pq_restore`](https://iangow.github.io/db2pqr/reference/pq_restore.md)
 
 ## Examples
 

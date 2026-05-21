@@ -47,7 +47,7 @@ Invisibly returns `out_file`.
 ## Details
 
 This is an experimental development path kept separate from
-[`lazy_tbl_to_pq`](https://iandgow.github.io/db2pqr/reference/lazy_tbl_to_pq.md)
+[`lazy_tbl_to_pq`](https://iangow.github.io/db2pqr/reference/lazy_tbl_to_pq.md)
 while we evaluate the ADBC transfer route. The ADBC path opens a second
 PostgreSQL connection for the transfer, so the database must allow an
 additional concurrent connection beyond the one already backing `tbl`.

@@ -52,8 +52,8 @@ Either `file_name` or both `table_name` and `schema` must be provided.
 
 ## See also
 
-[`pq_restore`](https://iandgow.github.io/db2pqr/reference/pq_restore.md),
-[`wrds_update_pq`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md)
+[`pq_restore`](https://iangow.github.io/db2pqr/reference/pq_restore.md),
+[`wrds_update_pq`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md)
 
 ## Examples
 

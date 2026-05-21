@@ -26,5 +26,5 @@ pgpass_has_entry(
 ```
 
 Use
-[`wrds_check_credentials()`](https://iandgow.github.io/db2pqr/reference/wrds_check_credentials.md)
+[`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md)
 to test a live connection when WRDS access is available.

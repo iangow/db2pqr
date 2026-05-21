@@ -88,7 +88,7 @@ wrds_update_pq("funda", "comp", keep = c("gvkey", "datadate", "at", "sale"))
 ```
 
 Because
-[`wrds_update_pq()`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md)
+[`wrds_update_pq()`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md)
 compares WRDS metadata with metadata embedded in the local Parquet file,
 it can be rerun without downloading a table that is already current.
 
@@ -132,7 +132,7 @@ visible to readers and coauthors.
 
 Parquet files written by WRDS helpers include `last_modified` metadata
 when the source table provides it. Use
-[`pq_last_modified()`](https://iandgow.github.io/db2pqr/reference/pq_last_modified.md)
+[`pq_last_modified()`](https://iangow.github.io/db2pqr/reference/pq_last_modified.md)
 to audit a repository:
 
 ``` r

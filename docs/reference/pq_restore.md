@@ -49,8 +49,8 @@ Invisibly returns the path to the restored file, or `NULL` on failure.
 
 ## See also
 
-[`pq_archive`](https://iandgow.github.io/db2pqr/reference/pq_archive.md),
-[`pq_last_modified`](https://iandgow.github.io/db2pqr/reference/pq_last_modified.md)
+[`pq_archive`](https://iangow.github.io/db2pqr/reference/pq_archive.md),
+[`pq_last_modified`](https://iangow.github.io/db2pqr/reference/pq_last_modified.md)
 
 ## Examples
 

@@ -17,7 +17,7 @@ the WRDS PostgreSQL service.
 ``` r
 
 # install.packages("pak")
-pak::pak("iandgow/db2pqr")
+pak::pak("iangow/db2pqr")
 ```
 
 ## WRDS credentials setup
@@ -36,9 +36,9 @@ wrds::wrds_set_credentials()
 ```
 
 Use
-[`wrds_check_credentials()`](https://iandgow.github.io/db2pqr/reference/wrds_check_credentials.md)
+[`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md)
 to test a live WRDS PostgreSQL connection and
-[`pgpass_has_entry()`](https://iandgow.github.io/db2pqr/reference/pgpass_has_entry.md)
+[`pgpass_has_entry()`](https://iangow.github.io/db2pqr/reference/pgpass_has_entry.md)
 to check whether a matching `.pgpass` entry exists.
 
 ## WRDS SSH setup (for `use_sas = TRUE`)

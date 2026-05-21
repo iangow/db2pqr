@@ -1,6 +1,6 @@
 # PostgreSQL to Parquet
 
-[`db_to_pq()`](https://iandgow.github.io/db2pqr/reference/db_to_pq.md)
+[`db_to_pq()`](https://iangow.github.io/db2pqr/reference/db_to_pq.md)
 exports PostgreSQL tables to Parquet using a DBI connection. It can
 filter rows, select columns, rename outputs, and apply Arrow type
 overrides.
@@ -18,7 +18,7 @@ db_to_pq(
 ```
 
 Use
-[`db_schema_tables()`](https://iandgow.github.io/db2pqr/reference/db_schema_tables.md)
+[`db_schema_tables()`](https://iangow.github.io/db2pqr/reference/db_schema_tables.md)
 to inspect available relations and
-[`db_schema_to_pq()`](https://iandgow.github.io/db2pqr/reference/db_schema_to_pq.md)
+[`db_schema_to_pq()`](https://iangow.github.io/db2pqr/reference/db_schema_to_pq.md)
 to export a schema.

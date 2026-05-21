@@ -45,12 +45,12 @@ db_schema_to_pq(
 - transfer_method:
 
   Transfer backend passed to
-  [`db_to_pq`](https://iandgow.github.io/db2pqr/reference/db_to_pq.md).
+  [`db_to_pq`](https://iangow.github.io/db2pqr/reference/db_to_pq.md).
 
 - numeric_mode:
 
   Numeric handling mode passed to
-  [`db_to_pq`](https://iandgow.github.io/db2pqr/reference/db_to_pq.md).
+  [`db_to_pq`](https://iangow.github.io/db2pqr/reference/db_to_pq.md).
 
 - archive:
 
@@ -67,7 +67,7 @@ db_schema_to_pq(
 - ...:
 
   Additional arguments passed to
-  [`db_to_pq`](https://iandgow.github.io/db2pqr/reference/db_to_pq.md).
+  [`db_to_pq`](https://iangow.github.io/db2pqr/reference/db_to_pq.md).
 
 ## Value
 

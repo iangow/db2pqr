@@ -14,11 +14,11 @@ helpers resolve usernames from explicit arguments, `WRDS_ID`,
 
 Useful links:
 
-- <https://github.com/iandgow/db2pqr>
+- <https://github.com/iangow/db2pqr>
 
-- <https://iandgow.github.io/db2pqr/>
+- <https://iangow.github.io/db2pqr/>
 
-- Report bugs at <https://github.com/iandgow/db2pqr/issues>
+- Report bugs at <https://github.com/iangow/db2pqr/issues>
 
 ## Author
 

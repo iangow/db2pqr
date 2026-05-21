@@ -1,7 +1,7 @@
 # Export all tables in a WRDS schema to Parquet
 
 Iterates over tables in a WRDS PostgreSQL schema and calls
-[`wrds_update_pq`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md)
+[`wrds_update_pq`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md)
 for each table.
 
 ## Usage
@@ -49,17 +49,17 @@ wrds_schema_to_pq(
 - transfer_method:
 
   Transfer backend passed to
-  [`wrds_update_pq`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md).
+  [`wrds_update_pq`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md).
 
 - numeric_mode:
 
   Numeric handling mode passed to
-  [`wrds_update_pq`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md).
+  [`wrds_update_pq`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md).
 
 - ...:
 
   Additional arguments passed to
-  [`wrds_update_pq`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md).
+  [`wrds_update_pq`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md).
 
 ## Value
 

@@ -2,7 +2,7 @@
 
 Runs SQL against WRDS PostgreSQL and writes the result to a Parquet file
 using the same DBI or ADBC transfer paths as
-[`wrds_update_pq`](https://iandgow.github.io/db2pqr/reference/wrds_update_pq.md).
+[`wrds_update_pq`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md).
 
 ## Usage
 

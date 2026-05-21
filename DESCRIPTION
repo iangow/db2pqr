@@ -8,8 +8,8 @@ Description: Tools for exporting PostgreSQL tables to Parquet files, with
     data library sourced from WRDS (Wharton Research Data Services), with
     update-checking based on table metadata, and archive management utilities
     for versioning local data files.
-URL: https://github.com/iandgow/db2pqr, https://iandgow.github.io/db2pqr/
-BugReports: https://github.com/iandgow/db2pqr/issues
+URL: https://github.com/iangow/db2pqr, https://iangow.github.io/db2pqr/
+BugReports: https://github.com/iangow/db2pqr/issues
 Authors@R: c(
     person(
       "Ian", "Gow",

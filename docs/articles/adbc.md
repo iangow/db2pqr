@@ -6,7 +6,7 @@ on local driver builds and SSL support.
 
 As of April 2026, Apache Arrow ADBC 23 is current and the R
 `adbcpostgresql` package has a 0.23.0 CRAN release. Use
-[`adbc_diagnostics()`](https://iandgow.github.io/db2pqr/reference/adbc_diagnostics.md)
+[`adbc_diagnostics()`](https://iangow.github.io/db2pqr/reference/adbc_diagnostics.md)
 to inspect the optional packages installed in your R library:
 
 ``` r

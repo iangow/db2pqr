@@ -58,8 +58,8 @@ Either `file_name` or both `table_name` and `schema` must be provided.
 
 ## See also
 
-[`pq_archive`](https://iandgow.github.io/db2pqr/reference/pq_archive.md),
-[`pq_restore`](https://iandgow.github.io/db2pqr/reference/pq_restore.md)
+[`pq_archive`](https://iangow.github.io/db2pqr/reference/pq_archive.md),
+[`pq_restore`](https://iangow.github.io/db2pqr/reference/pq_restore.md)
 
 ## Examples
 

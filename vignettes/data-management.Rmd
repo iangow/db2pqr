@@ -9,6 +9,30 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+has_pkg <- function(pkg) requireNamespace(pkg, quietly = TRUE)
+pq_path <- function(schema, table) {
+  file.path(Sys.getenv("DATA_DIR", unset = ""), schema, paste0(table, ".parquet"))
+}
+has_pq <- function(schema, table) {
+  nzchar(Sys.getenv("DATA_DIR", unset = "")) && file.exists(pq_path(schema, table))
+}
+live_repo <- all(
+  identical(Sys.getenv("IN_PKGDOWN"), "true"),
+  has_pkg("arrow"),
+  has_pkg("dplyr"),
+  has_pq("crsp", "dsi"),
+  has_pq("comp", "company")
+)
+doc_data_dir <- file.path(tempdir(), "db2pq-data-management")
+if (live_repo) {
+  unlink(doc_data_dir, recursive = TRUE)
+  dir.create(file.path(doc_data_dir, "comp"), recursive = TRUE, showWarnings = FALSE)
+  file.copy(
+    pq_path("comp", "company"),
+    file.path(doc_data_dir, "comp", "company.parquet"),
+    overwrite = TRUE
+  )
+}
 ```
 
 This article adapts a broader set of data-management ideas for the narrower
@@ -147,6 +171,14 @@ Metadata will not answer every provenance question, but it gives a lightweight
 audit trail. For more complex projects, combine it with project logs, scripts,
 or a data dictionary that records table sources and refresh dates.
 
+When this article is rendered with access to a local Parquet repository, the
+following chunk shows the embedded source metadata for a real WRDS-derived file.
+
+```{r live-metadata-dsi, eval = live_repo}
+Sys.getenv("DATA_DIR")
+pq_last_modified(table_name = "dsi", schema = "crsp")
+```
+
 ## Archive Before Replacing
 
 For tables where changes matter, use `archive = TRUE` so an existing file is
@@ -170,6 +202,35 @@ Archiving is most useful for relatively small reference tables or for cases
 where source revisions may affect published results. For very large tables,
 keeping every historical copy may be too expensive; in those cases, record the
 refresh date and source metadata instead.
+
+To make the archive mechanics concrete without modifying the main local data
+repository, this article copies `comp.company` into a temporary documentation
+repository and archives/restores that copy.
+
+```{r live-archive-copy, eval = live_repo}
+pq_last_modified(table_name = "company", schema = "comp", data_dir = doc_data_dir)
+```
+
+Archiving moves the active file into the schema's `archive` directory.
+
+```{r live-archive-run, eval = live_repo, message = FALSE}
+archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
+basename(archived_company)
+
+pq_last_modified(table_name = "company", schema = "comp",
+                 data_dir = doc_data_dir, archive = TRUE)[
+  c("file_name", "last_mod")
+]
+```
+
+Restoring the archived file makes it the active copy again.
+
+```{r live-restore-run, eval = live_repo, message = FALSE}
+pq_restore(tools::file_path_sans_ext(basename(archived_company)), "comp",
+           data_dir = doc_data_dir, archive = FALSE)
+
+pq_last_modified(table_name = "company", schema = "comp", data_dir = doc_data_dir)
+```
 
 ## Keep Large Data Out of Git
 
@@ -217,3 +278,121 @@ analysis-project/
 
 The refresh script owns calls to `db2pq`. Analysis scripts read Parquet files
 from `DATA_DIR` and write project-specific outputs to `data/derived`.
+
+## Live Examples with Local Parquet Files
+
+The examples in this section are designed for the locally rendered
+documentation site. They run when `DATA_DIR` points to a Parquet repository that
+contains the relevant WRDS-derived files. If those files are not present, the
+chunks are skipped.
+
+```{r local-example-setup, include = FALSE}
+live_crsp <- all(
+  identical(Sys.getenv("IN_PKGDOWN"), "true"),
+  has_pkg("DBI"),
+  has_pkg("duckdb"),
+  has_pkg("dplyr"),
+  has_pkg("dbplyr"),
+  has_pkg("ggplot2"),
+  has_pq("crsp", "dsf"),
+  has_pq("crsp", "stocknames")
+)
+```
+
+For example, if your repository contains `crsp.dsf` and `crsp.stocknames`, you
+can query the files directly with DuckDB without importing the full data into R.
+
+```{r live-crsp-connect, eval = live_crsp}
+library(DBI)
+library(dplyr)
+library(dbplyr)
+library(ggplot2)
+
+db <- dbConnect(duckdb::duckdb())
+
+parquet_tbl <- function(con, schema, table) {
+  path <- normalizePath(pq_path(schema, table), winslash = "/", mustWork = TRUE)
+  view <- paste(schema, table, sep = "_")
+  DBI::dbExecute(
+    con,
+    paste0("CREATE OR REPLACE VIEW ", view, " AS SELECT * FROM read_parquet('", path, "')")
+  )
+  tbl(con, view)
+}
+
+dsf <- parquet_tbl(db, "crsp", "dsf")
+stocknames <- parquet_tbl(db, "crsp", "stocknames")
+```
+
+A first check is simply to count the rows in the daily stock file.
+
+```{r live-crsp-count, eval = live_crsp}
+dsf |>
+  count() |>
+  collect()
+```
+
+Because DuckDB can query Parquet files in place, summaries can be computed
+without first reading every column into memory.
+
+```{r live-crsp-year-count, eval = live_crsp}
+dsf |>
+  mutate(year = as.integer(strftime(date, "%Y"))) |>
+  count(year) |>
+  arrange(desc(year)) |>
+  collect()
+```
+
+Filtering to one trading day reads only the rows and columns needed for that
+query.
+
+```{r live-crsp-one-day, eval = live_crsp}
+dsf_subset <-
+  dsf |>
+  filter(date == as.Date("1986-01-07")) |>
+  select(permno, date, ret, prc, vol) |>
+  collect()
+
+head(dsf_subset)
+```
+
+The same files can be used for a small analysis. Here we identify Apple's CRSP
+`permno` from `stocknames`, then compute a cumulative return series from
+`dsf`.
+
+```{r live-crsp-apple, eval = live_crsp, fig.width = 7, fig.height = 4}
+apple_permno <-
+  stocknames |>
+  filter(grepl("^APPLE COM", comnam)) |>
+  distinct(permno) |>
+  collect() |>
+  pull(permno) |>
+  min()
+
+apple_returns <-
+  dsf |>
+  filter(permno == apple_permno) |>
+  select(permno, date, ret) |>
+  arrange(date) |>
+  collect() |>
+  mutate(cumret = exp(cumsum(log(1 + coalesce(ret, 0)))))
+
+ggplot(apple_returns, aes(x = date, y = cumret)) +
+  geom_line() +
+  labs(x = NULL, y = "Cumulative return")
+```
+
+```{r live-crsp-disconnect, eval = live_crsp, include = FALSE}
+dbDisconnect(db, shutdown = TRUE)
+```
+
+These examples use a local Parquet repository as the analysis substrate. The
+refresh step that creates the files is still separate:
+
+```{r, eval = FALSE}
+wrds_update_pq("dsf", "crsp")
+wrds_update_pq("stocknames", "crsp")
+```
+
+That separation is the main point. `db2pq` handles the database-to-Parquet
+refresh; analysis code can then operate against local, typed, columnar files.

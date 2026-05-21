@@ -25,6 +25,9 @@
 #'   names match at least one pattern are retained. Applied after \code{drop}.
 #' @param drop Optional character vector of regex patterns. Columns whose names
 #'   match at least one pattern are removed. Applied before \code{keep}.
+#' @param rename Optional named character vector or list mapping source column
+#'   names to output column names. \code{col_types} names should refer to output
+#'   names after renaming.
 #' @param col_types Optional named list specifying column type overrides. Values
 #'   may be string type names (e.g. \code{"int32"}, \code{"float32"},
 #'   \code{"date"}) or Arrow \code{DataType} objects. Only columns that need to
@@ -96,6 +99,7 @@ wrds_update_pq <- function(
     obs = NULL,
     keep = NULL,
     drop = NULL,
+    rename = NULL,
     alt_table_name = NULL,
     chunk_size = NULL,
     col_types = NULL,
@@ -120,7 +124,7 @@ wrds_update_pq <- function(
   con <- if (identical(transfer_method, "adbc")) {
     wrds_connect_adbc(wrds_id = wrds_id)
   } else {
-    wrds::wrds_connect()
+    .wrds_connect_dbi(wrds_id = wrds_id)
   }
   on.exit(DBI::dbDisconnect(con), add = TRUE)
 
@@ -190,6 +194,7 @@ wrds_update_pq <- function(
     obs         = obs,
     keep        = keep,
     drop        = drop,
+    rename      = rename,
     alt_table_name = alt_table_name,
     chunk_size  = chunk_size,
     transfer_method = transfer_method,
@@ -317,7 +322,7 @@ wrds_update_pq <- function(
 }
 
 wrds_connect_adbc <- function(wrds_id = NULL) {
-  wrds_user <- .get_wrds_id(wrds_id)
+  wrds_user <- wrds_get_username(wrds_id)
   password <- Sys.getenv("PGPASSWORD", unset = "")
 
   uri <- .postgres_host_uri(

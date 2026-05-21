@@ -1,14 +1,38 @@
+#' Export all tables in a WRDS schema to Parquet
+#'
+#' Iterates over tables in a WRDS PostgreSQL schema and calls
+#' \code{\link{wrds_update_pq}} for each table.
+#'
+#' @param schema WRDS schema name.
+#' @param data_dir Root directory of the local Parquet data repository.
+#' @param force If `TRUE`, re-download tables even if local files appear
+#'   current.
+#' @param tables Optional subset of table names to process.
+#' @param chunk_size Number of rows fetched and written per chunk.
+#' @param wrds_id Optional WRDS username override.
+#' @param transfer_method Transfer backend passed to
+#'   \code{\link{wrds_update_pq}}.
+#' @param numeric_mode Numeric handling mode passed to
+#'   \code{\link{wrds_update_pq}}.
+#' @param ... Additional arguments passed to \code{\link{wrds_update_pq}}.
+#'
+#' @return Invisibly returns a named list of output paths or `NULL` values for
+#'   skipped/failed tables.
+#' @export
 wrds_schema_to_pq <- function(
     schema,
     data_dir = Sys.getenv("DATA_DIR", "."),
     force = FALSE,
     tables = NULL,
-    chunk_size = 100000L) {
+    chunk_size = 100000L,
+    wrds_id = NULL,
+    transfer_method = c("dbi", "adbc"),
+    numeric_mode = c("float64", "raw"),
+    ...) {
+  transfer_method <- match.arg(transfer_method)
+  numeric_mode <- match.arg(numeric_mode)
 
-  con <- wrds::wrds_connect()
-  on.exit(DBI::dbDisconnect(con), add = TRUE)
-
-  all_tables <- wrds::list_tables(con, schema)
+  all_tables <- wrds_get_tables(schema, wrds_id = wrds_id)
 
   if (!is.null(tables)) {
     unknown <- setdiff(tables, all_tables)
@@ -38,7 +62,11 @@ wrds_schema_to_pq <- function(
         schema     = schema,
         data_dir   = data_dir,
         force      = force,
-        chunk_size = chunk_size
+        chunk_size = chunk_size,
+        wrds_id = wrds_id,
+        transfer_method = transfer_method,
+        numeric_mode = numeric_mode,
+        ...
       ),
       error = function(e) {
         message("Error processing '", schema, ".", table_name, "': ", conditionMessage(e))

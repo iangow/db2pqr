@@ -1,0 +1,27 @@
+---
+title: "WRDS to Parquet"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{WRDS to Parquet}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+`wrds_update_pq()` exports a WRDS PostgreSQL table to a local Parquet file and
+skips the download when existing metadata indicate that the local file is
+current.
+
+```{r, eval = FALSE}
+Sys.setenv(DATA_DIR = "~/pq_data")
+
+wrds_update_pq("dsi", "crsp")
+wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
+wrds_update_pq("company", "comp", rename = c(conm = "company_name"))
+```
+
+Use `wrds_schema_to_pq()` for schema-wide refreshes and `wrds_sql_to_pq()` for
+custom WRDS SQL queries.

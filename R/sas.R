@@ -9,17 +9,7 @@
 # @return A non-empty character string.
 # @keywords internal
 .get_wrds_id <- function(wrds_id = NULL, user_key = "wrds_user") {
-  if (!is.null(wrds_id)) return(wrds_id)
-  tryCatch(
-    keyring::key_get(user_key),
-    error = function(e) {
-      stop(
-        "Could not retrieve WRDS username from keyring. ",
-        "Run wrds::wrds_set_credentials() to set up credentials.",
-        call. = FALSE
-      )
-    }
-  )
+  wrds_get_username(wrds_id = wrds_id, user_key = user_key)
 }
 
 # Execute SAS code on the WRDS server via SSH and return the output as a

@@ -1,0 +1,37 @@
+---
+title: "Authentication"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Authentication}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+`db2pq` resolves WRDS usernames from an explicit `wrds_id`, `WRDS_ID`,
+`WRDS_USER`, and finally the keyring entry created by `wrds::wrds_set_credentials()`.
+
+```{r, eval = FALSE}
+Sys.setenv(WRDS_ID = "your_wrds_id")
+wrds_get_username()
+wrds_conninfo(format = "uri")
+```
+
+For reproducible PostgreSQL access, prefer libpq's `.pgpass` file where
+possible. You can inspect whether a matching WRDS entry exists without opening a
+database connection:
+
+```{r, eval = FALSE}
+pgpass_has_entry(
+  host = "wrds-pgdata.wharton.upenn.edu",
+  port = 9737,
+  database = "wrds",
+  user = wrds_get_username()
+)
+```
+
+Use `wrds_check_credentials()` to test a live connection when WRDS access is
+available.

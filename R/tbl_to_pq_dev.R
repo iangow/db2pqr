@@ -5,7 +5,7 @@
 #' to a Parquet file.
 #'
 #' This is an experimental development path kept separate from
-#' [lazy_tbl_to_pq()] while we evaluate the ADBC transfer route. The ADBC path
+#' \code{\link{lazy_tbl_to_pq}} while we evaluate the ADBC transfer route. The ADBC path
 #' opens a second PostgreSQL connection for the transfer, so the database must
 #' allow an additional concurrent connection beyond the one already backing
 #' `tbl`.
@@ -57,9 +57,8 @@ tbl_to_pq <- function(tbl, out_file, chunk_size = 100000L, metadata = NULL,
 #' @return An ADBC connection created by `adbi`.
 #' @export
 con_to_adbi <- function(con) {
-  if (!requireNamespace("adbi", quietly = TRUE) ||
-      !requireNamespace("adbcpostgresql", quietly = TRUE)) {
-    stop("Packages `adbi` and `adbcpostgresql` must be installed to use `con_to_adbi()`.")
+  if (!requireNamespace("adbi", quietly = TRUE)) {
+    stop("Package `adbi` must be installed to use `con_to_adbi()`.")
   }
 
   uri <- .con_to_adbi_uri(con)
@@ -432,16 +431,99 @@ sql_to_pq_dev_debug <- function(con, sql, max_chunks = Inf) {
 }
 
 .connect_adbc_postgres <- function(uri) {
-  if (!requireNamespace("adbi", quietly = TRUE) ||
-      !requireNamespace("adbcpostgresql", quietly = TRUE)) {
-    stop("Packages `adbi` and `adbcpostgresql` must be installed to use the ADBC PostgreSQL path.")
-  }
+  tryCatch(
+    DBI::dbConnect(.adbc_postgres_dbi_driver(), uri = uri),
+    error = function(e) {
+      msg <- conditionMessage(e)
+      if (.is_adbc_ssl_error(msg)) {
+        stop(
+          msg,
+          "\n\nThe PostgreSQL ADBC driver failed while enabling SSL. ",
+          "WRDS requires SSL (`sslmode=require`). Install a current ",
+          "`adbcpostgresql` build from CRAN or use the stable DBI/RPostgres ",
+          "path with `transfer_method = \"dbi\"`.",
+          call. = FALSE
+        )
+      }
+      stop(e)
+    }
+  )
+}
 
-  DBI::dbConnect(adbi::adbi("adbcpostgresql"), uri = uri)
+.is_adbc_ssl_error <- function(message) {
+  msg <- tolower(message)
+  grepl("ssl", msg, fixed = TRUE) &&
+    (grepl("libpq", msg, fixed = TRUE) ||
+       grepl("sslmode", msg, fixed = TRUE) ||
+       grepl("not compiled", msg, fixed = TRUE))
 }
 
 .is_adbi_connection <- function(con) {
   inherits(con, "AdbiConnection")
+}
+
+.adbc_postgres_dbi_driver <- function() {
+  if (!requireNamespace("adbi", quietly = TRUE)) {
+    stop("Package `adbi` must be installed to use the ADBC PostgreSQL path.")
+  }
+
+  backend <- .adbc_postgres_backend()
+
+  if (backend %in% c("auto", "package") && .adbc_postgres_package_available()) {
+    return(adbi::adbi("adbcpostgresql"))
+  }
+
+  if (backend %in% c("auto", "drivermanager")) {
+    return(adbi::adbi(.adbc_postgres_drivermanager_driver()))
+  }
+
+  stop(
+    "Package `adbi` plus either package `adbcpostgresql` or ",
+    "`adbcdrivermanager` with a loadable PostgreSQL driver are required ",
+    "for the ADBC PostgreSQL path."
+  )
+}
+
+.adbc_postgres_backend <- function() {
+  backend <- Sys.getenv("DB2PQ_ADBC_POSTGRES_DRIVER_BACKEND", unset = "auto")
+  backend <- tolower(backend)
+
+  if (!backend %in% c("auto", "package", "drivermanager")) {
+    stop(
+      "Unsupported `DB2PQ_ADBC_POSTGRES_DRIVER_BACKEND`: `", backend, "`. ",
+      "Use one of `auto`, `package`, or `drivermanager`."
+    )
+  }
+
+  backend
+}
+
+.adbc_postgres_package_available <- function() {
+  requireNamespace("adbcpostgresql", quietly = TRUE)
+}
+
+.adbc_postgres_drivermanager_driver <- function() {
+  if (!requireNamespace("adbcdrivermanager", quietly = TRUE)) {
+    stop(
+      "Package `adbcdrivermanager` must be installed to use ",
+      "`DB2PQ_ADBC_POSTGRES_DRIVER_BACKEND=drivermanager`."
+    )
+  }
+
+  driver_name <- Sys.getenv("ADBC_POSTGRESQL_DRIVER", unset = "postgresql")
+
+  tryCatch(
+    adbcdrivermanager::adbc_driver(driver_name),
+    error = function(e) {
+      stop(
+        "Unable to load PostgreSQL ADBC driver `", driver_name, "` via ",
+        "`adbcdrivermanager`. Install it with `dbc install postgresql` ",
+        "or set `ADBC_POSTGRESQL_DRIVER` to the driver library path. ",
+        "Original error: ", conditionMessage(e),
+        call. = FALSE
+      )
+    }
+  )
 }
 
 .postgres_uri_query <- function(user = "", password = "", host = "", port = "",
@@ -512,6 +594,10 @@ sql_to_pq_dev_debug <- function(con, sql, max_chunks = Inf) {
 }
 
 .nanoarrow_schema_text <- function(batch) {
+  if (!requireNamespace("nanoarrow", quietly = TRUE)) {
+    return("")
+  }
+
   schema <- tryCatch(
     nanoarrow::infer_nanoarrow_schema(batch),
     error = function(e) NULL
@@ -521,7 +607,7 @@ sql_to_pq_dev_debug <- function(con, sql, max_chunks = Inf) {
     return("")
   }
 
-  paste(capture.output(print(schema)), collapse = "\n")
+  paste(utils::capture.output(print(schema)), collapse = "\n")
 }
 
 .nanoarrow_num_rows <- function(batch) {

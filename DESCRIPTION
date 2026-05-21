@@ -8,6 +8,8 @@ Description: Tools for exporting PostgreSQL tables to Parquet files, with
     data library sourced from WRDS (Wharton Research Data Services), with
     update-checking based on table metadata, and archive management utilities
     for versioning local data files.
+URL: https://github.com/iandgow/db2pqr, https://iandgow.github.io/db2pqr/
+BugReports: https://github.com/iandgow/db2pqr/issues
 Authors@R: c(
     person(
       "Ian", "Gow",
@@ -15,15 +17,14 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
+Author: Ian Gow [aut, cre]
+Maintainer: Ian Gow <iandgow@gmail.com>
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends:
     R (>= 4.1.0)
 Imports:
-    adbcpostgresql,
-    adbi,
     arrow,
     DBI,
     keyring,
@@ -32,8 +33,17 @@ Imports:
     tools,
     wrds
 Suggests: 
+    adbcpostgresql,
+    adbcdrivermanager,
+    adbi,
     dplyr,
     dbplyr,
+    knitr,
+    nanoarrow,
     processx,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Config/Needs/website: pkgdown
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

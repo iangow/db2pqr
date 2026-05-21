@@ -183,6 +183,68 @@ test_that("adbc_numeric_cast_map_from_column_info finds string-like result colum
   expect_identical(out, c("vwretd", "usdval"))
 })
 
+test_that("adbc postgres driver selection honors drivermanager override", {
+  skip_if_not_installed("adbi")
+  skip_if_not_installed("adbcdrivermanager")
+
+  old_backend <- Sys.getenv("DB2PQ_ADBC_POSTGRES_DRIVER_BACKEND", unset = NA_character_)
+  old_driver <- Sys.getenv("ADBC_POSTGRESQL_DRIVER", unset = NA_character_)
+  Sys.setenv(
+    DB2PQ_ADBC_POSTGRES_DRIVER_BACKEND = "drivermanager",
+    ADBC_POSTGRESQL_DRIVER = "postgresql"
+  )
+  on.exit({
+    if (is.na(old_backend)) Sys.unsetenv("DB2PQ_ADBC_POSTGRES_DRIVER_BACKEND") else Sys.setenv(DB2PQ_ADBC_POSTGRES_DRIVER_BACKEND = old_backend)
+    if (is.na(old_driver)) Sys.unsetenv("ADBC_POSTGRESQL_DRIVER") else Sys.setenv(ADBC_POSTGRESQL_DRIVER = old_driver)
+  }, add = TRUE)
+
+  restore_package_available <- local_rebind(
+    ".adbc_postgres_package_available",
+    function() TRUE,
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_package_available(), add = TRUE)
+
+  restore_drivermanager_driver <- local_rebind(
+    ".adbc_postgres_drivermanager_driver",
+    function() adbcdrivermanager::adbc_driver_void(),
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_drivermanager_driver(), add = TRUE)
+
+  drv <- db2pq:::.adbc_postgres_dbi_driver()
+
+  expect_s4_class(drv, "AdbiDriver")
+  expect_true(inherits(slot(drv, "driver"), "adbc_driver_void"))
+})
+
+test_that("connect_adbc_postgres routes uri through selected ADBC driver", {
+  fake_driver <- structure(list(), class = "FakeAdbiDriver")
+
+  restore_driver <- local_rebind(
+    ".adbc_postgres_dbi_driver",
+    function() fake_driver,
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_driver(), add = TRUE)
+
+  restore_db_connect <- local_rebind(
+    "dbConnect",
+    function(drv, ..., uri) {
+      expect_identical(drv, fake_driver)
+      expect_identical(uri, "postgresql://user:pass@example.test/wrds")
+      "connected"
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_db_connect(), add = TRUE)
+
+  expect_identical(
+    db2pq:::.connect_adbc_postgres("postgresql://user:pass@example.test/wrds"),
+    "connected"
+  )
+})
+
 test_that("rewrite_select_list applies numeric casts and timestamp expressions", {
   out <- db2pq:::.rewrite_select_list(
     columns = c("date", "prc", "ret"),
@@ -198,6 +260,49 @@ test_that("rewrite_select_list applies numeric casts and timestamp expressions",
       'CAST("ret" AS DOUBLE PRECISION) AS "ret"'
     )
   )
+})
+
+test_that("db_to_pq planner applies rename to select list and col_types", {
+  local_con <- structure(list(), class = "TestConnection")
+
+  restore_fields <- local_rebind(
+    "dbListFields",
+    function(conn, name, ...) c("gvkey", "conm", "prc"),
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_fields(), add = TRUE)
+
+  restore_get_query <- local_rebind(
+    "dbGetQuery",
+    function(conn, statement, params = NULL, ...) {
+      if (grepl("data_type    = 'numeric'", statement, fixed = TRUE)) {
+        return(data.frame(column_name = "prc"))
+      }
+      if (grepl("data_type    = 'timestamp without time zone'", statement, fixed = TRUE)) {
+        return(data.frame(column_name = character()))
+      }
+      stop("Unexpected query")
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_get_query(), add = TRUE)
+
+  plan <- db2pq:::.db_to_pq_plan(
+    con = local_con,
+    table_name = "company",
+    schema = "comp",
+    rename = c(conm = "company_name", prc = "price"),
+    col_types = list(company_name = "string"),
+    transfer_method = "adbc",
+    tz = NULL
+  )
+
+  expect_identical(
+    plan$sql,
+    'SELECT "gvkey", "conm" AS "company_name", CAST("prc" AS DOUBLE PRECISION) AS "price" FROM "comp"."company"'
+  )
+  expect_identical(plan$output_names, c("gvkey", "company_name", "price"))
+  expect_identical(names(plan$col_types), "company_name")
 })
 
 test_that("wrds_update_pq forwards transfer_method to db_to_pq", {
@@ -244,7 +349,7 @@ test_that("wrds_update_pq forwards transfer_method to db_to_pq", {
 
   restore_db_to_pq <- local_rebind(
     "db_to_pq",
-    function(table_name, schema, data_dir, out_file, where, obs, keep, drop,
+    function(table_name, schema, data_dir, out_file, where, obs, keep, drop, rename,
              alt_table_name, chunk_size, transfer_method, numeric_mode, con, metadata,
              col_types, tz) {
       expect_identical(table_name, "dsi")
@@ -318,7 +423,7 @@ test_that("wrds_update_pq uses native ADBC connection for adbc transfer", {
 
   restore_db_to_pq <- local_rebind(
     "db_to_pq",
-    function(table_name, schema, data_dir, out_file, where, obs, keep, drop,
+    function(table_name, schema, data_dir, out_file, where, obs, keep, drop, rename,
              alt_table_name, chunk_size, transfer_method, numeric_mode, con, metadata,
              col_types, tz) {
       expect_identical(transfer_method, "adbc")
@@ -377,7 +482,7 @@ test_that("wrds_update_pq respects explicit chunk_size override for adbc", {
 
   restore_db_to_pq <- local_rebind(
     "db_to_pq",
-    function(table_name, schema, data_dir, out_file, where, obs, keep, drop,
+    function(table_name, schema, data_dir, out_file, where, obs, keep, drop, rename,
              alt_table_name, chunk_size, transfer_method, numeric_mode, con, metadata,
              col_types, tz) {
       expect_identical(transfer_method, "adbc")
@@ -436,7 +541,7 @@ test_that("wrds_update_pq forwards raw numeric_mode for adbc", {
 
   restore_db_to_pq <- local_rebind(
     "db_to_pq",
-    function(table_name, schema, data_dir, out_file, where, obs, keep, drop,
+    function(table_name, schema, data_dir, out_file, where, obs, keep, drop, rename,
              alt_table_name, chunk_size, transfer_method, numeric_mode, con, metadata,
              col_types, tz) {
       expect_identical(transfer_method, "adbc")

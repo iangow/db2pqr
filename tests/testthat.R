@@ -6,7 +6,9 @@
 # * https://r-pkgs.org/testing-design.html#sec-tests-files-overview
 # * https://testthat.r-lib.org/articles/special-files.html
 
-library(testthat)
-library(db2pq)
+if (requireNamespace("testthat", quietly = TRUE)) {
+  library(testthat)
+  library(db2pq)
 
-test_check("db2pq")
+  test_check("db2pq")
+}

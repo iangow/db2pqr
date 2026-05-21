@@ -37,7 +37,7 @@ to a Parquet file.
 }
 \details{
 This is an experimental development path kept separate from
-\code{\link[=lazy_tbl_to_pq]{lazy_tbl_to_pq()}} while we evaluate the ADBC transfer route. The ADBC path
+\code{\link{lazy_tbl_to_pq}} while we evaluate the ADBC transfer route. The ADBC path
 opens a second PostgreSQL connection for the transfer, so the database must
 allow an additional concurrent connection beyond the one already backing
 \code{tbl}.

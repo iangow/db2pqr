@@ -1,3 +1,38 @@
+#' Export a PostgreSQL table to Parquet
+#'
+#' Exports a table from PostgreSQL to a Parquet file, with optional row
+#' filtering, column filtering, column renaming, Arrow type overrides, and
+#' timestamp normalization.
+#'
+#' @param table_name Name of the source PostgreSQL table.
+#' @param schema Name of the source PostgreSQL schema.
+#' @param host,database,user,password,port PostgreSQL connection parameters
+#'   used when `con` is not supplied.
+#' @param data_dir Root directory of the local Parquet data repository. Defaults
+#'   to `DATA_DIR`, or `"."` if unset.
+#' @param out_file Optional full output path. Overrides `data_dir`, `schema`,
+#'   and `table_name`.
+#' @param where Optional SQL `WHERE` clause without the `WHERE` keyword.
+#' @param obs Optional integer row limit.
+#' @param keep,drop Optional character vectors of regex patterns used to select
+#'   source columns. `drop` is applied before `keep`.
+#' @param rename Optional named character vector or list mapping source column
+#'   names to output column names, e.g. `c(conm = "company_name")`.
+#' @param alt_table_name Optional output basename when `out_file` is omitted.
+#' @param chunk_size Number of rows fetched and written per chunk.
+#' @param transfer_method Transfer backend: `"dbi"` for the stable DBI path or
+#'   `"adbc"` for the optional Arrow/ADBC path.
+#' @param numeric_mode Numeric handling mode for the ADBC path. `"float64"`
+#'   casts PostgreSQL `numeric` columns to `DOUBLE PRECISION`; `"raw"` keeps the
+#'   driver default.
+#' @param con Optional existing DBI connection.
+#' @param metadata Optional named list of Parquet schema metadata.
+#' @param col_types Optional named list of Arrow output type overrides. Names
+#'   refer to output column names after `rename`.
+#' @param tz Time zone used to interpret `TIMESTAMP WITHOUT TIME ZONE` columns.
+#'
+#' @return Invisibly returns the output file path.
+#' @export
 db_to_pq <- function(
     table_name,
     schema,
@@ -12,6 +47,7 @@ db_to_pq <- function(
     obs = NULL,
     keep = NULL,
     drop = NULL,
+    rename = NULL,
     alt_table_name = NULL,
     chunk_size = 100000L,
     transfer_method = c("dbi", "adbc"),
@@ -51,6 +87,7 @@ db_to_pq <- function(
     obs = obs,
     keep = keep,
     drop = drop,
+    rename = rename,
     col_types = col_types,
     tz = tz,
     transfer_method = transfer_method,
@@ -92,7 +129,8 @@ db_to_pq <- function(
 }
 
 .db_to_pq_plan <- function(con, table_name, schema, where = NULL, obs = NULL,
-                           keep = NULL, drop = NULL, col_types = NULL,
+                           keep = NULL, drop = NULL, rename = NULL,
+                           col_types = NULL,
                            tz = NULL, transfer_method = c("dbi", "adbc"),
                            numeric_mode = c("float64", "raw")) {
   transfer_method <- match.arg(transfer_method)
@@ -111,6 +149,7 @@ db_to_pq <- function(
   if (length(nms) == 0) {
     stop("No columns selected after applying keep/drop filters.")
   }
+  output_names <- .resolve_rename(nms, rename)
 
   # Resolve col_types up front so we can inspect types during SQL building
   resolved_col_types <- if (!is.null(col_types)) lapply(col_types, arrow_type) else list()
@@ -119,6 +158,7 @@ db_to_pq <- function(
     schema = schema,
     table_name = table_name,
     columns = nms,
+    output_names = output_names,
     col_types = resolved_col_types,
     transfer_method = transfer_method,
     numeric_mode = numeric_mode
@@ -131,10 +171,10 @@ db_to_pq <- function(
     naive_ts <- .naive_timestamp_cols(con, schema, table_name, nms)
 
     # Columns requested as timestamp via col_types but not natively timestamp in PG
-    cast_ts <- intersect(
-      names(resolved_col_types)[vapply(resolved_col_types, .is_arrow_timestamp, logical(1))],
-      setdiff(nms, naive_ts)
-    )
+    timestamp_type_names <- names(resolved_col_types)[
+      vapply(resolved_col_types, .is_arrow_timestamp, logical(1))
+    ]
+    cast_ts <- nms[output_names %in% timestamp_type_names & !(nms %in% naive_ts)]
 
     ts_cols <- union(naive_ts, cast_ts)
     if (length(ts_cols) > 0) {
@@ -143,10 +183,11 @@ db_to_pq <- function(
     }
 
     timestamp_exprs <- stats::setNames(vapply(nms, function(col) {
+      out_col <- output_names[[match(col, nms)]]
       if (col %in% naive_ts) {
-        return(sprintf('("%s" AT TIME ZONE \'%s\') AS "%s"', col, tz, col))
+        return(sprintf('("%s" AT TIME ZONE \'%s\') AS "%s"', col, tz, out_col))
       } else if (col %in% cast_ts) {
-        return(sprintf('(CAST("%s" AS TIMESTAMP) AT TIME ZONE \'%s\') AS "%s"', col, tz, col))
+        return(sprintf('(CAST("%s" AS TIMESTAMP) AT TIME ZONE \'%s\') AS "%s"', col, tz, out_col))
       }
       ""
     }, character(1)), nms)
@@ -154,15 +195,19 @@ db_to_pq <- function(
 
     col_exprs <- .rewrite_select_list(
       columns = nms,
+      output_names = output_names,
       numeric_cast_cols = numeric_cast_cols,
       timestamp_exprs = timestamp_exprs
     )
 
     # Remove cast_ts cols from col_types - PG now returns them as timestamptz
-    resolved_col_types <- resolved_col_types[setdiff(names(resolved_col_types), cast_ts)]
+    resolved_col_types <- resolved_col_types[
+      setdiff(names(resolved_col_types), output_names[nms %in% cast_ts])
+    ]
   } else {
     col_exprs <- .rewrite_select_list(
       columns = nms,
+      output_names = output_names,
       numeric_cast_cols = numeric_cast_cols
     )
   }
@@ -184,8 +229,34 @@ db_to_pq <- function(
   list(
     sql = sql,
     columns = nms,
+    output_names = output_names,
     col_types = col_types_final
   )
+}
+
+.resolve_rename <- function(columns, rename = NULL) {
+  output_names <- columns
+  if (is.null(rename)) {
+    return(output_names)
+  }
+
+  rename <- unlist(rename, use.names = TRUE)
+  if (is.null(names(rename)) || any(!nzchar(names(rename))) || any(!nzchar(rename))) {
+    stop("`rename` must be a named character vector or list mapping source names to output names.")
+  }
+
+  unknown <- setdiff(names(rename), columns)
+  if (length(unknown) > 0L) {
+    stop("`rename` contains source column(s) not selected for export: ",
+         paste(unknown, collapse = ", "), call. = FALSE)
+  }
+
+  output_names[match(names(rename), columns)] <- as.character(rename)
+  if (anyDuplicated(output_names)) {
+    stop("`rename` must not produce duplicate output column names.", call. = FALSE)
+  }
+
+  output_names
 }
 
 # Return the names of columns in `nms` whose PostgreSQL type is
@@ -216,6 +287,7 @@ db_to_pq <- function(
 }
 
 .adbc_table_export_plan <- function(con, schema, table_name, columns,
+                                    output_names = columns,
                                     col_types = list(),
                                     transfer_method = c("dbi", "adbc"),
                                     numeric_mode = c("float64", "raw")) {
@@ -235,6 +307,7 @@ db_to_pq <- function(
       schema = schema,
       table_name = table_name,
       columns = columns,
+      output_names = output_names,
       col_types = col_types
     )
   } else {
@@ -248,10 +321,11 @@ db_to_pq <- function(
 }
 
 .adbc_numeric_cast_cols <- function(con, schema, table_name, columns,
-                                    col_types = list()) {
+                                    output_names = columns, col_types = list()) {
+  typed_source_cols <- columns[output_names %in% names(col_types)]
   numeric_cast_cols <- setdiff(
     .numeric_cols(con, schema, table_name, columns),
-    names(col_types)
+    typed_source_cols
   )
 
   if (length(numeric_cast_cols) > 0L) {
@@ -276,14 +350,20 @@ db_to_pq <- function(
   names(out)
 }
 
-.rewrite_select_list <- function(columns, numeric_cast_cols = character(),
+.rewrite_select_list <- function(columns, output_names = columns,
+                                 numeric_cast_cols = character(),
                                  timestamp_exprs = NULL) {
+  output_names <- stats::setNames(output_names, columns)
   unname(vapply(columns, function(col) {
+    out_col <- output_names[[col]]
     if (!is.null(timestamp_exprs) && col %in% names(timestamp_exprs)) {
       return(timestamp_exprs[[col]])
     }
     if (col %in% numeric_cast_cols) {
-      return(sprintf('CAST("%s" AS DOUBLE PRECISION) AS "%s"', col, col))
+      return(sprintf('CAST("%s" AS DOUBLE PRECISION) AS "%s"', col, out_col))
+    }
+    if (!identical(col, out_col)) {
+      return(sprintf('"%s" AS "%s"', col, out_col))
     }
     sprintf('"%s"', col)
   }, character(1)))

@@ -1,3 +1,6 @@
 .Rproj.user
 .Rhistory
 .positai
+*.Rcheck/
+..Rcheck/
+*.tar.gz

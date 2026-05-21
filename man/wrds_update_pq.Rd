@@ -14,6 +14,7 @@ wrds_update_pq(
   obs = NULL,
   keep = NULL,
   drop = NULL,
+  rename = NULL,
   alt_table_name = NULL,
   chunk_size = NULL,
   col_types = NULL,
@@ -56,6 +57,10 @@ names match at least one pattern are retained. Applied after \code{drop}.}
 
 \item{drop}{Optional character vector of regex patterns. Columns whose names
 match at least one pattern are removed. Applied before \code{keep}.}
+
+\item{rename}{Optional named character vector or list mapping source column
+names to output column names. \code{col_types} names should refer to output
+names after renaming.}
 
 \item{alt_table_name}{Optional. Alternative basename for the output Parquet
 file, used when the file should have a different name from \code{table_name}.}

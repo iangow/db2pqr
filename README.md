@@ -20,15 +20,20 @@ pak::pak("iandgow/db2pqr")
 
 ## WRDS credentials setup
 
-Credentials are stored securely in your system keyring (Keychain on macOS,
-Credential Manager on Windows, Secret Service on Linux). Set them up once with:
+For reproducible WRDS PostgreSQL access, set your WRDS username with
+`WRDS_ID` or `WRDS_USER` and store the password in PostgreSQL's `.pgpass`
+file. The package still works with credentials created by
+`wrds::wrds_set_credentials()`:
 
 ```r
+Sys.setenv(WRDS_ID = "your_wrds_id")
+wrds_conninfo(format = "uri")
+
 wrds::wrds_set_credentials()
 ```
 
-This stores your WRDS username and password, which are used by both
-`wrds_connect()` and `wrds_update_pq()`.
+Use `wrds_check_credentials()` to test a live WRDS PostgreSQL connection and
+`pgpass_has_entry()` to check whether a matching `.pgpass` entry exists.
 
 ## WRDS SSH setup (for `use_sas = TRUE`)
 
@@ -123,11 +128,46 @@ wrds_update_pq("dsi", "crsp", use_sas = TRUE)
 wrds_schema_to_pq("crsp")
 ```
 
+### Export a custom WRDS SQL query
+
+```r
+wrds_sql_to_pq(
+  "SELECT permno, date, ret FROM crsp.dsf WHERE date >= '2024-01-01'",
+  table_name = "dsf_recent",
+  schema = "crsp"
+)
+```
+
+### Export a local PostgreSQL table
+
+```r
+db_to_pq(
+  table_name = "company",
+  schema = "comp",
+  keep = c("gvkey", "conm"),
+  rename = c(conm = "company_name")
+)
+```
+
 ### Check when local Parquet files were last updated
 
 ```r
 pq_last_modified(schema = "crsp")
 ```
+
+## ADBC backend
+
+The stable default transfer path uses DBI/RPostgres. The optional ADBC path can
+be selected with `transfer_method = "adbc"` when `adbi` and a PostgreSQL ADBC
+driver are installed:
+
+```r
+adbc_diagnostics()
+wrds_update_pq("dsi", "crsp", transfer_method = "adbc")
+```
+
+If ADBC reports an SSL/libpq error, use `transfer_method = "dbi"` or install a
+current SSL-capable `adbcpostgresql` build.
 
 ## Parquet layout
 

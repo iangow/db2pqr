@@ -1,0 +1,52 @@
+url: https://iandgow.github.io/db2pqr/
+
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [github]
+
+reference:
+  - title: PostgreSQL and WRDS to Parquet
+    contents:
+      - db_to_pq
+      - lazy_tbl_to_pq
+      - tbl_to_pq
+      - wrds_update_pq
+      - wrds_schema_to_pq
+      - wrds_sql_to_pq
+      - db_schema_to_pq
+      - db_schema_tables
+      - wrds_get_tables
+  - title: Authentication and configuration
+    contents:
+      - wrds_get_username
+      - wrds_conninfo
+      - wrds_check_credentials
+      - pgpass_path
+      - pgpass_find
+      - pgpass_has_entry
+      - adbc_diagnostics
+  - title: Parquet file utilities
+    contents:
+      - pq_last_modified
+      - pq_archive
+      - pq_restore
+      - pq_remove
+      - arrow_type
+  - title: ADBC development helpers
+    contents:
+      - con_to_adbi
+      - tbl_to_pq_debug
+
+articles:
+  - title: Workflows
+    navbar: Workflows
+    contents:
+      - authentication
+      - wrds-to-parquet
+      - postgres-to-parquet
+      - parquet-repository
+      - adbc

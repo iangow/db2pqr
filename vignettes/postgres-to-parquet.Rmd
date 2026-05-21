@@ -1,0 +1,29 @@
+---
+title: "PostgreSQL to Parquet"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{PostgreSQL to Parquet}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+`db_to_pq()` exports PostgreSQL tables to Parquet using a DBI connection. It can
+filter rows, select columns, rename outputs, and apply Arrow type overrides.
+
+```{r, eval = FALSE}
+db_to_pq(
+  table_name = "company",
+  schema = "comp",
+  data_dir = "~/pq_data",
+  keep = c("gvkey", "conm"),
+  rename = c(conm = "company_name"),
+  col_types = list(company_name = "string")
+)
+```
+
+Use `db_schema_tables()` to inspect available relations and `db_schema_to_pq()`
+to export a schema.

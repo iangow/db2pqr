@@ -48,5 +48,6 @@ articles:
       - authentication
       - wrds-to-parquet
       - postgres-to-parquet
+      - data-management
       - parquet-repository
       - adbc

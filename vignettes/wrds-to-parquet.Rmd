@@ -9,19 +9,465 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+has_pkg <- function(pkg) requireNamespace(pkg, quietly = TRUE)
+live_wrds_id <- tryCatch(db2pq::wrds_get_username(), error = function(e) "")
+has_wrds_id <- nzchar(live_wrds_id)
+has_libpq_password <- function(user) {
+  nzchar(Sys.getenv("PGPASSWORD", unset = "")) ||
+    tryCatch(
+      db2pq::pgpass_has_entry(
+        host = "wrds-pgdata.wharton.upenn.edu",
+        port = 9737L,
+        database = "wrds",
+        user = user
+      ),
+      error = function(e) FALSE
+    )
+}
+live_wrds <- all(
+  identical(Sys.getenv("IN_PKGDOWN"), "true"),
+  has_wrds_id,
+  has_libpq_password(live_wrds_id),
+  has_pkg("arrow"),
+  has_pkg("dplyr"),
+  has_pkg("DBI"),
+  has_pkg("RPostgres")
+)
+doc_data_dir <- file.path(tempdir(), "db2pq-wrds-to-parquet")
+if (live_wrds) {
+  unlink(doc_data_dir, recursive = TRUE)
+  dir.create(doc_data_dir, recursive = TRUE, showWarnings = FALSE)
+}
 ```
 
-`wrds_update_pq()` exports a WRDS PostgreSQL table to a local Parquet file and
-skips the download when existing metadata indicate that the local file is
-current.
+This is the place to start when your source data live in the WRDS PostgreSQL
+database and you want local Parquet files that can be reused across projects.
+
+`db2pq` writes files using the layout:
+
+```text
+<DATA_DIR>/<schema>/<table>.parquet
+```
+
+For example, `wrds_update_pq("company", "comp")` writes
+`<DATA_DIR>/comp/company.parquet` unless you provide `data_dir` or `out_file`
+explicitly.
+
+## Main Helpers
+
+The main helper on this path is `wrds_update_pq()`. It downloads a WRDS
+PostgreSQL table as a Parquet file and skips the download when the existing
+local file already appears current.
+
+Related helpers are:
+
+- `wrds_sql_to_pq()` exports a custom SQL query against WRDS into the standard
+  Parquet layout.
+- `wrds_schema_to_pq()` updates all or selected tables in a WRDS schema.
+- `pq_last_modified()`, `pq_archive()`, and `pq_restore()` inspect and manage
+  local Parquet files after they have been created.
+
+## Setup
+
+Set `DATA_DIR` to the local repository where you want Parquet files to live:
 
 ```{r, eval = FALSE}
-Sys.setenv(DATA_DIR = "~/pq_data")
-
-wrds_update_pq("dsi", "crsp")
-wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
-wrds_update_pq("company", "comp", rename = c(conm = "company_name"))
+Sys.setenv(DATA_DIR = "~/Dropbox/pq_data")
 ```
 
-Use `wrds_schema_to_pq()` for schema-wide refreshes and `wrds_sql_to_pq()` for
-custom WRDS SQL queries.
+For WRDS credentials, `db2pq` can use credentials configured by the `wrds`
+package, and it also provides helpers for checking username and connection
+settings:
+
+```{r, eval = FALSE}
+Sys.setenv(WRDS_ID = "your_wrds_id")
+wrds_get_username()
+wrds_conninfo(format = "uri")
+wrds_check_credentials()
+```
+
+For compatibility with Tidy Finance-style setups, `WRDS_USER` is also
+recognized. See the authentication article for more detail.
+
+## Using `wrds_update_pq()`
+
+### An Illustrative First Run
+
+A good first table is `comp.company`, which is small enough for a quick test:
+
+```{r, eval = FALSE}
+library(db2pq)
+
+wrds_update_pq("company", "comp")
+```
+
+When this article is rendered locally with WRDS credentials, the same example
+runs against a temporary documentation repository rather than the main
+`DATA_DIR`.
+
+```{r live-company-first-run, eval = live_wrds}
+library(db2pq)
+
+wrds_id <- wrds_get_username()
+company_file <- wrds_update_pq(
+  "company",
+  "comp",
+  data_dir = doc_data_dir,
+  wrds_id = wrds_id
+)
+file.path("<temporary data repository>", "comp", basename(company_file))
+```
+
+Typical output from a first run looks like:
+
+```text
+Updated comp.company is available.
+Beginning file download at 2026-04-09 17:12:41 UTC.
+Completed file download at 2026-04-09 17:12:46 UTC.
+```
+
+Running the same command later should usually skip the download if WRDS
+metadata indicate that the local file is already current.
+
+```{r live-company-second-run, eval = live_wrds}
+wrds_update_pq("company", "comp", data_dir = doc_data_dir, wrds_id = wrds_id)
+```
+
+The resulting file is an ordinary Parquet file. It can be inspected with
+`arrow`, `dplyr`, DuckDB, Python, or any other tool that reads Parquet.
+
+```{r live-company-preview, eval = live_wrds}
+dplyr::select(
+  arrow::read_parquet(company_file),
+  gvkey, conm, sic
+) |>
+  head()
+```
+
+### Identifying Table Names and Schemas
+
+WRDS uses schema names such as `crsp`, `comp`, `audit`, and `bank`. If existing
+code refers to `comp.funda`, then the schema is `comp` and the table is
+`funda`:
+
+```{r, eval = FALSE}
+wrds_update_pq("funda", "comp")
+```
+
+You can list tables in a WRDS schema from R:
+
+```{r, eval = FALSE}
+wrds_get_tables("crsp")
+wrds_get_tables("comp", views = TRUE)
+```
+
+During a local site render, this page can show the first few tables returned
+from WRDS:
+
+```{r live-list-comp-tables, eval = live_wrds}
+head(wrds_get_tables("comp", wrds_id = wrds_id))
+```
+
+The WRDS web query interface can also be useful for identifying the underlying
+schema and table behind a dataset, but once the table is known, script the
+download with `db2pq` so it is reproducible.
+
+## Cleaning and Shaping Data
+
+### Correcting Data Types
+
+Some WRDS columns are stored in PostgreSQL with a type that is not ideal for
+analysis. For example, link-history identifiers in `crsp.ccmxpf_lnkhist` are
+often better represented as integers:
+
+```{r, eval = FALSE}
+wrds_update_pq(
+  "ccmxpf_lnkhist",
+  "crsp",
+  col_types = list(lpermno = "int32", lpermco = "int32")
+)
+```
+
+### Setting Time Zones
+
+WRDS PostgreSQL often stores timestamps without time-zone information. The `tz`
+argument tells `db2pq` how to interpret those values before writing normalized
+timestamps to Parquet.
+
+For FFIEC Call Report data in the WRDS `bank` schema, timestamps should be
+interpreted as US Eastern time:
+
+```{r, eval = FALSE}
+wrds_update_pq(
+  "wrds_call_rcfa_1",
+  "bank",
+  tz = "America/New_York"
+)
+```
+
+Some timestamp-like fields are stored as strings. Use `col_types` with `tz` to
+coerce selected fields:
+
+```{r, eval = FALSE}
+wrds_update_pq(
+  "feed03_audit_fees",
+  "audit",
+  keep = c("auditor_fkey", "file_accepted"),
+  col_types = list(
+    auditor_fkey = "int32",
+    file_accepted = "timestamp"
+  ),
+  tz = "America/New_York",
+  force = TRUE
+)
+```
+
+## Working With Large Tables
+
+### Dropping Unwanted Variables
+
+Some WRDS tables contain blocks of columns that are not needed for most
+analyses. The `drop` argument removes columns whose names match one or more
+regular expressions:
+
+```{r, eval = FALSE}
+wrds_update_pq(
+  "feed02_auditor_changes",
+  "audit",
+  drop = "^(match|prior|closest)"
+)
+```
+
+### Selecting Only Certain Variables
+
+Use `keep` when you want a small subset of columns:
+
+```{r, eval = FALSE}
+wrds_update_pq(
+  "dsf",
+  "crsp",
+  keep = c("permno", "date", "ret")
+)
+```
+
+### Renaming Variables
+
+Use `rename` to write output columns with preferred names:
+
+```{r, eval = FALSE}
+wrds_update_pq(
+  "company",
+  "comp",
+  keep = c("gvkey", "conm", "sic"),
+  rename = c(conm = "company_name")
+)
+```
+
+For a small documentation example, the renamed file can be written to the
+temporary repository:
+
+```{r live-company-rename, eval = live_wrds}
+renamed_company_file <- wrds_update_pq(
+  "company",
+  "comp",
+  data_dir = doc_data_dir,
+  alt_table_name = "company_names",
+  keep = c("gvkey", "conm", "sic"),
+  rename = c(conm = "company_name"),
+  wrds_id = wrds_id,
+  force = TRUE
+)
+
+dplyr::select(
+  arrow::read_parquet(renamed_company_file),
+  gvkey, company_name, sic
+) |>
+  head()
+```
+
+If `rename` and `col_types` are used together, names in `col_types` refer to
+the output names after renaming:
+
+```{r, eval = FALSE}
+wrds_update_pq(
+  "ccmxpf_lnkhist",
+  "crsp",
+  rename = c(lpermno = "permno_link"),
+  col_types = list(permno_link = "int32")
+)
+```
+
+### Selecting Only Certain Rows
+
+Use `where` for SQL row filters. For Compustat annual fundamentals, a common
+filter is the standard industrial format, standard data format, consolidated,
+domestic-population set:
+
+```{r, eval = FALSE}
+wrds_update_pq(
+  "funda",
+  "comp",
+  where = paste(
+    "indfmt = 'INDL'",
+    "AND datafmt = 'STD'",
+    "AND consol = 'C'",
+    "AND popsrc = 'D'"
+  )
+)
+```
+
+### Limiting Rows for a Test Download
+
+Use `obs` to test a download before running the full export:
+
+```{r, eval = FALSE}
+wrds_update_pq("funda", "comp", obs = 1000)
+```
+
+Combining `keep`, `where`, and `obs` is a useful way to produce a small local
+file while developing a refresh script:
+
+```{r live-funda-sample, eval = live_wrds}
+funda_sample_file <- wrds_update_pq(
+  "funda",
+  "comp",
+  data_dir = doc_data_dir,
+  alt_table_name = "funda_sample",
+  keep = c("gvkey", "datadate", "fyear", "at", "sale"),
+  where = paste(
+    "indfmt = 'INDL'",
+    "AND datafmt = 'STD'",
+    "AND consol = 'C'",
+    "AND popsrc = 'D'"
+  ),
+  obs = 1000,
+  wrds_id = wrds_id,
+  force = TRUE
+)
+
+dplyr::glimpse(arrow::read_parquet(funda_sample_file))
+```
+
+## Update Logic
+
+### Forcing an Update
+
+Use `force = TRUE` when you want to re-download even if local metadata suggest
+the file is current. This is useful after changing `keep`, `drop`, `rename`,
+`col_types`, or `tz`.
+
+```{r, eval = FALSE}
+wrds_update_pq("funda", "comp", force = TRUE)
+```
+
+### Using SAS Metadata
+
+By default, `wrds_update_pq()` compares the local Parquet metadata with WRDS
+PostgreSQL table comments. Some WRDS PostgreSQL tables do not have useful
+comments. In those cases, `use_sas = TRUE` can retrieve update metadata from
+the corresponding WRDS SAS dataset.
+
+Some schemas have different names on the PostgreSQL and SAS sides. For example,
+RavenPack's PostgreSQL schema can differ from its SAS library:
+
+```{r, eval = FALSE}
+wrds_update_pq(
+  "rpa_entity_mappings",
+  "ravenpack_common",
+  use_sas = TRUE,
+  sas_schema = "rpa"
+)
+```
+
+This path requires SSH access to the WRDS SAS server. See the README for the
+WRDS SSH setup notes.
+
+### Archiving Data When Updating
+
+Use `archive = TRUE` when you want replaced files moved into the schema's
+archive directory before the new file is written:
+
+```{r, eval = FALSE}
+wrds_update_pq("company", "comp", archive = TRUE)
+pq_last_modified("company", "comp", archive = TRUE)
+```
+
+Archives live under:
+
+```text
+<DATA_DIR>/<schema>/archive/
+```
+
+For documentation and testing, archive examples should use a temporary data
+repository. This keeps the real local Parquet repository unchanged while still
+exercising the same file-management code.
+
+```{r live-company-archive, eval = live_wrds, message = FALSE}
+archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
+basename(archived_company)
+
+pq_last_modified("company", "comp", data_dir = doc_data_dir, archive = TRUE)[
+  c("file_name", "last_mod")
+]
+```
+
+The archived copy can be restored, again without touching the main `DATA_DIR`.
+
+```{r live-company-restore, eval = live_wrds, message = FALSE}
+pq_restore(
+  tools::file_path_sans_ext(basename(archived_company)),
+  "comp",
+  data_dir = doc_data_dir,
+  archive = FALSE
+)
+
+pq_last_modified("company", "comp", data_dir = doc_data_dir)
+```
+
+## Custom SQL
+
+Use `wrds_sql_to_pq()` when the object you want is better expressed as a query
+than as a full table export:
+
+```{r, eval = FALSE}
+wrds_sql_to_pq(
+  "SELECT permno, date, ret FROM crsp.dsf WHERE date >= '2024-01-01'",
+  table_name = "dsf_recent",
+  schema = "crsp"
+)
+```
+
+For a small query result, use `LIMIT` and write to the temporary documentation
+repository:
+
+```{r live-sql-export, eval = live_wrds}
+sql_file <- wrds_sql_to_pq(
+  paste(
+    "SELECT gvkey, datadate, fyear, at, sale",
+    "FROM comp.funda",
+    "WHERE indfmt = 'INDL'",
+    "AND datafmt = 'STD'",
+    "AND consol = 'C'",
+    "AND popsrc = 'D'",
+    "ORDER BY gvkey, datadate",
+    "LIMIT 20"
+  ),
+  table_name = "funda_sql_sample",
+  schema = "comp",
+  data_dir = doc_data_dir,
+  wrds_id = wrds_id,
+  archive = TRUE
+)
+
+arrow::read_parquet(sql_file)
+```
+
+## Related Pages
+
+- `wrds_update_pq()`
+- `wrds_sql_to_pq()`
+- `wrds_schema_to_pq()`
+- `pq_last_modified()`
+- `pq_archive()`
+- Authentication article
+- Data management article

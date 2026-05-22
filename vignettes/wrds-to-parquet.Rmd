@@ -87,7 +87,9 @@ wrds_check_credentials()
 ```
 
 For compatibility with Tidy Finance-style setups, `WRDS_USER` is also
-recognized. See the authentication article for more detail.
+recognized. See the authentication article for more detail. SSH access is only
+needed when using SAS metadata with `use_sas = TRUE`; see the
+[WRDS SSH setup article](wrds-ssh.html) for that separate setup.
 
 ## Using `wrds_update_pq()`
 
@@ -379,8 +381,8 @@ wrds_update_pq(
 )
 ```
 
-This path requires SSH access to the WRDS SAS server. See the README for the
-WRDS SSH setup notes.
+This path requires SSH access to the WRDS SAS server. See the
+[WRDS SSH setup article](wrds-ssh.html).
 
 ### Archiving Data When Updating
 
@@ -406,9 +408,8 @@ exercising the same file-management code.
 archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
 basename(archived_company)
 
-pq_last_modified("company", "comp", data_dir = doc_data_dir, archive = TRUE)[
-  c("file_name", "last_mod")
-]
+pq_last_modified("company", "comp", data_dir = doc_data_dir, archive = TRUE) |>
+  dplyr::select(file_name, last_mod)
 ```
 
 The archived copy can be restored, again without touching the main `DATA_DIR`.

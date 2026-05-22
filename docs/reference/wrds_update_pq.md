@@ -32,7 +32,7 @@ wrds_update_pq(
   encoding = "utf-8",
   wrds_id = NULL,
   transfer_method = c("dbi", "adbc"),
-  numeric_mode = c("float64", "raw")
+  numeric_mode = c("decimal", "float64", "text", "raw")
 )
 ```
 
@@ -159,10 +159,12 @@ wrds_update_pq(
 
 - numeric_mode:
 
-  Numeric handling mode for the ADBC path. Use `"float64"` to cast
-  PostgreSQL `numeric` columns to `DOUBLE PRECISION` before fetching, or
-  `"raw"` to keep the driver default representation. Ignored when
-  `transfer_method = "dbi"`.
+  Numeric handling mode for PostgreSQL `numeric` columns. The default
+  `"decimal"` transfers values as text and writes bounded
+  `numeric(p, s)` columns as Arrow decimals. Use `"float64"` to cast
+  values to `DOUBLE PRECISION` before fetching, `"text"` to retain text
+  values, or `"raw"` to keep the transfer backend's default
+  representation.
 
 ## Value
 

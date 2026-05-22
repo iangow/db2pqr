@@ -1,0 +1,204 @@
+---
+title: "Examples Demonstrating Parquet Utility Functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples Demonstrating Parquet Utility Functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+has_pq <- function(schema, table) {
+  data_dir <- Sys.getenv("DATA_DIR", unset = "")
+  nzchar(data_dir) &&
+    file.exists(file.path(data_dir, schema, paste0(table, ".parquet")))
+}
+live_repo <- all(
+  identical(Sys.getenv("IN_PKGDOWN"), "true"),
+  has_pq("comp", "company"),
+  has_pq("crsp", "dsi")
+)
+company_file <- file.path(
+  Sys.getenv("DATA_DIR", unset = "."),
+  "comp",
+  "company.parquet"
+)
+```
+
+This page groups together examples for the Parquet utility helpers:
+`pq_last_modified()`, `pq_archive()`, `pq_restore()`, and `pq_remove()`.
+
+The goal is different from the API reference. The API pages document arguments
+and return values. This page shows how the utilities fit together in the
+practical workflow of maintaining a local Parquet repository.
+
+## When to Use This Page
+
+Use these helpers when you already have a Parquet repository and want to:
+
+- inspect what is in it
+- check which vintage of a table you currently have
+- archive a current active file before replacing it
+- restore an archived vintage
+- remove active or archived files explicitly
+
+The related API pages are:
+
+- `pq_last_modified()`
+- `pq_archive()`
+- `pq_restore()`
+- `pq_remove()`
+
+## Setup
+
+Load the packages used in the examples:
+
+```{r parquet-utils-packages, message = FALSE}
+library(db2pq)
+library(dplyr)
+```
+
+Set `DATA_DIR` to the Parquet repository you want to inspect:
+
+```{r, eval = FALSE}
+Sys.setenv(DATA_DIR = "~/Dropbox/pq_data")
+```
+
+The examples below are rendered from a local Parquet repository. The examples
+that move files run only during a local `pkgdown` render when the repository
+contains `comp.company` and `crsp.dsi`.
+
+## Inspect a Schema Directory
+
+Use `pq_last_modified()` without `table_name` to summarize the active Parquet
+files in a schema:
+
+```{r parquet-utils-list-schema, eval = live_repo}
+pq_last_modified(schema = "comp") |>
+  select(file_name, table, last_mod) |>
+  head(10)
+```
+
+If you want to inspect archived files instead:
+
+```{r parquet-utils-list-archive, eval = live_repo}
+pq_last_modified(schema = "comp", archive = TRUE) |>
+  select(file_name, table, last_mod) |>
+  head(10)
+```
+
+If your project uses a repository outside the default `DATA_DIR`, pass
+`data_dir` explicitly:
+
+```{r parquet-utils-list-explicit-dir, eval = live_repo}
+pq_last_modified(schema = "crsp", data_dir = Sys.getenv("DATA_DIR")) |>
+  select(file_name, table, last_mod) |>
+  head(5)
+```
+
+## Check the Current Active Vintage
+
+With `table_name` and `schema`, `pq_last_modified()` returns the raw embedded
+`last_modified` metadata string for the active file:
+
+```{r parquet-utils-active-vintage, eval = live_repo}
+pq_last_modified(table_name = "dsi", schema = "crsp")
+```
+
+This is often the fastest way to confirm what vintage a local Parquet file
+represents before starting analysis.
+
+## Inspect Archived Vintages
+
+If you archive replaced files, you can ask for the archived versions of a
+table:
+
+```{r parquet-utils-archived-vintages, eval = live_repo}
+pq_last_modified(table_name = "company", schema = "comp", archive = TRUE) |>
+  select(file_name, table, last_mod, last_mod_str) |>
+  tail(10)
+```
+
+That returns a table-like summary of the archived vintages for the requested
+dataset. To inspect archived files for a whole schema, use `schema` without
+`table_name`:
+
+```{r parquet-utils-schema-archive-summary, eval = live_repo}
+pq_last_modified(schema = "comp", archive = TRUE) |>
+  select(file_name, table, last_mod) |>
+  head(10)
+```
+
+## Archive the Currently Active File
+
+You can archive a file manually even outside an update workflow:
+
+```{r, eval = FALSE}
+pq_archive(table_name = "company", schema = "comp")
+```
+
+Or archive an exact file path. During the live render, this moves the current
+`comp.company` file into its archive directory:
+
+```{r parquet-utils-archive-file, eval = live_repo, message = FALSE}
+company_archive <- pq_archive(file_name = company_file)
+basename(company_archive)
+```
+
+This is useful when you want to preserve the current active vintage before
+running an experimental refresh or downstream transformation.
+
+## Restore an Archived Vintage
+
+To promote an archived file back into the active schema directory:
+
+```{r parquet-utils-restore-file, eval = live_repo, message = FALSE}
+restored_company <- pq_restore(
+  tools::file_path_sans_ext(basename(company_archive)),
+  "comp",
+  archive = FALSE
+)
+basename(restored_company)
+```
+
+The archived basename may include or omit the `.parquet` suffix. If an active
+destination file already exists, `pq_restore()` can archive that file first
+with its default `archive = TRUE`.
+
+```{r parquet-utils-restored-vintage, eval = live_repo}
+pq_last_modified(table_name = "company", schema = "comp")
+```
+
+## Remove a File Explicitly
+
+Use `pq_remove()` when you want to delete an active or archived file rather
+than archive it. The removal examples below are shown but not run during the
+documentation build. For an active file:
+
+```{r, eval = FALSE}
+pq_remove(table_name = "dsi", schema = "crsp")
+```
+
+To remove an archived file:
+
+```{r, eval = FALSE}
+pq_remove(
+  table_name = "company_20260407T060000Z",
+  schema = "comp",
+  archive = TRUE
+)
+```
+
+Or remove a file by exact path:
+
+```{r, eval = FALSE}
+pq_remove(file_name = company_archive)
+```
+
+## Related Pages
+
+- Data management article
+- WRDS to Parquet article
+- PostgreSQL to Parquet article
+- Parquet file utility reference pages

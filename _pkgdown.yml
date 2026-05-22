@@ -46,8 +46,9 @@ articles:
     navbar: Workflows
     contents:
       - authentication
+      - wrds-ssh
       - wrds-to-parquet
       - postgres-to-parquet
       - data-management
-      - parquet-repository
+      - parquet-utilities-examples
       - adbc

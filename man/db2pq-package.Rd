@@ -27,11 +27,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Ian Gow \email{iandgow@gmail.com}
+\strong{Maintainer}: Ian D. Gow \email{iandgow@gmail.com}
 
 Authors:
 \itemize{
-  \item Ian Gow \email{iandgow@gmail.com}
+  \item Ian D. Gow \email{iandgow@gmail.com}
 }
 
 }

@@ -9,6 +9,7 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(db2pq)
 has_pkg <- function(pkg) requireNamespace(pkg, quietly = TRUE)
 pq_path <- function(schema, table) {
   file.path(Sys.getenv("DATA_DIR", unset = ""), schema, paste0(table, ".parquet"))
@@ -218,9 +219,8 @@ archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
 basename(archived_company)
 
 pq_last_modified(table_name = "company", schema = "comp",
-                 data_dir = doc_data_dir, archive = TRUE)[
-  c("file_name", "last_mod")
-]
+                 data_dir = doc_data_dir, archive = TRUE) |>
+  dplyr::select(file_name, last_mod)
 ```
 
 Restoring the archived file makes it the active copy again.

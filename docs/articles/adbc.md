@@ -16,5 +16,6 @@ wrds_update_pq("dsi", "crsp", transfer_method = "adbc")
 ```
 
 If the ADBC path reports an SSL/libpq error, use
-`transfer_method = "dbi"` or install a current SSL-capable
-`adbcpostgresql` build.
+`transfer_method = "dbi"` or use an ADBC PostgreSQL driver that is built
+against an SSL-capable `libpq`. WRDS requires SSL, and the stable WRDS
+path remains DBI/RPostgres.

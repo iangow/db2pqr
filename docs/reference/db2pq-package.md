@@ -22,8 +22,8 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Ian Gow <iandgow@gmail.com>
+**Maintainer**: Ian D. Gow <iandgow@gmail.com>
 
 Authors:
 
-- Ian Gow <iandgow@gmail.com>
+- Ian D. Gow <iandgow@gmail.com>

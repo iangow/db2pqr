@@ -20,103 +20,25 @@ the WRDS PostgreSQL service.
 pak::pak("iangow/db2pqr")
 ```
 
-## WRDS credentials setup
-
-For reproducible WRDS PostgreSQL access, set your WRDS username with
-`WRDS_ID` or `WRDS_USER` and store the password in PostgreSQL’s
-`.pgpass` file. The package still works with credentials created by
-[`wrds::wrds_set_credentials()`](https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html):
-
-``` r
-
-Sys.setenv(WRDS_ID = "your_wrds_id")
-wrds_conninfo(format = "uri")
-
-wrds::wrds_set_credentials()
-```
-
-Use
-[`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md)
-to test a live WRDS PostgreSQL connection and
-[`pgpass_has_entry()`](https://iangow.github.io/db2pqr/reference/pgpass_has_entry.md)
-to check whether a matching `.pgpass` entry exists.
-
-## WRDS SSH setup (for `use_sas = TRUE`)
-
-`wrds_update_pq(..., use_sas = TRUE)` retrieves last-modified dates by
-running `PROC CONTENTS` on the WRDS SAS server via SSH. This can be
-useful for tables whose PostgreSQL comment does not carry a reliable
-date.
-
-The `processx` package is required for this option:
-
-``` r
-
-install.packages("processx")
-```
-
-You also need to configure SSH key access to your WRDS account. WRDS
-provides a dedicated SSH endpoint for key-based authentication:
-`wrds-cloud-sshkey.wharton.upenn.edu`
-
-#### Step 1: Generate an SSH key
-
-We recommend the modern ed25519 key type:
-
-``` bash
-ssh-keygen -t ed25519 -C "your_wrds_id@wrds"
-```
-
-Accept the default location (`~/.ssh/id_ed25519`). You may use a
-passphrase if your SSH agent is running. For unattended scripts, an
-empty passphrase may be required.
-
-#### Step 2: Copy the public key to WRDS
-
-``` bash
-cat ~/.ssh/id_ed25519.pub | \
-  ssh your_wrds_id@wrds-cloud-sshkey.wharton.upenn.edu \
-  "mkdir -p ~/.ssh && chmod 700 ~/.ssh && \
-   cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
-```
-
-#### Step 3: (Recommended) Configure SSH
-
-Add an entry to `~/.ssh/config`:
-
-    Host wrds
-        HostName wrds-cloud-sshkey.wharton.upenn.edu
-        User your_wrds_id
-        IdentityFile ~/.ssh/id_ed25519
-        IdentitiesOnly yes
-
-You can then verify the connection with:
-
-``` bash
-ssh wrds
-```
-
-#### Troubleshooting
-
-If SSH still prompts for a password, run:
-
-``` bash
-ssh -vvv wrds
-```
-
-and confirm that `publickey` appears in the list of authentication
-methods.
-
 ## Quickstart
 
 ### Update a WRDS table
+
+You can pass a WRDS username directly for a first call:
 
 ``` r
 
 library(db2pq)
 
-wrds_update_pq("dsi", "crsp")
+wrds_update_pq("dsi", "crsp", wrds_id = "your_wrds_id")
 ```
+
+For repeated use, configure the WRDS username and PostgreSQL password
+outside the call. The [authentication
+article](https://iangow.github.io/db2pqr/articles/authentication.html)
+documents the `WRDS_ID`, `.pgpass`, and
+[`wrds::wrds_set_credentials()`](https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html)
+paths. The remaining WRDS examples assume that setup is in place.
 
 ### Force a re-download
 
@@ -131,6 +53,10 @@ wrds_update_pq("dsi", "crsp", force = TRUE)
 
 wrds_update_pq("dsi", "crsp", use_sas = TRUE)
 ```
+
+SSH setup is only needed for this SAS metadata path. See the [WRDS SSH
+setup article](https://iangow.github.io/db2pqr/articles/wrds-ssh.html)
+for the key-based setup used by that option.
 
 ### Update all tables in a schema
 
@@ -298,12 +224,14 @@ MIT License. See `LICENSE.md`.
 ### Workflows
 
 - [Authentication](https://iangow.github.io/db2pqr/articles/authentication.md):
+- [WRDS SSH Setup for SAS
+  Metadata](https://iangow.github.io/db2pqr/articles/wrds-ssh.md):
 - [WRDS to
   Parquet](https://iangow.github.io/db2pqr/articles/wrds-to-parquet.md):
 - [PostgreSQL to
   Parquet](https://iangow.github.io/db2pqr/articles/postgres-to-parquet.md):
 - [Data Management for
   Research](https://iangow.github.io/db2pqr/articles/data-management.md):
-- [Managing a Parquet
-  Repository](https://iangow.github.io/db2pqr/articles/parquet-repository.md):
+- [Examples Demonstrating Parquet Utility
+  Functions](https://iangow.github.io/db2pqr/articles/parquet-utilities-examples.md):
 - [ADBC Backend](https://iangow.github.io/db2pqr/articles/adbc.md):

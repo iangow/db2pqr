@@ -12,13 +12,13 @@ URL: https://github.com/iangow/db2pqr, https://iangow.github.io/db2pqr/
 BugReports: https://github.com/iangow/db2pqr/issues
 Authors@R: c(
     person(
-      "Ian", "Gow",
+      "Ian D.", "Gow",
       email = "iandgow@gmail.com",
       role = c("aut", "cre")
     )
   )
-Author: Ian Gow [aut, cre]
-Maintainer: Ian Gow <iandgow@gmail.com>
+Author: Ian D. Gow [aut, cre]
+Maintainer: Ian D. Gow <iandgow@gmail.com>
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

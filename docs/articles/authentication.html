@@ -36,10 +36,11 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Data Management for Research</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-repository.html">Managing a Parquet Repository</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC Backend</a></li>
   </ul>
 </li>
@@ -69,33 +70,199 @@
 
     
     
-<p><code>db2pq</code> resolves WRDS usernames from an explicit
-<code>wrds_id</code>, <code>WRDS_ID</code>, <code>WRDS_USER</code>, and
-finally the keyring entry created by
-<code><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds::wrds_set_credentials()</a></code>.</p>
+<p><code>db2pq</code> separates two pieces of WRDS PostgreSQL
+authentication:</p>
+<ol style="list-style-type: decimal">
+<li>identifying the WRDS username</li>
+<li>letting PostgreSQL find a password for that username</li>
+</ol>
+<p>The goal is to keep WRDS refresh scripts free of hard-coded
+credentials while still working with credential setups that are already
+common in R.</p>
+<div class="section level2">
+<h2 id="the-short-version">The Short Version<a class="anchor" aria-label="anchor" href="#the-short-version"></a>
+</h2>
+<p>For a reproducible WRDS setup:</p>
+<ol style="list-style-type: decimal">
+<li>Put your WRDS username in <code>WRDS_ID</code> or
+<code>WRDS_USER</code>.</li>
+<li>Put the WRDS PostgreSQL password in PostgreSQL’s
+<code>.pgpass</code> file.</li>
+<li>Use <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> to test the connection
+before a long export.</li>
+</ol>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iangow/db2pqr" class="external-link">db2pq</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/wrds_get_username.html">wrds_get_username</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/wrds_check_credentials.html">wrds_check_credentials</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>The <code>wrds</code> package’s keyring setup remains supported for
+existing R workflows:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">wrds</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds_set_credentials</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="username-resolution">Username Resolution<a class="anchor" aria-label="anchor" href="#username-resolution"></a>
+</h2>
+<p>For credential helpers, <code>db2pq</code> resolves a WRDS username
+in this order:</p>
+<ul>
+<li>an explicit <code>wrds_id</code> argument</li>
+<li><code>WRDS_ID</code></li>
+<li><code>WRDS_USER</code></li>
+<li>the keyring username created by
+<code><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds::wrds_set_credentials()</a></code>
+</li>
+</ul>
+<p><code>WRDS_USER</code> is accepted mainly for compatibility with Tidy
+Finance-style setups.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>WRDS_ID <span class="op">=</span> <span class="st">"your_wrds_id"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu"><a href="../reference/wrds_get_username.html">wrds_get_username</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_conninfo.html">wrds_conninfo</a></span><span class="op">(</span>format <span class="op">=</span> <span class="st">"uri"</span><span class="op">)</span></span></code></pre></div>
-<p>For reproducible PostgreSQL access, prefer libpq’s
-<code>.pgpass</code> file where possible. You can inspect whether a
-matching WRDS entry exists without opening a database connection:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>An explicit function argument can override environment or keyring
+defaults:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span>, wrds_id <span class="op">=</span> <span class="st">"your_wrds_id"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="environment-variables-in-r">Environment Variables in R<a class="anchor" aria-label="anchor" href="#environment-variables-in-r"></a>
+</h2>
+<p><code><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv()</a></code> is useful for a running R session:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span></span>
+<span>  WRDS_ID <span class="op">=</span> <span class="st">"your_wrds_id"</span>,</span>
+<span>  DATA_DIR <span class="op">=</span> <span class="st">"~/Dropbox/pq_data"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>For settings you want available when R starts, use
+<code>.Renviron</code>. This is the closest R analogue to a simple
+environment-variable file for this workflow. R searches for
+<code>.Renviron</code> in the current working directory and then in the
+user’s home directory, so there are two useful patterns:</p>
+<ul>
+<li>
+<code>~/.Renviron</code>: user-level defaults that apply broadly on
+your machine</li>
+<li>
+<code>.Renviron</code> in a project directory: project-local values
+for that project</li>
+</ul>
+<p>A user-level <code>~/.Renviron</code> is a good place for a default
+WRDS username or default Parquet repository:</p>
+<pre class="text"><code>WRDS_ID=your_wrds_id
+DATA_DIR=~/Dropbox/pq_data</code></pre>
+<p>A project-local <code>.Renviron</code> is useful when one project
+should override the user-level defaults without changing other R work on
+the same machine. For example, it can select a project-specific Parquet
+repository and, when needed, a project-specific WRDS username:</p>
+<pre class="text"><code>WRDS_ID=project_wrds_id
+DATA_DIR=~/research/project-data/pq_data</code></pre>
+<p>The environment file should not be committed if it contains private,
+machine-specific, or secret values. After editing a
+<code>.Renviron</code> file, start a new R session or load it explicitly
+with <code><a href="https://rdrr.io/r/base/readRenviron.html" class="external-link">readRenviron()</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="password-handling">Password Handling<a class="anchor" aria-label="anchor" href="#password-handling"></a>
+</h2>
+<p>WRDS helpers eventually connect to PostgreSQL. For the password,
+prefer PostgreSQL’s native password-file mechanism,
+<code>.pgpass</code>, rather than putting a password in R code.</p>
+<p>The default password-file path used by <code><a href="../reference/pgpass_path.html">pgpass_path()</a></code>
+is:</p>
+<ul>
+<li>
+<code>~/.pgpass</code> on macOS and Linux</li>
+<li>
+<code>%APPDATA%/postgresql/pgpass.conf</code> on Windows</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/pgpass_path.html">pgpass_path</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>A WRDS <code>.pgpass</code> entry has the PostgreSQL password-file
+shape:</p>
+<pre class="text"><code><span><span class="va">wrds</span><span class="op">-</span><span class="va">pgdata.wharton.upenn.edu</span><span class="op">:</span><span class="fl">9737</span><span class="op">:</span><span class="va">wrds</span><span class="op">:</span><span class="va">your_wrds_id</span><span class="op">:</span><span class="va">your_wrds_password</span></span></code></pre>
+<p>On macOS and Linux, PostgreSQL expects the file to be readable only
+by the owner:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">chmod</span> 600 ~/.pgpass</span></code></pre></div>
+<p>This setup also works with other libpq-aware PostgreSQL tools, not
+only <code>db2pq</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="inspect-and-test-the-setup">Inspect and Test the Setup<a class="anchor" aria-label="anchor" href="#inspect-and-test-the-setup"></a>
+</h2>
+<p><code><a href="../reference/pgpass_has_entry.html">pgpass_has_entry()</a></code> checks whether the default password
+file has a matching WRDS entry without printing the password:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pgpass_has_entry.html">pgpass_has_entry</a></span><span class="op">(</span></span>
 <span>  host <span class="op">=</span> <span class="st">"wrds-pgdata.wharton.upenn.edu"</span>,</span>
 <span>  port <span class="op">=</span> <span class="fl">9737</span>,</span>
 <span>  database <span class="op">=</span> <span class="st">"wrds"</span>,</span>
 <span>  user <span class="op">=</span> <span class="fu"><a href="../reference/wrds_get_username.html">wrds_get_username</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Use <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> to test a live connection
-when WRDS access is available.</p>
-  </main>
+<p>Use <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> for a live connection
+test:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_check_credentials.html">wrds_check_credentials</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>The returned diagnostic reports whether a small WRDS PostgreSQL
+connection succeeded and whether the matching target appears in
+<code>.pgpass</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="existing-wrds-package-credentials">Existing <code>wrds</code> Package Credentials<a class="anchor" aria-label="anchor" href="#existing-wrds-package-credentials"></a>
+</h2>
+<p>If you already use the <code>wrds</code> package, its keyring-based
+setup is still a valid path:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">wrds</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds_set_credentials</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span><span class="op">)</span></span></code></pre></div>
+<p>Use this route when you want to stay close to existing R WRDS code.
+Use the environment-variable plus <code>.pgpass</code> route when you
+want credentials to work across <code>db2pq</code>, RPostgres/libpq, and
+other PostgreSQL tools on the same machine.</p>
+</div>
+<div class="section level2">
+<h2 id="sas-based-workflows">SAS-Based Workflows<a class="anchor" aria-label="anchor" href="#sas-based-workflows"></a>
+</h2>
+<p>Most <code>db2pq</code> WRDS work uses WRDS PostgreSQL. If you set
+<code>use_sas = TRUE</code>, <code>db2pq</code> also retrieves metadata
+from the WRDS SAS side over SSH. That SSH setup is separate from
+PostgreSQL password handling; see the <a href="wrds-ssh.html">WRDS SSH
+setup article</a> before using SAS metadata in unattended refresh
+scripts.</p>
+</div>
+<div class="section level2">
+<h2 id="practical-recommendation">Practical Recommendation<a class="anchor" aria-label="anchor" href="#practical-recommendation"></a>
+</h2>
+<ul>
+<li>Put a default <code>WRDS_ID</code> and <code>DATA_DIR</code> in
+user-level <code>~/.Renviron</code> if they apply across projects.</li>
+<li>Use a project-local <code>.Renviron</code> when a project should
+override <code>WRDS_ID</code> or <code>DATA_DIR</code>.</li>
+<li>Store the WRDS PostgreSQL password in <code>.pgpass</code>.</li>
+<li>Keep <code><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds::wrds_set_credentials()</a></code> as a compatibility
+route for existing R WRDS workflows.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="related-pages">Related Pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
+</h2>
+<ul>
+<li>WRDS to Parquet article</li>
+<li>Data management article</li>
+<li><code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code></li>
+<li><code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code></li>
+<li><code><a href="../reference/pgpass_path.html">pgpass_path()</a></code></li>
+</ul>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Ian Gow.</p>
+  <p>Developed by Ian D. Gow.</p>
 </div>
 
 <div class="pkgdown-footer-right">

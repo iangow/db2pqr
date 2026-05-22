@@ -25,7 +25,7 @@ db_to_pq(
   alt_table_name = NULL,
   chunk_size = 100000L,
   transfer_method = c("dbi", "adbc"),
-  numeric_mode = c("float64", "raw"),
+  numeric_mode = c("decimal", "float64", "text", "raw"),
   con = NULL,
   metadata = NULL,
   col_types = NULL,
@@ -90,9 +90,11 @@ db_to_pq(
 
 - numeric_mode:
 
-  Numeric handling mode for the ADBC path. `"float64"` casts PostgreSQL
-  `numeric` columns to `DOUBLE PRECISION`; `"raw"` keeps the driver
-  default.
+  Numeric handling mode for PostgreSQL `numeric` columns. The default
+  `"decimal"` transfers them as text and writes bounded `numeric(p, s)`
+  columns as Arrow decimal Parquet columns. `"float64"` casts them to
+  `DOUBLE PRECISION` before transfer. `"text"` transfers them as text
+  without recreating decimal types. `"raw"` keeps the backend default.
 
 - con:
 

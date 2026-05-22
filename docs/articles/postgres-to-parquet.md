@@ -22,3 +22,28 @@ Use
 to inspect available relations and
 [`db_schema_to_pq()`](https://iangow.github.io/db2pqr/reference/db_schema_to_pq.md)
 to export a schema.
+
+## PostgreSQL Numeric Columns
+
+By default, table exports preserve bounded PostgreSQL `NUMERIC(p, s)`
+columns as Parquet decimal columns:
+
+``` r
+
+db_to_pq(
+  table_name = "dsi",
+  schema = "crsp",
+  data_dir = "~/pq_data"
+)
+```
+
+The default `numeric_mode = "decimal"` detects `NUMERIC` columns from
+PostgreSQL metadata, transfers them as text, and casts columns with
+known precision and scale back to Arrow decimal types before writing
+Parquet. PostgreSQL `NUMERIC` columns without precision and scale remain
+text because a Parquet decimal type requires those bounds.
+
+Use `numeric_mode = "text"` to retain exact text values for all detected
+`NUMERIC` columns, `numeric_mode = "float64"` when double-precision
+output is the intended representation, or `numeric_mode = "raw"` to keep
+the backend default.

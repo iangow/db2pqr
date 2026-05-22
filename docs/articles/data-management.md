@@ -150,6 +150,18 @@ lightweight audit trail. For more complex projects, combine it with
 project logs, scripts, or a data dictionary that records table sources
 and refresh dates.
 
+When this article is rendered with access to a local Parquet repository,
+the following chunk shows the embedded source metadata for a real
+WRDS-derived file.
+
+``` r
+
+Sys.getenv("DATA_DIR")
+#> [1] "/Users/igow/Dropbox/pq_data"
+pq_last_modified(table_name = "dsi", schema = "crsp")
+#> [1] "Stock - Market Indexes Daily NYSE/AMEX/NASDAQ/ARCA (Updated 2025-02-08)"
+```
+
 ## Archive Before Replacing
 
 For tables where changes matter, use `archive = TRUE` so an existing
@@ -174,6 +186,44 @@ Archiving is most useful for relatively small reference tables or for
 cases where source revisions may affect published results. For very
 large tables, keeping every historical copy may be too expensive; in
 those cases, record the refresh date and source metadata instead.
+
+To make the archive mechanics concrete without modifying the main local
+data repository, this article copies `comp.company` into a temporary
+documentation repository and archives/restores that copy.
+
+``` r
+
+pq_last_modified(table_name = "company", schema = "comp", data_dir = doc_data_dir)
+#> [1] "Company (Updated 2026-05-22)"
+```
+
+Archiving moves the active file into the schema’s `archive` directory.
+
+``` r
+
+archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
+basename(archived_company)
+#> [1] "company_20260522T060000Z.parquet"
+
+pq_last_modified(table_name = "company", schema = "comp",
+                 data_dir = doc_data_dir, archive = TRUE) |>
+  dplyr::select(file_name, last_mod)
+#> # A tibble: 1 × 2
+#>   file_name                last_mod           
+#>   <chr>                    <dttm>             
+#> 1 company_20260522T060000Z 2026-05-22 06:00:00
+```
+
+Restoring the archived file makes it the active copy again.
+
+``` r
+
+pq_restore(tools::file_path_sans_ext(basename(archived_company)), "comp",
+           data_dir = doc_data_dir, archive = FALSE)
+
+pq_last_modified(table_name = "company", schema = "comp", data_dir = doc_data_dir)
+#> [1] "Company (Updated 2026-05-22)"
+```
 
 ## Keep Large Data Out of Git
 
@@ -224,3 +274,154 @@ analysis-project/
 The refresh script owns calls to `db2pq`. Analysis scripts read Parquet
 files from `DATA_DIR` and write project-specific outputs to
 `data/derived`.
+
+## Live Examples with Local Parquet Files
+
+The examples in this section are designed for the locally rendered
+documentation site. They run when `DATA_DIR` points to a Parquet
+repository that contains the relevant WRDS-derived files. If those files
+are not present, the chunks are skipped.
+
+For example, if your repository contains `crsp.dsf` and
+`crsp.stocknames`, you can query the files directly with DuckDB without
+importing the full data into R.
+
+``` r
+
+library(DBI)
+library(dplyr)
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+library(dbplyr)
+#> 
+#> Attaching package: 'dbplyr'
+#> The following objects are masked from 'package:dplyr':
+#> 
+#>     ident, sql
+library(ggplot2)
+
+db <- dbConnect(duckdb::duckdb())
+
+parquet_tbl <- function(con, schema, table) {
+  path <- normalizePath(pq_path(schema, table), winslash = "/", mustWork = TRUE)
+  view <- paste(schema, table, sep = "_")
+  DBI::dbExecute(
+    con,
+    paste0("CREATE OR REPLACE VIEW ", view, " AS SELECT * FROM read_parquet('", path, "')")
+  )
+  tbl(con, view)
+}
+
+dsf <- parquet_tbl(db, "crsp", "dsf")
+stocknames <- parquet_tbl(db, "crsp", "stocknames")
+```
+
+A first check is simply to count the rows in the daily stock file.
+
+``` r
+
+dsf |>
+  count() |>
+  collect()
+#> # A tibble: 1 × 1
+#>           n
+#>       <dbl>
+#> 1 107663470
+```
+
+Because DuckDB can query Parquet files in place, summaries can be
+computed without first reading every column into memory.
+
+``` r
+
+dsf |>
+  mutate(year = as.integer(strftime(date, "%Y"))) |>
+  count(year) |>
+  arrange(desc(year)) |>
+  collect()
+#> # A tibble: 100 × 2
+#>     year       n
+#>    <int>   <dbl>
+#>  1  2024 2400962
+#>  2  2023 2353845
+#>  3  2022 2390163
+#>  4  2021 2187548
+#>  5  2020 1948995
+#>  6  2019 1912085
+#>  7  2018 1869604
+#>  8  2017 1827893
+#>  9  2016 1828555
+#> 10  2015 1820358
+#> # ℹ 90 more rows
+```
+
+Filtering to one trading day reads only the rows and columns needed for
+that query.
+
+``` r
+
+dsf_subset <-
+  dsf |>
+  filter(date == as.Date("1986-01-07")) |>
+  select(permno, date, ret, prc, vol) |>
+  collect()
+
+head(dsf_subset)
+#> # A tibble: 6 × 5
+#>   permno date            ret    prc   vol
+#>    <int> <date>        <dbl>  <dbl> <dbl>
+#> 1  10000 1986-01-07 NA       -2.56   1000
+#> 2  10015 1986-01-07  0        9.88   4400
+#> 3  10031 1986-01-07  0       -4.75      0
+#> 4  10057 1986-01-07  0.0265  14.5   28900
+#> 5  10065 1986-01-07  0.00641 19.6   11300
+#> 6  10066 1986-01-07  0.0645  -0.516 22500
+```
+
+The same files can be used for a small analysis. Here we identify
+Apple’s CRSP `permno` from `stocknames`, then compute a cumulative
+return series from `dsf`.
+
+``` r
+
+apple_permno <-
+  stocknames |>
+  filter(grepl("^APPLE COM", comnam)) |>
+  distinct(permno) |>
+  collect() |>
+  pull(permno) |>
+  min()
+
+apple_returns <-
+  dsf |>
+  filter(permno == apple_permno) |>
+  select(permno, date, ret) |>
+  arrange(date) |>
+  collect() |>
+  mutate(cumret = exp(cumsum(log(1 + coalesce(ret, 0)))))
+
+ggplot(apple_returns, aes(x = date, y = cumret)) +
+  geom_line() +
+  labs(x = NULL, y = "Cumulative return")
+```
+
+![](data-management_files/figure-html/live-crsp-apple-1.png)
+
+These examples use a local Parquet repository as the analysis substrate.
+The refresh step that creates the files is still separate:
+
+``` r
+
+wrds_update_pq("dsf", "crsp")
+wrds_update_pq("stocknames", "crsp")
+```
+
+That separation is the main point. `db2pq` handles the
+database-to-Parquet refresh; analysis code can then operate against
+local, typed, columnar files.

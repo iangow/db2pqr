@@ -15,7 +15,7 @@ wrds_schema_to_pq(
   chunk_size = 100000L,
   wrds_id = NULL,
   transfer_method = c("dbi", "adbc"),
-  numeric_mode = c("float64", "raw"),
+  numeric_mode = c("decimal", "float64", "text", "raw"),
   ...
 )
 ```

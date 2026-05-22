@@ -1,0 +1,97 @@
+---
+title: "WRDS SSH Setup for SAS Metadata"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{WRDS SSH Setup for SAS Metadata}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+Most `db2pq` WRDS work uses WRDS PostgreSQL credentials. SSH access is a
+separate setup used only when `wrds_update_pq()` needs metadata from the WRDS
+SAS side:
+
+```{r, eval = FALSE}
+wrds_update_pq("dsi", "crsp", use_sas = TRUE)
+```
+
+With `use_sas = TRUE`, `db2pq` retrieves last-modified dates by running
+`PROC CONTENTS` on the WRDS SAS server over SSH. This can be useful for tables
+whose PostgreSQL comment does not carry a reliable date.
+
+## Before You Start
+
+The `processx` package is required for the SAS metadata option:
+
+```{r, eval = FALSE}
+install.packages("processx")
+```
+
+Configure PostgreSQL credentials separately for ordinary WRDS table downloads.
+See the [authentication article](authentication.html) for the `WRDS_ID`,
+`.pgpass`, and `wrds::wrds_set_credentials()` paths supported by `db2pq`.
+
+## Configure WRDS SSH
+
+WRDS provides a dedicated SSH endpoint for key-based authentication:
+`wrds-cloud-sshkey.wharton.upenn.edu`.
+
+### Generate an SSH Key
+
+The ed25519 key type is a reasonable default:
+
+```sh
+ssh-keygen -t ed25519 -C "your_wrds_id@wrds"
+```
+
+Accept the default location (`~/.ssh/id_ed25519`). You may use a passphrase if
+your SSH agent is running. For unattended scripts, an empty passphrase may be
+required.
+
+### Copy the Public Key to WRDS
+
+```sh
+cat ~/.ssh/id_ed25519.pub | \
+  ssh your_wrds_id@wrds-cloud-sshkey.wharton.upenn.edu \
+  "mkdir -p ~/.ssh && chmod 700 ~/.ssh && \
+   cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+```
+
+### Configure SSH
+
+Add an entry to `~/.ssh/config`:
+
+```text
+Host wrds
+    HostName wrds-cloud-sshkey.wharton.upenn.edu
+    User your_wrds_id
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+```
+
+Verify the connection:
+
+```sh
+ssh wrds
+```
+
+## Troubleshooting
+
+If SSH still prompts for a password, inspect the connection:
+
+```sh
+ssh -vvv wrds
+```
+
+Confirm that `publickey` appears in the list of authentication methods. Also
+check that `~/.ssh/config` uses the WRDS SSH endpoint and the key you copied to
+WRDS.
+
+## Related Pages
+
+- [Authentication](authentication.html)
+- [WRDS to Parquet](wrds-to-parquet.html)

@@ -163,6 +163,21 @@ wrds_get_tables("crsp")
 wrds_get_tables("comp", views = TRUE)
 ```
 
+Use the PostgreSQL schema name exposed by WRDS, which can differ from a short
+product name or SAS library name. For example, the Fama-French PostgreSQL
+base-table schema is `ff_all`, so a schema download starts with:
+
+```{r, eval = FALSE}
+wrds_schema_to_pq("ff_all")
+```
+
+Schemas containing views need `views = TRUE` during discovery. For example,
+relations exposed through the Fama-French `ff` schema can be processed with:
+
+```{r, eval = FALSE}
+wrds_schema_to_pq("ff", views = TRUE)
+```
+
 During a local site render, this page can show the first few tables returned
 from WRDS:
 

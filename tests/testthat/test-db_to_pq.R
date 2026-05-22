@@ -627,3 +627,74 @@ test_that("wrds_update_pq forwards raw numeric_mode for adbc", {
     "out.parquet"
   )
 })
+
+test_that("wrds_schema_to_pq can discover WRDS views", {
+  restore_get_tables <- local_rebind(
+    "wrds_get_tables",
+    function(schema, wrds_id = NULL, views = FALSE) {
+      expect_identical(schema, "ff")
+      expect_identical(wrds_id, "wrds-user")
+      expect_true(views)
+      "factors_monthly"
+    },
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_get_tables(), add = TRUE)
+
+  restore_update_pq <- local_rebind(
+    "wrds_update_pq",
+    function(table_name, schema, data_dir, force, chunk_size, wrds_id,
+             transfer_method, numeric_mode, ...) {
+      expect_identical(table_name, "factors_monthly")
+      expect_identical(schema, "ff")
+      expect_identical(wrds_id, "wrds-user")
+      "ff/factors_monthly.parquet"
+    },
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_update_pq(), add = TRUE)
+
+  expect_identical(
+    db2pq::wrds_schema_to_pq("ff", views = TRUE, wrds_id = "wrds-user"),
+    list(factors_monthly = "ff/factors_monthly.parquet")
+  )
+})
+
+test_that("wrds_schema_to_pq suppresses empty child messages", {
+  restore_get_tables <- local_rebind(
+    "wrds_get_tables",
+    function(schema, wrds_id = NULL, views = FALSE) "factors_daily",
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_get_tables(), add = TRUE)
+
+  restore_update_pq <- local_rebind(
+    "wrds_update_pq",
+    function(table_name, schema, ...) {
+      message("")
+      message("\n")
+      message(schema, ".", table_name, " already up to date.")
+      NULL
+    },
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_update_pq(), add = TRUE)
+
+  messages <- character()
+  stdout <- capture.output(
+    withCallingHandlers(
+      db2pq::wrds_schema_to_pq("ff", views = TRUE),
+      message = function(m) {
+        messages <<- c(messages, conditionMessage(m))
+        invokeRestart("muffleMessage")
+      }
+    ),
+    type = "output"
+  )
+
+  expect_identical(
+    messages,
+    "Processing 1 table(s) in schema 'ff'.\n"
+  )
+  expect_identical(stdout, "ff.factors_daily already up to date.")
+})

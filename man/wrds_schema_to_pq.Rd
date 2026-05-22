@@ -9,6 +9,7 @@ wrds_schema_to_pq(
   data_dir = Sys.getenv("DATA_DIR", "."),
   force = FALSE,
   tables = NULL,
+  views = FALSE,
   chunk_size = 100000L,
   wrds_id = NULL,
   transfer_method = c("dbi", "adbc"),
@@ -25,6 +26,8 @@ wrds_schema_to_pq(
 current.}
 
 \item{tables}{Optional subset of table names to process.}
+
+\item{views}{If \code{TRUE}, include views as well as base tables.}
 
 \item{chunk_size}{Number of rows fetched and written per chunk.}
 

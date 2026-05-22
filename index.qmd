@@ -1,0 +1,152 @@
+---
+title: "db2pq: export PostgreSQL and WRDS data to Parquet"
+format: gfm
+---
+
+I created `db2pq` as an R package for moving data from PostgreSQL into Apache Parquet files.
+I believe that Parquet files are the best file format for researchers and data analysts who want "local" data, but without the hassle of managing a relational database server.
+The design of the `db2pq` R package is modelled on that of [my Python package](https://pypi.org/project/db2pq/) of the same name.
+However, I have elected to keep the R package focused on a PostgreSQL-to-Parquet pathway.
+If you want to get Parquet data into a PostgreSQL database or move data from one PostgreSQL database to another, then look at [the Python package](https://pypi.org/project/db2pq/) for those pathways.
+
+This package is designed both for general PostgreSQL sources and for the WRDS PostgreSQL service.
+
+## What does `db2pq` do?
+
+Some examples of what `db2pq` does are:
+
+- Exports a single PostgreSQL table to Parquet.
+- Exports all tables in a PostgreSQL schema to Parquet.
+- Updates WRDS Parquet files only when the source table is newer.
+- Reads and manages `last_modified` metadata embedded in Parquet files.
+- Archives and restores different versions of Parquet files.
+
+## Installation
+
+To install from CRAN:
+
+```r
+install.packages("db2pq")
+```
+
+Or use `pak` to get the version from GitHub:
+
+```r
+# install.packages("pak")
+pak::pak("iangow/db2pqr")
+```
+
+## Quickstart
+
+### Load the package
+
+Once you have installed `db2pq`, you can load into R it with `library()`.
+
+```{r}
+library(db2pq)
+```
+
+### Update a WRDS table
+
+The main WRDS-related function is `wrds_update_pq()`.
+
+```r
+wrds_update_pq("dsi", "crsp", wrds_id = "your_wrds_id")
+```
+
+
+While you can pass a WRDS username directly to `wrds_update_pq()`, for general use, you should configure the WRDS username using *environment variables*.
+The [authentication page](https://iangow.github.io/db2pqr/articles/authentication.html) explains how to do this.
+The WRDS examples below assume that such a setup is in place.
+
+Note that `wrds_update_pq()` only downloads data if WRDS has newer data than that stored in a local Parquet file.
+
+```{r}
+wrds_update_pq("dsi", "crsp")
+```
+
+### Force a re-download
+
+If you want to overwrite existing data, you can use `force = TRUE`.
+
+```{r}
+wrds_update_pq("dsi", "crsp", force = TRUE)
+```
+
+### Using SAS metadata for updates
+
+The update logic of `wrds_update_pq()` works by comparing information stored by WRDS in the PostgreSQL table comment with that retrieved and stored from previous runs of `wrds_update_pq()`. 
+However, in some cases the PostgreSQL table comments are missing or may not provide the signal of "freshness" that we want to use.
+
+WRDS data tables generally come in two forms: PostgreSQL tables and SAS files. 
+The `wrds_update_pq()` function allows a user to specify `use_sas = TRUE`, which causes the function to check the "last updated" metadata from the corresponding WRDS SAS file instead.
+
+In some cases, the schema used for SAS differs from that used for PostgreSQL and `wrds_update_pq()` can handle such cases using the `sas_schema` argument. 
+For example, the WRDS PostgreSQL schema and the SAS schema do not line up for RavenPack and the following code handles this.
+
+```{r}
+wrds_update_pq("rpa_entity_mappings", "ravenpack_common",
+               use_sas = TRUE, sas_schema = "rpa")
+```
+
+Additional setup is needed for this SAS metadata path; see the [WRDS SSH setup article](https://iangow.github.io/db2pqr/articles/wrds-ssh.html) for details.
+
+### Update all tables in a schema
+
+```{r}
+wrds_schema_to_pq("ff", views = TRUE)
+```
+
+### Export a custom WRDS SQL query
+
+```r
+wrds_sql_to_pq(
+  "SELECT permno, date, ret FROM crsp.dsf WHERE date >= '2024-01-01'",
+  table_name = "dsf_recent",
+  schema = "crsp"
+)
+```
+
+### Export a local PostgreSQL table
+
+```r
+db_to_pq(
+  table_name = "company",
+  schema = "comp",
+  keep = c("gvkey", "conm"),
+  rename = c(conm = "company_name")
+)
+```
+
+### Check when local Parquet files were last updated
+
+```{r}
+pq_last_modified(schema = "crsp")
+```
+
+## Parquet layout
+
+Files are organized as:
+
+```
+<DATA_DIR>/<schema>/<table>.parquet
+```
+
+For example:
+
+```
+~/pq_data/crsp/dsi.parquet
+```
+
+The `DATA_DIR` environment variable sets the root directory. It can also be
+passed directly as `data_dir` to any function.
+
+When `archive = TRUE`, replaced files are moved to:
+
+```
+<DATA_DIR>/<schema>/archive/<table>_<timestamp>.parquet
+```
+
+## License
+
+MIT License. See `LICENSE.md`.

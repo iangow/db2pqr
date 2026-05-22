@@ -22,7 +22,7 @@
 #' @export
 wrds_schema_to_pq <- function(
     schema,
-    data_dir = Sys.getenv("DATA_DIR", "."),
+    data_dir = db2pq_data_dir(),
     force = FALSE,
     tables = NULL,
     views = FALSE,

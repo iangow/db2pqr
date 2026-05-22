@@ -12,7 +12,8 @@ are current against source table metadata.
 }
 \section{Configuration}{
 
-\code{DATA_DIR} controls the default root directory for Parquet output. WRDS
+\code{DATA_DIR} controls the default root directory for Parquet output;
+\code{\link{db2pq_data_dir}} can guide interactive first-time setup. WRDS
 helpers resolve usernames from explicit arguments, \code{WRDS_ID}, \code{WRDS_USER},
 and then the credential store used by the \code{wrds} package.
 }

@@ -25,6 +25,7 @@ reference:
       - wrds_get_username
       - wrds_conninfo
       - wrds_check_credentials
+      - db2pq_data_dir
       - pgpass_path
       - pgpass_find
       - pgpass_has_entry
@@ -46,6 +47,7 @@ articles:
     navbar: Workflows
     contents:
       - authentication
+      - data-dir
       - wrds-ssh
       - wrds-to-parquet
       - postgres-to-parquet

@@ -36,6 +36,7 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/data-dir.html">Choosing a DATA_DIR</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
@@ -145,8 +146,8 @@ the main <code>DATA_DIR</code>.</p>
 <span>  wrds_id <span class="op">=</span> <span class="va">wrds_id</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Updated comp.company is available.</span></span>
-<span><span class="co">#&gt; Beginning file download at 2026-05-22 14:17:19 UTC.</span></span>
-<span><span class="co">#&gt; Completed file download at 2026-05-22 14:17:21 UTC.</span></span>
+<span><span class="co">#&gt; Beginning file download at 2026-05-22 18:06:45 UTC.</span></span>
+<span><span class="co">#&gt; Completed file download at 2026-05-22 18:06:46 UTC.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"&lt;temporary data repository&gt;"</span>, <span class="st">"comp"</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">company_file</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "&lt;temporary data repository&gt;/comp/company.parquet"</span></span></code></pre></div>
 <p>Typical output from a first run looks like:</p>
@@ -190,9 +191,20 @@ table is <code>funda</code>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_get_tables.html">wrds_get_tables</a></span><span class="op">(</span><span class="st">"crsp"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_get_tables.html">wrds_get_tables</a></span><span class="op">(</span><span class="st">"comp"</span>, views <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Use the PostgreSQL schema name exposed by WRDS, which can differ from
+a short product name or SAS library name. For example, the Fama-French
+PostgreSQL base-table schema is <code>ff_all</code>, so a schema
+download starts with:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_schema_to_pq.html">wrds_schema_to_pq</a></span><span class="op">(</span><span class="st">"ff_all"</span><span class="op">)</span></span></code></pre></div>
+<p>Schemas containing views need <code>views = TRUE</code> during
+discovery. For example, relations exposed through the Fama-French
+<code>ff</code> schema can be processed with:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_schema_to_pq.html">wrds_schema_to_pq</a></span><span class="op">(</span><span class="st">"ff"</span>, views <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>During a local site render, this page can show the first few tables
 returned from WRDS:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/wrds_get_tables.html">wrds_get_tables</a></span><span class="op">(</span><span class="st">"comp"</span>, wrds_id <span class="op">=</span> <span class="va">wrds_id</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 <p>The WRDS web query interface can also be useful for identifying the
@@ -211,7 +223,7 @@ reproducible.</p>
 ideal for analysis. For example, link-history identifiers in
 <code>crsp.ccmxpf_lnkhist</code> are often better represented as
 integers:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"ccmxpf_lnkhist"</span>,</span>
 <span>  <span class="st">"crsp"</span>,</span>
@@ -227,7 +239,7 @@ to interpret those values before writing normalized timestamps to
 Parquet.</p>
 <p>For FFIEC Call Report data in the WRDS <code>bank</code> schema,
 timestamps should be interpreted as US Eastern time:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"wrds_call_rcfa_1"</span>,</span>
 <span>  <span class="st">"bank"</span>,</span>
@@ -236,7 +248,7 @@ timestamps should be interpreted as US Eastern time:</p>
 <p>Some timestamp-like fields are stored as strings. Use
 <code>col_types</code> with <code>tz</code> to coerce selected
 fields:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"feed03_audit_fees"</span>,</span>
 <span>  <span class="st">"audit"</span>,</span>
@@ -259,7 +271,7 @@ fields:</p>
 <p>Some WRDS tables contain blocks of columns that are not needed for
 most analyses. The <code>drop</code> argument removes columns whose
 names match one or more regular expressions:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"feed02_auditor_changes"</span>,</span>
 <span>  <span class="st">"audit"</span>,</span>
@@ -270,7 +282,7 @@ names match one or more regular expressions:</p>
 <h3 id="selecting-only-certain-variables">Selecting Only Certain Variables<a class="anchor" aria-label="anchor" href="#selecting-only-certain-variables"></a>
 </h3>
 <p>Use <code>keep</code> when you want a small subset of columns:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"dsf"</span>,</span>
 <span>  <span class="st">"crsp"</span>,</span>
@@ -282,7 +294,7 @@ names match one or more regular expressions:</p>
 </h3>
 <p>Use <code>rename</code> to write output columns with preferred
 names:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"company"</span>,</span>
 <span>  <span class="st">"comp"</span>,</span>
@@ -291,7 +303,7 @@ names:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>For a small documentation example, the renamed file can be written to
 the temporary repository:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">renamed_company_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"company"</span>,</span>
 <span>  <span class="st">"comp"</span>,</span>
@@ -303,8 +315,8 @@ the temporary repository:</p>
 <span>  force <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Forcing update based on user request.</span></span>
-<span><span class="co">#&gt; Beginning file download at 2026-05-22 14:17:24 UTC.</span></span>
-<span><span class="co">#&gt; Completed file download at 2026-05-22 14:17:24 UTC.</span></span>
+<span><span class="co">#&gt; Beginning file download at 2026-05-22 18:06:48 UTC.</span></span>
+<span><span class="co">#&gt; Completed file download at 2026-05-22 18:06:49 UTC.</span></span>
 <span></span>
 <span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
 <span>  <span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="va">renamed_company_file</span><span class="op">)</span>,</span>
@@ -323,7 +335,7 @@ the temporary repository:</p>
 <p>If <code>rename</code> and <code>col_types</code> are used together,
 names in <code>col_types</code> refer to the output names after
 renaming:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"ccmxpf_lnkhist"</span>,</span>
 <span>  <span class="st">"crsp"</span>,</span>
@@ -337,7 +349,7 @@ renaming:</p>
 <p>Use <code>where</code> for SQL row filters. For Compustat annual
 fundamentals, a common filter is the standard industrial format,
 standard data format, consolidated, domestic-population set:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"funda"</span>,</span>
 <span>  <span class="st">"comp"</span>,</span>
@@ -354,12 +366,12 @@ standard data format, consolidated, domestic-population set:</p>
 </h3>
 <p>Use <code>obs</code> to test a download before running the full
 export:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"funda"</span>, <span class="st">"comp"</span>, obs <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
 <p>Combining <code>keep</code>, <code>where</code>, and <code>obs</code>
 is a useful way to produce a small local file while developing a refresh
 script:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">funda_sample_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"funda"</span>,</span>
 <span>  <span class="st">"comp"</span>,</span>
@@ -377,8 +389,8 @@ script:</p>
 <span>  force <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Forcing update based on user request.</span></span>
-<span><span class="co">#&gt; Beginning file download at 2026-05-22 14:17:25 UTC.</span></span>
-<span><span class="co">#&gt; Completed file download at 2026-05-22 14:17:25 UTC.</span></span>
+<span><span class="co">#&gt; Beginning file download at 2026-05-22 18:06:50 UTC.</span></span>
+<span><span class="co">#&gt; Completed file download at 2026-05-22 18:06:50 UTC.</span></span>
 <span></span>
 <span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="va">funda_sample_file</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 1,000</span></span>
@@ -424,7 +436,7 @@ script:</p>
 local metadata suggest the file is current. This is useful after
 changing <code>keep</code>, <code>drop</code>, <code>rename</code>,
 <code>col_types</code>, or <code>tz</code>.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"funda"</span>, <span class="st">"comp"</span>, force <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -438,7 +450,7 @@ corresponding WRDS SAS dataset.</p>
 <p>Some schemas have different names on the PostgreSQL and SAS sides.
 For example, RavenPack’s PostgreSQL schema can differ from its SAS
 library:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"rpa_entity_mappings"</span>,</span>
 <span>  <span class="st">"ravenpack_common"</span>,</span>
@@ -452,7 +464,7 @@ library:</p>
 </h3>
 <p>Use <code>archive = TRUE</code> when you want replaced files moved
 into the schema’s archive directory before the new file is written:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Archives live under:</p>
@@ -460,7 +472,7 @@ into the schema’s archive directory before the new file is written:</p>
 <p>For documentation and testing, archive examples should use a
 temporary data repository. This keeps the real local Parquet repository
 unchanged while still exercising the same file-management code.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">archived_company</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pq_archive.html">pq_archive</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span>, data_dir <span class="op">=</span> <span class="va">doc_data_dir</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">archived_company</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "company_20260522T060000Z.parquet"</span></span>
@@ -473,7 +485,7 @@ unchanged while still exercising the same file-management code.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> company_20260522T060000Z 2026-05-22 <span style="color: #949494;">06:00:00</span></span></span></code></pre></div>
 <p>The archived copy can be restored, again without touching the main
 <code>DATA_DIR</code>.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_restore.html">pq_restore</a></span><span class="op">(</span></span>
 <span>  <span class="fu">tools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/tools/fileutils.html" class="external-link">file_path_sans_ext</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">archived_company</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="st">"comp"</span>,</span>
@@ -490,7 +502,7 @@ unchanged while still exercising the same file-management code.</p>
 </h2>
 <p>Use <code><a href="../reference/wrds_sql_to_pq.html">wrds_sql_to_pq()</a></code> when the object you want is better
 expressed as a query than as a full table export:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_sql_to_pq.html">wrds_sql_to_pq</a></span><span class="op">(</span></span>
 <span>  <span class="st">"SELECT permno, date, ret FROM crsp.dsf WHERE date &gt;= '2024-01-01'"</span>,</span>
 <span>  table_name <span class="op">=</span> <span class="st">"dsf_recent"</span>,</span>
@@ -498,7 +510,7 @@ expressed as a query than as a full table export:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>For a small query result, use <code>LIMIT</code> and write to the
 temporary documentation repository:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sql_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wrds_sql_to_pq.html">wrds_sql_to_pq</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
 <span>    <span class="st">"SELECT gvkey, datadate, fyear, at, sale"</span>,</span>

@@ -4,12 +4,19 @@
 \alias{wrds_get_username}
 \title{Resolve a WRDS username}
 \usage{
-wrds_get_username(wrds_id = NULL, user_key = "wrds_user")
+wrds_get_username(
+  wrds_id = NULL,
+  user_key = "wrds_user",
+  prompt = interactive()
+)
 }
 \arguments{
 \item{wrds_id}{Optional WRDS username override.}
 
 \item{user_key}{Keyring key used by the \code{wrds} package for the WRDS username.}
+
+\item{prompt}{If \code{TRUE}, prompt interactively for a WRDS username when no
+explicit, environment, or keyring username can be resolved.}
 }
 \value{
 A non-empty character string.

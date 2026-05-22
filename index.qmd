@@ -49,21 +49,15 @@ library(db2pq)
 ### Update a WRDS table
 
 The main WRDS-related function is `wrds_update_pq()`.
-
-```r
-wrds_update_pq("dsi", "crsp", wrds_id = "your_wrds_id")
-```
-
-
-While you can pass a WRDS username directly to `wrds_update_pq()`, for general use, you should configure the WRDS username using *environment variables*.
-The [authentication page](https://iangow.github.io/db2pqr/articles/authentication.html) explains how to do this.
-The WRDS examples below assume that such a setup is in place.
-
-Note that `wrds_update_pq()` only downloads data if WRDS has newer data than that stored in a local Parquet file.
+By default, it downloads a table only when WRDS metadata indicate that the source is newer than the local Parquet file.
 
 ```{r}
 wrds_update_pq("dsi", "crsp")
 ```
+
+If you have not already configured your WRDS username and password using one of the mechanisms described [here](https://iangow.github.io/db2pqr/articles/authentication.html), then an interactive first call prompts for them. After a successful connection, `db2pq` can reuse the saved username and `.pgpass` password entry in later sessions.
+
+If `DATA_DIR` has not been set, an interactive first call also helps choose the local Parquet repository root. The [DATA_DIR article](https://iangow.github.io/db2pqr/articles/data-dir.html) explains when to use a shared setting, a project-specific setting, or an explicit `data_dir` argument.
 
 ### Force a re-download
 
@@ -109,7 +103,7 @@ wrds_sql_to_pq(
 
 ### Export a local PostgreSQL table
 
-```r
+```{r}
 db_to_pq(
   table_name = "company",
   schema = "comp",
@@ -139,7 +133,9 @@ For example:
 ```
 
 The `DATA_DIR` environment variable sets the root directory. It can also be
-passed directly as `data_dir` to any function.
+passed directly as `data_dir` to any function. For first-time setup, an
+interactive Parquet helper can call `db2pq_data_dir()` to select or create the
+directory and save `DATA_DIR` in project-level or user-level `.Renviron`.
 
 When `archive = TRUE`, replaced files are moved to:
 

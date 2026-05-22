@@ -372,12 +372,12 @@ test_that("db_to_pq planner applies rename to select list and col_types", {
 test_that("wrds_update_pq forwards transfer_method to db_to_pq", {
   local_con <- structure(list(), class = "TestConnection")
 
-  restore_wrds_connect <- local_rebind(
-    "wrds_connect",
+  restore_wrds_connect_dbi <- local_rebind(
+    ".wrds_connect_dbi",
     function(...) local_con,
-    env = asNamespace("wrds")
+    env = asNamespace("db2pq")
   )
-  on.exit(restore_wrds_connect(), add = TRUE)
+  on.exit(restore_wrds_connect_dbi(), add = TRUE)
 
   restore_disconnect <- local_rebind(
     "dbDisconnect",

@@ -1,0 +1,111 @@
+---
+title: "Choosing a DATA_DIR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Choosing a DATA_DIR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+`db2pq` writes Parquet files into a local repository. `DATA_DIR` names the
+root of that repository so the same refresh code can work with a repository on
+different machines or in different projects.
+
+For example, this call:
+
+```{r, eval = FALSE}
+library(db2pq)
+
+wrds_update_pq("dsi", "crsp")
+```
+
+writes the active Parquet file to:
+
+```text
+<DATA_DIR>/crsp/dsi.parquet
+```
+
+The standard layout is:
+
+```text
+<DATA_DIR>/<schema>/<table>.parquet
+```
+
+When updates use `archive = TRUE`, replaced files are moved under:
+
+```text
+<DATA_DIR>/<schema>/archive/<table>_<timestamp>.parquet
+```
+
+## First-Time Setup
+
+All Parquet helpers use `db2pq_data_dir()` for their default `data_dir`.
+When `DATA_DIR` is missing in an interactive session, that helper says so
+before asking whether to open a directory chooser. You can select a directory
+there, or decline the chooser and enter a path in R. If an entered path does
+not exist, the helper can create it after confirmation.
+
+```{r, eval = FALSE}
+db2pq_data_dir()
+```
+
+The selected directory is available as `DATA_DIR` for the current R session.
+The helper then offers three persistence choices:
+
+- project `.Renviron`
+- user `~/.Renviron`
+- no persistent setting
+
+After editing or creating `.Renviron`, start a new R session before expecting
+R to read the new value automatically.
+
+## Choosing the Scope
+
+A user-level `DATA_DIR` is appropriate for a long-lived local Parquet library
+that many projects use. For example, `~/.Renviron` might contain:
+
+```text
+DATA_DIR=~/Dropbox/pq_data
+```
+
+A project-level `DATA_DIR` is useful when one project should use a frozen or
+separate repository. A `.Renviron` file in that project might contain:
+
+```text
+DATA_DIR=data/pq_data
+```
+
+R reads project `.Renviron` values when the project session starts, so this
+lets project code keep using the same calls while pointing at a different
+Parquet repository.
+
+Do not commit `.Renviron` or Parquet files when they contain private,
+machine-specific, or licensed data.
+
+## Explicit Overrides
+
+You do not have to use `DATA_DIR`. An explicit `data_dir` argument overrides
+the default for a call:
+
+```{r, eval = FALSE}
+wrds_update_pq("dsi", "crsp", data_dir = "data")
+```
+
+That pattern is useful when a refresh script should write a project-level copy
+while your default `DATA_DIR` still points at a shared local library.
+
+For non-interactive code, set `DATA_DIR` or pass `data_dir` explicitly when the
+working directory is not the repository root you intend to use.
+
+## Related Pages
+
+- [Authentication](authentication.html) covers `WRDS_ID`, passwords, and
+  `.pgpass`.
+- [WRDS to Parquet](wrds-to-parquet.html) shows the refresh workflow.
+- [Data Management for Research](data-management.html) discusses shared
+  repositories, project-level copies, and archives in a broader research
+  workflow.

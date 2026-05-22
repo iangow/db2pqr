@@ -9,7 +9,7 @@ wrds_sql_to_pq(
   table_name,
   schema,
   wrds_id = NULL,
-  data_dir = Sys.getenv("DATA_DIR", "."),
+  data_dir = db2pq_data_dir(),
   out_file = NULL,
   modified = NULL,
   alt_table_name = NULL,

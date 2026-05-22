@@ -11,7 +11,7 @@
 #'   provided.
 #' @param schema Schema name. Required if \code{file_name} is not provided.
 #' @param data_dir Root directory of the Parquet data repository. Defaults to
-#'   the \code{DATA_DIR} environment variable, or \code{"."} if unset.
+#'   \code{\link{db2pq_data_dir}}.
 #' @param file_name Full path to the Parquet file to remove. If provided,
 #'   \code{table_name}, \code{schema}, \code{data_dir}, and \code{archive} are
 #'   ignored.
@@ -34,7 +34,7 @@
 #' @export
 pq_remove <- function(table_name = NULL,
                       schema = NULL,
-                      data_dir = Sys.getenv("DATA_DIR", "."),
+                      data_dir = db2pq_data_dir(),
                       file_name = NULL,
                       archive = FALSE,
                       archive_dir = "archive") {
@@ -83,7 +83,7 @@ pq_remove <- function(table_name = NULL,
 #'   provided.
 #' @param schema Schema name. Required if \code{file_name} is not provided.
 #' @param data_dir Root directory of the Parquet data repository. Defaults to
-#'   the \code{DATA_DIR} environment variable, or \code{"."} if unset.
+#'   \code{\link{db2pq_data_dir}}.
 #' @param file_name Full path to the Parquet file to archive. If provided,
 #'   \code{table_name}, \code{schema}, and \code{data_dir} are ignored.
 #' @param archive_dir Name of the archive subdirectory relative to the schema
@@ -102,7 +102,7 @@ pq_remove <- function(table_name = NULL,
 #' @export
 pq_archive <- function(table_name = NULL,
                        schema = NULL,
-                       data_dir = Sys.getenv("DATA_DIR", "."),
+                       data_dir = db2pq_data_dir(),
                        file_name = NULL,
                        archive_dir = "archive") {
   if (!is.null(file_name)) {
@@ -150,7 +150,7 @@ pq_archive <- function(table_name = NULL,
 #'   \code{.parquet} extension), e.g. \code{"company_20251109T072042Z"}.
 #' @param schema Schema name.
 #' @param data_dir Root directory of the Parquet data repository. Defaults to
-#'   the \code{DATA_DIR} environment variable, or \code{"."} if unset.
+#'   \code{\link{db2pq_data_dir}}.
 #' @param archive If \code{TRUE} (default), any existing file at the
 #'   destination is archived before the restore. If \code{FALSE}, the function
 #'   stops if the destination already exists.
@@ -169,7 +169,7 @@ pq_archive <- function(table_name = NULL,
 #' @export
 pq_restore <- function(file_basename,
                        schema,
-                       data_dir = Sys.getenv("DATA_DIR", "."),
+                       data_dir = db2pq_data_dir(),
                        archive = TRUE,
                        archive_dir = "archive") {
   archive_dir  <- archive_dir %||% "archive"

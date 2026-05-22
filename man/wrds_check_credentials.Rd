@@ -4,13 +4,30 @@
 \alias{wrds_check_credentials}
 \title{Check WRDS PostgreSQL credentials}
 \usage{
-wrds_check_credentials(wrds_id = NULL, password = NULL)
+wrds_check_credentials(
+  wrds_id = NULL,
+  password = NULL,
+  prompt = interactive(),
+  save = TRUE,
+  passfile = pgpass_path()
+)
 }
 \arguments{
 \item{wrds_id}{Optional WRDS username override.}
 
 \item{password}{Optional password. If omitted, PostgreSQL may use \code{.pgpass},
-\code{PGPASSWORD}, or another libpq-supported mechanism.}
+\code{PGPASSWORD}, or another libpq-supported mechanism. If no matching
+\code{.pgpass} entry exists and \code{prompt = TRUE}, an interactive password prompt
+is used.}
+
+\item{prompt}{If \code{TRUE}, prompt interactively for a WRDS PostgreSQL password
+when no password was supplied and no matching \code{.pgpass} entry exists.}
+
+\item{save}{If \code{TRUE}, save a supplied or prompted password to \code{.pgpass}
+after a successful WRDS connection test.}
+
+\item{passfile}{PostgreSQL password-file path. Defaults to \code{PGPASSFILE} when
+set, otherwise the platform default from \code{\link{pgpass_path}}.}
 }
 \value{
 A one-row tibble with \code{ok}, \code{method}, and \code{message} columns.

@@ -36,6 +36,7 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/data-dir.html">Choosing a DATA_DIR</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
@@ -125,6 +126,11 @@ Finance-style setups.</p>
 defaults:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span>, wrds_id <span class="op">=</span> <span class="st">"your_wrds_id"</span><span class="op">)</span></span></code></pre></div>
+<p>When <code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code> runs interactively and cannot
+find an explicit, environment, or keyring username, it asks for the WRDS
+username. The prompt sets <code>WRDS_ID</code> for the current session
+and offers to store it in user-level <code>~/.Renviron</code> for future
+R sessions.</p>
 </div>
 <div class="section level2">
 <h2 id="environment-variables-in-r">Environment Variables in R<a class="anchor" aria-label="anchor" href="#environment-variables-in-r"></a>
@@ -155,13 +161,21 @@ DATA_DIR=~/Dropbox/pq_data</code></pre>
 <p>A project-local <code>.Renviron</code> is useful when one project
 should override the user-level defaults without changing other R work on
 the same machine. For example, it can select a project-specific Parquet
-repository and, when needed, a project-specific WRDS username:</p>
-<pre class="text"><code>WRDS_ID=project_wrds_id
-DATA_DIR=~/research/project-data/pq_data</code></pre>
+repository:</p>
+<pre class="text"><code>DATA_DIR=~/research/project-data/pq_data</code></pre>
 <p>The environment file should not be committed if it contains private,
 machine-specific, or secret values. After editing a
 <code>.Renviron</code> file, start a new R session or load it explicitly
 with <code><a href="https://rdrr.io/r/base/readRenviron.html" class="external-link">readRenviron()</a></code>.</p>
+<p>For first-time <code>DATA_DIR</code> setup, call
+<code><a href="../reference/db2pq_data_dir.html">db2pq_data_dir()</a></code> or let a Parquet helper call it as its
+default. In an interactive session without a <code>DATA_DIR</code>, the
+helper asks for a data directory, can create a new directory if needed,
+and offers to store <code>DATA_DIR</code> in either project-level
+<code>.Renviron</code> or user-level <code>~/.Renviron</code>. That
+scope choice is useful for data repositories; the interactive WRDS
+username prompt stores <code>WRDS_ID</code> in user-level
+<code>~/.Renviron</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="password-handling">Password Handling<a class="anchor" aria-label="anchor" href="#password-handling"></a>
@@ -204,6 +218,14 @@ file has a matching WRDS entry without printing the password:</p>
 test:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_check_credentials.html">wrds_check_credentials</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>If the matching WRDS entry is not already in <code>.pgpass</code>, an
+interactive <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> call asks for the WRDS
+PostgreSQL password. When the connection test succeeds, it writes that
+password to <code>.pgpass</code> for later libpq-backed connections. You
+can pass <code>password = ...</code> explicitly for a non-interactive
+setup check, use <code>save = FALSE</code> for a one-time check, or use
+<code>passfile = ...</code> to target a specific PostgreSQL password
+file.</p>
 <p>The returned diagnostic reports whether a small WRDS PostgreSQL
 connection succeeded and whether the matching target appears in
 <code>.pgpass</code>.</p>

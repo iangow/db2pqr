@@ -3,6 +3,7 @@
 export(adbc_diagnostics)
 export(arrow_type)
 export(con_to_adbi)
+export(db2pq_data_dir)
 export(db_schema_tables)
 export(db_schema_to_pq)
 export(db_to_pq)

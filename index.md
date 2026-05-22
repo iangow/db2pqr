@@ -53,27 +53,28 @@ library(db2pq)
 
 ### Update a WRDS table
 
-The main WRDS-related function is `wrds_update_pq()`.
-
-``` r
-wrds_update_pq("dsi", "crsp", wrds_id = "your_wrds_id")
-```
-
-While you can pass a WRDS username directly to `wrds_update_pq()`, for
-general use, you should configure the WRDS username using *environment
-variables*. The [authentication
-page](https://iangow.github.io/db2pqr/articles/authentication.html)
-explains how to do this. The WRDS examples below assume that such a
-setup is in place.
-
-Note that `wrds_update_pq()` only downloads data if WRDS has newer data
-than that stored in a local Parquet file.
+The main WRDS-related function is `wrds_update_pq()`. By default, it
+downloads a table only when WRDS metadata indicate that the source is
+newer than the local Parquet file.
 
 ``` r
 wrds_update_pq("dsi", "crsp")
 ```
 
     crsp.dsi already up to date.
+
+If you have not already configured your WRDS username and password using
+one of the mechanisms described
+[here](https://iangow.github.io/db2pqr/articles/authentication.html),
+then an interactive first call prompts for them. After a successful
+connection, `db2pq` can reuse the saved username and `.pgpass` password
+entry in later sessions.
+
+If `DATA_DIR` has not been set, an interactive first call also helps
+choose the local Parquet repository root. The [DATA_DIR
+article](https://iangow.github.io/db2pqr/articles/data-dir.html)
+explains when to use a shared setting, a project-specific setting, or an
+explicit `data_dir` argument.
 
 ### Force a re-download
 
@@ -85,9 +86,9 @@ wrds_update_pq("dsi", "crsp", force = TRUE)
 
     Forcing update based on user request.
 
-    Beginning file download at 2026-05-22 16:10:28 UTC.
+    Beginning file download at 2026-05-22 18:05:36 UTC.
 
-    Completed file download at 2026-05-22 16:10:28 UTC.
+    Completed file download at 2026-05-22 18:05:36 UTC.
 
 ### Using SAS metadata for updates
 
@@ -169,19 +170,20 @@ db_to_pq(
 pq_last_modified(schema = "crsp")
 ```
 
-## ADBC backend
-
-The stable default transfer path uses DBI/RPostgres. The optional ADBC
-path can be selected with `transfer_method = "adbc"` when `adbi` and a
-PostgreSQL ADBC driver are installed:
-
-``` r
-adbc_diagnostics()
-wrds_update_pq("dsi", "crsp", transfer_method = "adbc")
-```
-
-If ADBC reports an SSL/libpq error, use `transfer_method = "dbi"` or
-install a current SSL-capable `adbcpostgresql` build.
+    # A tibble: 33 × 5
+       file_name        table            schema last_mod            last_mod_str
+       <chr>            <chr>            <chr>  <dttm>              <chr>
+     1 ccmxpf_linktable ccmxpf_linktable crsp   2026-02-06 07:00:00 CRSP/COMPUSTAT …
+     2 ccmxpf_lnkhist   ccmxpf_lnkhist   crsp   2026-02-06 07:00:00 Native Link usa…
+     3 ccmxpf_lnkused   ccmxpf_lnkused   crsp   2026-02-06 07:00:00 LINKUSED struct…
+     4 comphist         comphist         crsp   2026-02-06 07:00:00 CRSP/COMPUSTAT …
+     5 dse              dse              crsp   2025-02-08 07:00:00 Daily Stock - E…
+     6 dsedelist        dsedelist        crsp   2025-02-08 07:00:00 CRSP Daily Stoc…
+     7 dsedist          dsedist          crsp   2025-02-08 07:00:00 CRSP Daily Stoc…
+     8 dseexchdates     dseexchdates     crsp   2025-01-18 23:37:28 Last modified: …
+     9 dsf              dsf              crsp   2025-02-08 07:00:00 Daily Stock - S…
+    10 dsf_v2           dsf_v2           crsp   2026-02-06 07:00:00 Daily Stock Fil…
+    # ℹ 23 more rows
 
 ## Parquet layout
 
@@ -194,7 +196,10 @@ For example:
     ~/pq_data/crsp/dsi.parquet
 
 The `DATA_DIR` environment variable sets the root directory. It can also
-be passed directly as `data_dir` to any function.
+be passed directly as `data_dir` to any function. For first-time setup,
+an interactive Parquet helper can call `db2pq_data_dir()` to select or
+create the directory and save `DATA_DIR` in project-level or user-level
+`.Renviron`.
 
 When `archive = TRUE`, replaced files are moved to:
 

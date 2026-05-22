@@ -2,13 +2,14 @@
 % Please edit documentation in R/auth.R
 \name{pgpass_path}
 \alias{pgpass_path}
-\title{Default PostgreSQL password file path}
+\title{PostgreSQL password file path}
 \usage{
 pgpass_path()
 }
 \value{
-The platform-specific default \code{.pgpass} path.
+The \code{PGPASSFILE} path when set, otherwise the platform-specific
+default \code{.pgpass} path.
 }
 \description{
-Default PostgreSQL password file path
+PostgreSQL password file path
 }

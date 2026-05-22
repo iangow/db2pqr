@@ -6,7 +6,7 @@
 \usage{
 wrds_schema_to_pq(
   schema,
-  data_dir = Sys.getenv("DATA_DIR", "."),
+  data_dir = db2pq_data_dir(),
   force = FALSE,
   tables = NULL,
   views = FALSE,

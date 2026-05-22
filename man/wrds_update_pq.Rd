@@ -7,7 +7,7 @@
 wrds_update_pq(
   table_name,
   schema,
-  data_dir = Sys.getenv("DATA_DIR", "."),
+  data_dir = db2pq_data_dir(),
   out_file = NULL,
   force = FALSE,
   where = NULL,
@@ -35,8 +35,8 @@ wrds_update_pq(
 \item{schema}{Name of the database schema (e.g. \code{"crsp"}, \code{"comp"}).}
 
 \item{data_dir}{Root directory of the local Parquet data repository. Defaults
-to the \code{DATA_DIR} environment variable, or \code{"."} if unset. The
-output file is written to \code{<data_dir>/<schema>/<table_name>.parquet}.}
+to \code{\link{db2pq_data_dir}}. The output file is written to
+\code{<data_dir>/<schema>/<table_name>.parquet}.}
 
 \item{out_file}{Optional. Full path for the output Parquet file. Overrides
 the path derived from \code{data_dir}, \code{schema}, and \code{table_name}.}

@@ -65,6 +65,11 @@ An explicit function argument can override environment or keyring defaults:
 wrds_update_pq("company", "comp", wrds_id = "your_wrds_id")
 ```
 
+When `wrds_get_username()` runs interactively and cannot find an explicit,
+environment, or keyring username, it asks for the WRDS username. The prompt
+sets `WRDS_ID` for the current session and offers to store it in user-level
+`~/.Renviron` for future R sessions.
+
 ## Environment Variables in R
 
 `Sys.setenv()` is useful for a running R session:
@@ -94,17 +99,22 @@ DATA_DIR=~/Dropbox/pq_data
 
 A project-local `.Renviron` is useful when one project should override the
 user-level defaults without changing other R work on the same machine. For
-example, it can select a project-specific Parquet repository and, when needed,
-a project-specific WRDS username:
+example, it can select a project-specific Parquet repository:
 
 ```text
-WRDS_ID=project_wrds_id
 DATA_DIR=~/research/project-data/pq_data
 ```
 
 The environment file should not be committed if it contains private,
 machine-specific, or secret values. After editing a `.Renviron` file, start a
 new R session or load it explicitly with `readRenviron()`.
+
+For first-time `DATA_DIR` setup, call `db2pq_data_dir()` or let a Parquet helper
+call it as its default. In an interactive session without a `DATA_DIR`, the
+helper asks for a data directory, can create a new directory if needed, and
+offers to store `DATA_DIR` in either project-level `.Renviron` or user-level
+`~/.Renviron`. That scope choice is useful for data repositories; the
+interactive WRDS username prompt stores `WRDS_ID` in user-level `~/.Renviron`.
 
 ## Password Handling
 
@@ -156,6 +166,13 @@ Use `wrds_check_credentials()` for a live connection test:
 ```{r, eval = FALSE}
 wrds_check_credentials()
 ```
+
+If the matching WRDS entry is not already in `.pgpass`, an interactive
+`wrds_check_credentials()` call asks for the WRDS PostgreSQL password. When the
+connection test succeeds, it writes that password to `.pgpass` for later
+libpq-backed connections. You can pass `password = ...` explicitly for a
+non-interactive setup check, use `save = FALSE` for a one-time check, or use
+`passfile = ...` to target a specific PostgreSQL password file.
 
 The returned diagnostic reports whether a small WRDS PostgreSQL connection
 succeeded and whether the matching target appears in `.pgpass`.

@@ -22,9 +22,11 @@
 #' @param chunk_size Number of rows fetched and written per chunk.
 #' @param transfer_method Transfer backend: `"dbi"` for the stable DBI path or
 #'   `"adbc"` for the optional Arrow/ADBC path.
-#' @param numeric_mode Numeric handling mode for the ADBC path. `"float64"`
-#'   casts PostgreSQL `numeric` columns to `DOUBLE PRECISION`; `"raw"` keeps the
-#'   driver default.
+#' @param numeric_mode Numeric handling mode for PostgreSQL `numeric` columns.
+#'   The default `"decimal"` transfers them as text and writes bounded
+#'   `numeric(p, s)` columns as Arrow decimal Parquet columns. `"float64"` casts
+#'   them to `DOUBLE PRECISION` before transfer. `"text"` transfers them as text
+#'   without recreating decimal types. `"raw"` keeps the backend default.
 #' @param con Optional existing DBI connection.
 #' @param metadata Optional named list of Parquet schema metadata.
 #' @param col_types Optional named list of Arrow output type overrides. Names
@@ -51,7 +53,7 @@ db_to_pq <- function(
     alt_table_name = NULL,
     chunk_size = 100000L,
     transfer_method = c("dbi", "adbc"),
-    numeric_mode = c("float64", "raw"),
+    numeric_mode = c("decimal", "float64", "text", "raw"),
     con = NULL,
     metadata = NULL,
     col_types = NULL,
@@ -132,7 +134,7 @@ db_to_pq <- function(
                            keep = NULL, drop = NULL, rename = NULL,
                            col_types = NULL,
                            tz = NULL, transfer_method = c("dbi", "adbc"),
-                           numeric_mode = c("float64", "raw")) {
+                           numeric_mode = c("decimal", "float64", "text", "raw")) {
   transfer_method <- match.arg(transfer_method)
   numeric_mode <- match.arg(numeric_mode)
   # Resolve column list, applying keep/drop filters
@@ -153,7 +155,7 @@ db_to_pq <- function(
 
   # Resolve col_types up front so we can inspect types during SQL building
   resolved_col_types <- if (!is.null(col_types)) lapply(col_types, arrow_type) else list()
-  adbc_plan <- .adbc_table_export_plan(
+  numeric_plan <- .numeric_table_export_plan(
     con = con,
     schema = schema,
     table_name = table_name,
@@ -163,8 +165,9 @@ db_to_pq <- function(
     transfer_method = transfer_method,
     numeric_mode = numeric_mode
   )
-  resolved_col_types <- adbc_plan$col_types
-  numeric_cast_cols <- adbc_plan$numeric_cast_cols
+  resolved_col_types <- numeric_plan$col_types
+  numeric_double_cols <- numeric_plan$numeric_double_cols
+  numeric_text_cols <- numeric_plan$numeric_text_cols
 
   # Build SELECT expressions, wrapping timestamp columns with AT TIME ZONE
   if (!is.null(tz)) {
@@ -196,7 +199,8 @@ db_to_pq <- function(
     col_exprs <- .rewrite_select_list(
       columns = nms,
       output_names = output_names,
-      numeric_cast_cols = numeric_cast_cols,
+      numeric_cast_cols = numeric_double_cols,
+      numeric_text_cols = numeric_text_cols,
       timestamp_exprs = timestamp_exprs
     )
 
@@ -208,7 +212,8 @@ db_to_pq <- function(
     col_exprs <- .rewrite_select_list(
       columns = nms,
       output_names = output_names,
-      numeric_cast_cols = numeric_cast_cols
+      numeric_cast_cols = numeric_double_cols,
+      numeric_text_cols = numeric_text_cols
     )
   }
 
@@ -273,9 +278,9 @@ db_to_pq <- function(
   intersect(nms, rows$column_name)
 }
 
-.numeric_cols <- function(con, schema, table_name, nms) {
+.numeric_column_info <- function(con, schema, table_name, nms) {
   rows <- DBI::dbGetQuery(con,
-    "SELECT column_name
+    "SELECT column_name, numeric_precision, numeric_scale
      FROM information_schema.columns
      WHERE table_schema = $1
        AND table_name   = $2
@@ -283,60 +288,101 @@ db_to_pq <- function(
     params = list(schema, table_name)
   )
 
-  intersect(nms, rows$column_name)
-}
-
-.adbc_table_export_plan <- function(con, schema, table_name, columns,
-                                    output_names = columns,
-                                    col_types = list(),
-                                    transfer_method = c("dbi", "adbc"),
-                                    numeric_mode = c("float64", "raw")) {
-  transfer_method <- match.arg(transfer_method)
-  numeric_mode <- match.arg(numeric_mode)
-
-  if (!identical(transfer_method, "adbc")) {
-    return(list(
-      col_types = col_types,
-      numeric_cast_cols = character()
+  if (nrow(rows) == 0L) {
+    return(data.frame(
+      column_name = character(),
+      numeric_precision = integer(),
+      numeric_scale = integer()
     ))
   }
 
-  numeric_cast_cols <- if (identical(numeric_mode, "float64")) {
-    .adbc_numeric_cast_cols(
-      con = con,
-      schema = schema,
-      table_name = table_name,
-      columns = columns,
-      output_names = output_names,
-      col_types = col_types
+  for (col in c("numeric_precision", "numeric_scale")) {
+    if (!col %in% names(rows)) {
+      rows[[col]] <- NA_integer_
+    }
+  }
+
+  rows[rows$column_name %in% nms, , drop = FALSE]
+}
+
+.numeric_table_export_plan <- function(con, schema, table_name, columns,
+                                       output_names = columns,
+                                       col_types = list(),
+                                       transfer_method = c("dbi", "adbc"),
+                                       numeric_mode = c("decimal", "float64", "text", "raw")) {
+  transfer_method <- match.arg(transfer_method)
+  numeric_mode <- match.arg(numeric_mode)
+
+  if (identical(numeric_mode, "raw")) {
+    return(list(
+      col_types = col_types,
+      numeric_double_cols = character(),
+      numeric_text_cols = character()
+    ))
+  }
+
+  numeric_info <- .numeric_column_info(con, schema, table_name, columns)
+  typed_source_cols <- columns[output_names %in% names(col_types)]
+  numeric_cols <- setdiff(numeric_info$column_name, typed_source_cols)
+
+  if (identical(numeric_mode, "float64")) {
+    if (identical(transfer_method, "adbc") && length(numeric_cols) > 0L) {
+      message(
+        "Casting ", length(numeric_cols),
+        " PostgreSQL numeric column(s) to DOUBLE PRECISION for ADBC: ",
+        paste(numeric_cols, collapse = ", "), "."
+      )
+    }
+    return(list(
+      col_types = col_types,
+      numeric_double_cols = numeric_cols,
+      numeric_text_cols = character()
+    ))
+  }
+
+  if (identical(numeric_mode, "decimal")) {
+    col_types <- utils::modifyList(
+      .pg_decimal_col_types(
+        numeric_info = numeric_info,
+        columns = columns,
+        output_names = output_names,
+        explicit_col_types = col_types
+      ),
+      col_types
     )
-  } else {
-    character()
   }
 
   list(
     col_types = col_types,
-    numeric_cast_cols = numeric_cast_cols
+    numeric_double_cols = character(),
+    numeric_text_cols = numeric_cols
   )
 }
 
-.adbc_numeric_cast_cols <- function(con, schema, table_name, columns,
-                                    output_names = columns, col_types = list()) {
-  typed_source_cols <- columns[output_names %in% names(col_types)]
-  numeric_cast_cols <- setdiff(
-    .numeric_cols(con, schema, table_name, columns),
-    typed_source_cols
-  )
+.pg_decimal_col_types <- function(numeric_info, columns, output_names = columns,
+                                  explicit_col_types = list()) {
+  out <- list()
+  output_names <- stats::setNames(output_names, columns)
 
-  if (length(numeric_cast_cols) > 0L) {
-    message(
-      "Casting ", length(numeric_cast_cols),
-      " PostgreSQL numeric column(s) to DOUBLE PRECISION for ADBC: ",
-      paste(numeric_cast_cols, collapse = ", "), "."
+  for (i in seq_len(nrow(numeric_info))) {
+    source_name <- numeric_info$column_name[[i]]
+    output_name <- output_names[[source_name]]
+    precision <- numeric_info$numeric_precision[[i]]
+    scale <- numeric_info$numeric_scale[[i]]
+
+    if (output_name %in% names(explicit_col_types) ||
+        is.na(precision) || is.na(scale) ||
+        precision < 1L || precision > 76L) {
+      next
+    }
+
+    out[[output_name]] <- arrow::decimal(
+      precision = as.integer(precision),
+      scale = as.integer(scale)
     )
   }
 
-  numeric_cast_cols
+  out
 }
 
 .adbc_numeric_cast_map_from_column_info <- function(column_info) {
@@ -352,6 +398,7 @@ db_to_pq <- function(
 
 .rewrite_select_list <- function(columns, output_names = columns,
                                  numeric_cast_cols = character(),
+                                 numeric_text_cols = character(),
                                  timestamp_exprs = NULL) {
   output_names <- stats::setNames(output_names, columns)
   unname(vapply(columns, function(col) {
@@ -361,6 +408,9 @@ db_to_pq <- function(
     }
     if (col %in% numeric_cast_cols) {
       return(sprintf('CAST("%s" AS DOUBLE PRECISION) AS "%s"', col, out_col))
+    }
+    if (col %in% numeric_text_cols) {
+      return(sprintf('CAST("%s" AS TEXT) AS "%s"', col, out_col))
     }
     if (!identical(col, out_col)) {
       return(sprintf('"%s" AS "%s"', col, out_col))

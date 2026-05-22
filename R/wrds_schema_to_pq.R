@@ -27,7 +27,7 @@ wrds_schema_to_pq <- function(
     chunk_size = 100000L,
     wrds_id = NULL,
     transfer_method = c("dbi", "adbc"),
-    numeric_mode = c("float64", "raw"),
+    numeric_mode = c("decimal", "float64", "text", "raw"),
     ...) {
   transfer_method <- match.arg(transfer_method)
   numeric_mode <- match.arg(numeric_mode)

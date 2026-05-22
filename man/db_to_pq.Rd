@@ -22,7 +22,7 @@ db_to_pq(
   alt_table_name = NULL,
   chunk_size = 100000L,
   transfer_method = c("dbi", "adbc"),
-  numeric_mode = c("float64", "raw"),
+  numeric_mode = c("decimal", "float64", "text", "raw"),
   con = NULL,
   metadata = NULL,
   col_types = NULL,
@@ -60,9 +60,11 @@ names to output column names, e.g. \code{c(conm = "company_name")}.}
 \item{transfer_method}{Transfer backend: \code{"dbi"} for the stable DBI path or
 \code{"adbc"} for the optional Arrow/ADBC path.}
 
-\item{numeric_mode}{Numeric handling mode for the ADBC path. \code{"float64"}
-casts PostgreSQL \code{numeric} columns to \verb{DOUBLE PRECISION}; \code{"raw"} keeps the
-driver default.}
+\item{numeric_mode}{Numeric handling mode for PostgreSQL \code{numeric} columns.
+The default \code{"decimal"} transfers them as text and writes bounded
+\code{numeric(p, s)} columns as Arrow decimal Parquet columns. \code{"float64"} casts
+them to \verb{DOUBLE PRECISION} before transfer. \code{"text"} transfers them as text
+without recreating decimal types. \code{"raw"} keeps the backend default.}
 
 \item{con}{Optional existing DBI connection.}
 

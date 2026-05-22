@@ -81,7 +81,7 @@ wrds_get_tables <- function(schema, wrds_id = NULL, views = FALSE) {
 db_schema_to_pq <- function(schema, data_dir = Sys.getenv("DATA_DIR", "."),
                             force = FALSE, tables = NULL, chunk_size = 100000L,
                             transfer_method = c("dbi", "adbc"),
-                            numeric_mode = c("float64", "raw"),
+                            numeric_mode = c("decimal", "float64", "text", "raw"),
                             archive = FALSE, archive_dir = "archive",
                             con = NULL, ...) {
   transfer_method <- match.arg(transfer_method)

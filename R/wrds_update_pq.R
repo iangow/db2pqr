@@ -66,11 +66,12 @@
 #' @param transfer_method Transfer backend used for the SQL-to-Parquet step.
 #'   Use \code{"dbi"} for the existing DBI/data-frame path or \code{"adbc"}
 #'   for the experimental ADBC/Arrow path.
-#' @param numeric_mode Numeric handling mode for the ADBC path. Use
-#'   \code{"float64"} to cast PostgreSQL \code{numeric} columns to
-#'   \code{DOUBLE PRECISION} before fetching, or \code{"raw"} to keep the
-#'   driver default representation. Ignored when
-#'   \code{transfer_method = "dbi"}.
+#' @param numeric_mode Numeric handling mode for PostgreSQL \code{numeric}
+#'   columns. The default \code{"decimal"} transfers values as text and writes
+#'   bounded \code{numeric(p, s)} columns as Arrow decimals. Use
+#'   \code{"float64"} to cast values to \code{DOUBLE PRECISION} before
+#'   fetching, \code{"text"} to retain text values, or \code{"raw"} to keep
+#'   the transfer backend's default representation.
 #'
 #' @return Invisibly returns the path to the Parquet file if written, or
 #'   \code{NULL} if the update was skipped.
@@ -111,7 +112,7 @@ wrds_update_pq <- function(
     encoding = "utf-8",
     wrds_id = NULL,
     transfer_method = c("dbi", "adbc"),
-    numeric_mode = c("float64", "raw")) {
+    numeric_mode = c("decimal", "float64", "text", "raw")) {
   transfer_method <- match.arg(transfer_method)
   numeric_mode <- match.arg(numeric_mode)
   chunk_size <- .resolve_wrds_chunk_size(chunk_size, transfer_method)

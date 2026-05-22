@@ -71,7 +71,7 @@ test_that("db_to_pq routes ADBC transfer through sql_to_pq_dev", {
   )
 })
 
-test_that("db_to_pq casts numeric columns for adbc transfer", {
+test_that("db_to_pq float64 numeric_mode casts numeric columns for adbc transfer", {
   local_con <- structure(list(), class = "TestConnection")
 
   restore_fields <- local_rebind(
@@ -114,6 +114,7 @@ test_that("db_to_pq casts numeric columns for adbc transfer", {
       schema = "demo",
       out_file = "out.parquet",
       transfer_method = "adbc",
+      numeric_mode = "float64",
       con = local_con,
       tz = NULL
     ),
@@ -169,6 +170,69 @@ test_that("db_to_pq raw numeric_mode skips adbc numeric casts", {
     ),
     "out.parquet"
   )
+})
+
+test_that("db_to_pq decimal numeric_mode repairs bounded PostgreSQL numerics", {
+  local_con <- structure(list(), class = "TestConnection")
+
+  restore_fields <- local_rebind(
+    "dbListFields",
+    function(conn, name, ...) c("gvkey", "prc", "open_numeric"),
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_fields(), add = TRUE)
+
+  restore_get_query <- local_rebind(
+    "dbGetQuery",
+    function(conn, statement, params = NULL, ...) {
+      if (grepl("data_type    = 'numeric'", statement, fixed = TRUE)) {
+        return(data.frame(
+          column_name = c("prc", "open_numeric"),
+          numeric_precision = c(11L, NA_integer_),
+          numeric_scale = c(5L, NA_integer_)
+        ))
+      }
+      stop("Unexpected query")
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_get_query(), add = TRUE)
+
+  plan <- db2pq:::.db_to_pq_plan(
+    con = local_con,
+    table_name = "dsf",
+    schema = "crsp",
+    rename = c(prc = "price"),
+    numeric_mode = "decimal",
+    tz = NULL
+  )
+
+  expect_identical(
+    plan$sql,
+    paste(
+      'SELECT "gvkey", CAST("prc" AS TEXT) AS "price",',
+      'CAST("open_numeric" AS TEXT) AS "open_numeric" FROM "crsp"."dsf"'
+    )
+  )
+  expect_identical(names(plan$col_types), "price")
+  expect_match(plan$col_types$price$ToString(), "^decimal")
+  expect_match(plan$col_types$price$ToString(), "\\(11, 5\\)$")
+})
+
+test_that("string-backed PostgreSQL numerics can cast to Arrow decimals", {
+  tab <- arrow::Table$create(data.frame(
+    prc = c("123.45000", "-0.01000"),
+    stringsAsFactors = FALSE
+  ))
+  schemas <- db2pq:::.build_arrow_schemas(
+    tab$schema,
+    col_types = list(prc = arrow::decimal(precision = 11L, scale = 5L))
+  )
+
+  out <- db2pq:::.coerce_arrow_table(tab, schemas$data_schema)
+
+  expect_match(out$schema$GetFieldByName("prc")$type$ToString(), "^decimal")
+  expect_match(out$schema$GetFieldByName("prc")$type$ToString(), "\\(11, 5\\)$")
 })
 
 test_that("adbc_numeric_cast_map_from_column_info finds string-like result columns", {
@@ -299,7 +363,7 @@ test_that("db_to_pq planner applies rename to select list and col_types", {
 
   expect_identical(
     plan$sql,
-    'SELECT "gvkey", "conm" AS "company_name", CAST("prc" AS DOUBLE PRECISION) AS "price" FROM "comp"."company"'
+    'SELECT "gvkey", "conm" AS "company_name", CAST("prc" AS TEXT) AS "price" FROM "comp"."company"'
   )
   expect_identical(plan$output_names, c("gvkey", "company_name", "price"))
   expect_identical(names(plan$col_types), "company_name")
@@ -357,7 +421,7 @@ test_that("wrds_update_pq forwards transfer_method to db_to_pq", {
       expect_identical(out_file, "out.parquet")
       expect_identical(chunk_size, 100000L)
       expect_identical(transfer_method, "dbi")
-      expect_identical(numeric_mode, "float64")
+      expect_identical(numeric_mode, "decimal")
       expect_identical(con, local_con)
       expect_identical(metadata, list(last_modified = "Last modified: 03/15/2024 14:30:00"))
       expect_null(col_types)
@@ -428,7 +492,7 @@ test_that("wrds_update_pq uses native ADBC connection for adbc transfer", {
              col_types, tz) {
       expect_identical(transfer_method, "adbc")
       expect_identical(chunk_size, 250000L)
-      expect_identical(numeric_mode, "float64")
+      expect_identical(numeric_mode, "decimal")
       expect_identical(con, adbc_con)
       invisible(out_file)
     },
@@ -487,7 +551,7 @@ test_that("wrds_update_pq respects explicit chunk_size override for adbc", {
              col_types, tz) {
       expect_identical(transfer_method, "adbc")
       expect_identical(chunk_size, 12345L)
-      expect_identical(numeric_mode, "float64")
+      expect_identical(numeric_mode, "decimal")
       invisible(out_file)
     },
     env = asNamespace("db2pq")

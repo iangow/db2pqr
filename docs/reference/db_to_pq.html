@@ -72,7 +72,7 @@ timestamp normalization.</p>
 <span>  alt_table_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  chunk_size <span class="op">=</span> <span class="fl">100000L</span>,</span>
 <span>  transfer_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dbi"</span>, <span class="st">"adbc"</span><span class="op">)</span>,</span>
-<span>  numeric_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"float64"</span>, <span class="st">"raw"</span><span class="op">)</span>,</span>
+<span>  numeric_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"decimal"</span>, <span class="st">"float64"</span>, <span class="st">"text"</span>, <span class="st">"raw"</span><span class="op">)</span>,</span>
 <span>  con <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  metadata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  col_types <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -139,9 +139,11 @@ names to output column names, e.g. <code>c(conm = "company_name")</code>.</p></d
 
 
 <dt id="arg-numeric-mode">numeric_mode<a class="anchor" aria-label="anchor" href="#arg-numeric-mode"></a></dt>
-<dd><p>Numeric handling mode for the ADBC path. <code>"float64"</code>
-casts PostgreSQL <code>numeric</code> columns to <code>DOUBLE PRECISION</code>; <code>"raw"</code> keeps the
-driver default.</p></dd>
+<dd><p>Numeric handling mode for PostgreSQL <code>numeric</code> columns.
+The default <code>"decimal"</code> transfers them as text and writes bounded
+<code>numeric(p, s)</code> columns as Arrow decimal Parquet columns. <code>"float64"</code> casts
+them to <code>DOUBLE PRECISION</code> before transfer. <code>"text"</code> transfers them as text
+without recreating decimal types. <code>"raw"</code> keeps the backend default.</p></dd>
 
 
 <dt id="arg-con">con<a class="anchor" aria-label="anchor" href="#arg-con"></a></dt>

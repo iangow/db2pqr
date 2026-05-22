@@ -80,8 +80,9 @@ installed in your R library:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/adbc_diagnostics.html">adbc_diagnostics</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"dsi"</span>, <span class="st">"crsp"</span>, transfer_method <span class="op">=</span> <span class="st">"adbc"</span><span class="op">)</span></span></code></pre></div>
 <p>If the ADBC path reports an SSL/libpq error, use
-<code>transfer_method = "dbi"</code> or install a current SSL-capable
-<code>adbcpostgresql</code> build.</p>
+<code>transfer_method = "dbi"</code> or use an ADBC PostgreSQL driver
+that is built against an SSL-capable <code>libpq</code>. WRDS requires
+SSL, and the stable WRDS path remains DBI/RPostgres.</p>
   </main>
 </div>
 

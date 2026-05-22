@@ -82,7 +82,7 @@ repeatedly as part of a scheduled data refresh.</p>
 <span>  encoding <span class="op">=</span> <span class="st">"utf-8"</span>,</span>
 <span>  wrds_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  transfer_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dbi"</span>, <span class="st">"adbc"</span><span class="op">)</span>,</span>
-<span>  numeric_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"float64"</span>, <span class="st">"raw"</span><span class="op">)</span></span>
+<span>  numeric_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"decimal"</span>, <span class="st">"float64"</span>, <span class="st">"text"</span>, <span class="st">"raw"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -214,11 +214,12 @@ for the experimental ADBC/Arrow path.</p></dd>
 
 
 <dt id="arg-numeric-mode">numeric_mode<a class="anchor" aria-label="anchor" href="#arg-numeric-mode"></a></dt>
-<dd><p>Numeric handling mode for the ADBC path. Use
-<code>"float64"</code> to cast PostgreSQL <code>numeric</code> columns to
-<code>DOUBLE PRECISION</code> before fetching, or <code>"raw"</code> to keep the
-driver default representation. Ignored when
-<code>transfer_method = "dbi"</code>.</p></dd>
+<dd><p>Numeric handling mode for PostgreSQL <code>numeric</code>
+columns. The default <code>"decimal"</code> transfers values as text and writes
+bounded <code>numeric(p, s)</code> columns as Arrow decimals. Use
+<code>"float64"</code> to cast values to <code>DOUBLE PRECISION</code> before
+fetching, <code>"text"</code> to retain text values, or <code>"raw"</code> to keep
+the transfer backend's default representation.</p></dd>
 
 </dl></div>
     <div class="section level2">

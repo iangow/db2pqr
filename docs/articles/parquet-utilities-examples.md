@@ -63,8 +63,8 @@ pq_last_modified(schema = "comp") |>
   select(file_name, table, last_mod) |>
   head(10)
 #> # A tibble: 10 × 3
-#>    file_name   table       last_mod
-#>    <chr>       <chr>       <dttm>
+#>    file_name   table       last_mod           
+#>    <chr>       <chr>       <dttm>             
 #>  1 aco_pnfnda  aco_pnfnda  2026-05-21 06:00:00
 #>  2 adsprate    adsprate    2026-04-09 06:00:00
 #>  3 co_adesind  co_adesind  2026-04-09 06:00:00
@@ -72,7 +72,7 @@ pq_last_modified(schema = "comp") |>
 #>  5 co_filedate co_filedate 2026-04-09 06:00:00
 #>  6 co_hgic     co_hgic     2026-04-09 06:00:00
 #>  7 co_ifndq    co_ifndq    2026-04-09 06:00:00
-#>  8 company     company     NA
+#>  8 company     company     NA                 
 #>  9 funda       funda       2026-05-21 06:00:00
 #> 10 funda_fncd  funda_fncd  2026-05-21 06:00:00
 ```
@@ -85,8 +85,8 @@ pq_last_modified(schema = "comp", archive = TRUE) |>
   select(file_name, table, last_mod) |>
   head(10)
 #> # A tibble: 10 × 3
-#>    file_name                   table      last_mod
-#>    <chr>                       <chr>      <dttm>
+#>    file_name                   table      last_mod           
+#>    <chr>                       <chr>      <dttm>             
 #>  1 aco_pnfnda_20260330T060000Z aco_pnfnda 2026-03-30 06:00:00
 #>  2 company_20260105T070000Z    company    2026-01-05 07:00:00
 #>  3 company_20260107T070000Z    company    2026-01-07 07:00:00
@@ -108,8 +108,8 @@ pq_last_modified(schema = "crsp", data_dir = Sys.getenv("DATA_DIR")) |>
   select(file_name, table, last_mod) |>
   head(5)
 #> # A tibble: 5 × 3
-#>   file_name        table            last_mod
-#>   <chr>            <chr>            <dttm>
+#>   file_name        table            last_mod           
+#>   <chr>            <chr>            <dttm>             
 #> 1 ccmxpf_linktable ccmxpf_linktable 2026-02-06 07:00:00
 #> 2 ccmxpf_lnkhist   ccmxpf_lnkhist   2026-02-06 07:00:00
 #> 3 ccmxpf_lnkused   ccmxpf_lnkused   2026-02-06 07:00:00
@@ -144,8 +144,8 @@ pq_last_modified(table_name = "company", schema = "comp", archive = TRUE) |>
   select(file_name, table, last_mod, last_mod_str) |>
   tail(10)
 #> # A tibble: 10 × 4
-#>    file_name                table   last_mod            last_mod_str
-#>    <chr>                    <chr>   <dttm>              <chr>
+#>    file_name                table   last_mod            last_mod_str            
+#>    <chr>                    <chr>   <dttm>              <chr>                   
 #>  1 company_20260225T000000Z company 2026-02-24 07:00:00 Company (Updated 2026-0…
 #>  2 company_20260225T070000Z company 2026-02-25 07:00:00 Company (Updated 2026-0…
 #>  3 company_20260226T070000Z company 2026-02-26 07:00:00 Company (Updated 2026-0…
@@ -168,8 +168,8 @@ pq_last_modified(schema = "comp", archive = TRUE) |>
   select(file_name, table, last_mod) |>
   head(10)
 #> # A tibble: 10 × 3
-#>    file_name                   table      last_mod
-#>    <chr>                       <chr>      <dttm>
+#>    file_name                   table      last_mod           
+#>    <chr>                       <chr>      <dttm>             
 #>  1 aco_pnfnda_20260330T060000Z aco_pnfnda 2026-03-30 06:00:00
 #>  2 company_20260105T070000Z    company    2026-01-05 07:00:00
 #>  3 company_20260107T070000Z    company    2026-01-07 07:00:00

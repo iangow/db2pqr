@@ -43,10 +43,9 @@ Suggests:
     knitr,
     nanoarrow,
     processx,
-    rmarkdown,
+    quarto,
     rstudioapi,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Config/Needs/website: pkgdown
-VignetteBuilder: knitr
+Config/Needs/website: pkgdown, quarto
 Config/roxygen2/version: 8.0.0

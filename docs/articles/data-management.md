@@ -1,5 +1,10 @@
 # Data Management for Research
 
+``` r
+
+library(db2pq)
+```
+
 This article adapts a broader set of data-management ideas for the
 narrower task that `db2pq` is designed to support: building and
 maintaining a local Parquet repository from WRDS or another PostgreSQL
@@ -210,7 +215,7 @@ pq_last_modified(table_name = "company", schema = "comp",
   dplyr::select(file_name, last_mod)
 #> # A tibble: 1 × 2
 #>   file_name                last_mod
-#>   <chr>                    <dttm>
+#>   <chr>                    <dttm>  
 #> 1 company_unknown_modified NA
 ```
 
@@ -290,19 +295,19 @@ importing the full data into R.
 
 library(DBI)
 library(dplyr)
-#>
+#> 
 #> Attaching package: 'dplyr'
 #> The following objects are masked from 'package:stats':
-#>
+#> 
 #>     filter, lag
 #> The following objects are masked from 'package:base':
-#>
+#> 
 #>     intersect, setdiff, setequal, union
 library(dbplyr)
-#>
+#> 
 #> Attaching package: 'dbplyr'
 #> The following objects are masked from 'package:dplyr':
-#>
+#> 
 #>     ident, sql
 library(ggplot2)
 

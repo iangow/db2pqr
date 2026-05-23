@@ -10,7 +10,9 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="PostgreSQL to Parquet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="postgres-to-parquet_files/libs/quarto-html/popper.min.js"></script><script src="postgres-to-parquet_files/libs/quarto-html/tippy.umd.min.js"></script><link href="postgres-to-parquet_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="postgres-to-parquet_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="PostgreSQL to Parquet">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -54,27 +56,27 @@
 
 
   </div>
-</nav><div class="container template-article">
-
-
-
-
+</nav><div class="container template-quarto">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>PostgreSQL to Parquet</h1>
-            
-      
-      <small class="dont-index">Source: <a href="https://github.com/iangow/db2pqr/blob/HEAD/vignettes/postgres-to-parquet.Rmd" class="external-link"><code>vignettes/postgres-to-parquet.Rmd</code></a></small>
-      <div class="d-none name"><code>postgres-to-parquet.Rmd</code></div>
+
+
+
+
+      <small class="dont-index">Source: <a href="https://github.com/iangow/db2pqr/blob/HEAD/vignettes/postgres-to-parquet.qmd" class="external-link"><code>vignettes/postgres-to-parquet.qmd</code></a></small>
+      <div class="d-none name"><code></code></div>
     </div>
 
-    
-    
-<p><code><a href="../reference/db_to_pq.html">db_to_pq()</a></code> exports PostgreSQL tables to Parquet using a
-DBI connection. It can filter rows, select columns, rename outputs, and
-apply Arrow type overrides.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+
+
+
+
+
+    <p><code><a href="../reference/db_to_pq.html">db_to_pq()</a></code> exports PostgreSQL tables to Parquet using a DBI connection. It can filter rows, select columns, rename outputs, and apply Arrow type overrides.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/db_to_pq.html">db_to_pq</a></span><span class="op">(</span></span>
 <span>  table_name <span class="op">=</span> <span class="st">"company"</span>,</span>
 <span>  schema <span class="op">=</span> <span class="st">"comp"</span>,</span>
@@ -83,34 +85,106 @@ apply Arrow type overrides.</p>
 <span>  rename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>conm <span class="op">=</span> <span class="st">"company_name"</span><span class="op">)</span>,</span>
 <span>  col_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>company_name <span class="op">=</span> <span class="st">"string"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Use <code><a href="../reference/db_schema_tables.html">db_schema_tables()</a></code> to inspect available relations
-and <code><a href="../reference/db_schema_to_pq.html">db_schema_to_pq()</a></code> to export a schema.</p>
-<div class="section level2">
-<h2 id="postgresql-numeric-columns">PostgreSQL Numeric Columns<a class="anchor" aria-label="anchor" href="#postgresql-numeric-columns"></a>
+</div>
+<p>Use <code><a href="../reference/db_schema_tables.html">db_schema_tables()</a></code> to inspect available relations and <code><a href="../reference/db_schema_to_pq.html">db_schema_to_pq()</a></code> to export a schema.</p>
+<section class="level2"><h2 id="postgresql-numeric-columns">PostgreSQL Numeric Columns<a class="anchor" aria-label="anchor" href="#postgresql-numeric-columns"></a>
 </h2>
-<p>By default, table exports preserve bounded PostgreSQL
-<code>NUMERIC(p, s)</code> columns as Parquet decimal columns:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>By default, table exports preserve bounded PostgreSQL <code>NUMERIC(p, s)</code> columns as Parquet decimal columns:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/db_to_pq.html">db_to_pq</a></span><span class="op">(</span></span>
 <span>  table_name <span class="op">=</span> <span class="st">"dsi"</span>,</span>
 <span>  schema <span class="op">=</span> <span class="st">"crsp"</span>,</span>
 <span>  data_dir <span class="op">=</span> <span class="st">"~/pq_data"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>The default <code>numeric_mode = "decimal"</code> detects
-<code>NUMERIC</code> columns from PostgreSQL metadata, transfers them as
-text, and casts columns with known precision and scale back to Arrow
-decimal types before writing Parquet. PostgreSQL <code>NUMERIC</code>
-columns without precision and scale remain text because a Parquet
-decimal type requires those bounds.</p>
-<p>Use <code>numeric_mode = "text"</code> to retain exact text values
-for all detected <code>NUMERIC</code> columns,
-<code>numeric_mode = "float64"</code> when double-precision output is
-the intended representation, or <code>numeric_mode = "raw"</code> to
-keep the backend default.</p>
 </div>
-  </main>
+<p>The default <code>numeric_mode = "decimal"</code> detects <code>NUMERIC</code> columns from PostgreSQL metadata, transfers them as text, and casts columns with known precision and scale back to Arrow decimal types before writing Parquet. PostgreSQL <code>NUMERIC</code> columns without precision and scale remain text because a Parquet decimal type requires those bounds.</p>
+<p>Use <code>numeric_mode = "text"</code> to retain exact text values for all detected <code>NUMERIC</code> columns, <code>numeric_mode = "float64"</code> when double-precision output is the intended representation, or <code>numeric_mode = "raw"</code> to keep the backend default.</p>
+</section><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config);
+    }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script></main>
 </div>
-
 
 
     <footer><div class="pkgdown-footer-left">

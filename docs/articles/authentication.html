@@ -10,7 +10,9 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Authentication">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="authentication_files/libs/quarto-html/popper.min.js"></script><script src="authentication_files/libs/quarto-html/tippy.umd.min.js"></script><link href="authentication_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="authentication_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Authentication">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -54,210 +56,134 @@
 
 
   </div>
-</nav><div class="container template-article">
-
-
-
-
+</nav><div class="container template-quarto">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Authentication</h1>
-            
-      
-      <small class="dont-index">Source: <a href="https://github.com/iangow/db2pqr/blob/HEAD/vignettes/authentication.Rmd" class="external-link"><code>vignettes/authentication.Rmd</code></a></small>
-      <div class="d-none name"><code>authentication.Rmd</code></div>
+
+
+
+
+      <small class="dont-index">Source: <a href="https://github.com/iangow/db2pqr/blob/HEAD/vignettes/authentication.qmd" class="external-link"><code>vignettes/authentication.qmd</code></a></small>
+      <div class="d-none name"><code></code></div>
     </div>
 
-    
-    
-<p>There are two elements required for a WRDS PostgreSQL
-authentication:</p>
-<ol style="list-style-type: decimal">
+
+
+
+
+
+    <p>There are two elements required for a WRDS PostgreSQL authentication:</p>
+<ol type="1">
 <li>the WRDS username</li>
 <li>the WRDS password for that username</li>
 </ol>
-<p>One goal of the <code>db2pq</code> package is to keep scripts used to
-manage WRDS data free of hard-coded credentials. In addition, the
-<code>db2pq</code> package endeavours to build on existing credential
-management processes that users may have.</p>
-<div class="section level2">
-<h2 id="resolving-the-wrds-username">Resolving the WRDS username<a class="anchor" aria-label="anchor" href="#resolving-the-wrds-username"></a>
+<p>One goal of the <code>db2pq</code> package is to keep scripts used to manage WRDS data free of hard-coded credentials. In addition, the <code>db2pq</code> package endeavours to build on existing credential management processes that users may have.</p>
+<section class="level2"><h2 id="resolving-the-wrds-username">Resolving the WRDS username<a class="anchor" aria-label="anchor" href="#resolving-the-wrds-username"></a>
 </h2>
-<p>For credential helpers, <code>db2pq</code> resolves a WRDS username
-using the following order:</p>
-<ol style="list-style-type: decimal">
-<li>an explicit <code>wrds_id</code> argument supplied to the
-function</li>
+<p>For credential helpers, <code>db2pq</code> resolves a WRDS username using the following order:</p>
+<ol type="1">
+<li>an explicit <code>wrds_id</code> argument supplied to the function</li>
 <li>the <code>WRDS_ID</code> environment variable</li>
-<li>the <code>WRDS_USER</code> environment variable<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;&lt;code&gt;WRDS_USER&lt;/code&gt; is accepted mainly for
-compatibility with the Tidy Finance setup.&lt;/p&gt;"><sup>1</sup></a>
+<li>the <code>WRDS_USER</code> environment variable<a class="footnote-ref" role="doc-noteref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;&lt;code&gt;WRDS_USER&lt;/code&gt; is accepted mainly for compatibility with the Tidy Finance setup.&lt;/p&gt;"><sup>1</sup></a>
 </li>
-<li>the keyring username created by
-<code><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds::wrds_set_credentials()</a></code>
+<li>the keyring username created by <code><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds::wrds_set_credentials()</a></code>
 </li>
 </ol>
-<p>Because of this order, an explicit function argument can be used to
-override environment variables or keyring defaults:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<p>Because of this order, an explicit function argument can be used to override environment variables or keyring defaults:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span>, wrds_id <span class="op">=</span> <span class="st">"your_wrds_id"</span><span class="op">)</span></span></code></pre></div>
-<p>The <code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code> function can be used to see the
-resolved WRDS username:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_get_username.html">wrds_get_username</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>If <code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code> does not resolve to a WRDS
-username using the process described above, then the user is prompted to
-supply one. The supplied username is used for the current session and
-the user is given the option to save the username for future R
-sessions.</p>
 </div>
-<div class="section level2">
-<h2 id="resolving-the-wrds-password">Resolving the WRDS password<a class="anchor" aria-label="anchor" href="#resolving-the-wrds-password"></a>
+<p>The <code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code> function can be used to see the resolved WRDS username:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_get_username.html">wrds_get_username</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>If <code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code> does not resolve to a WRDS username using the process described above, then the user is prompted to supply one. The supplied username is used for the current session and the user is given the option to save the username for future R sessions.</p>
+</section><section class="level2"><h2 id="resolving-the-wrds-password">Resolving the WRDS password<a class="anchor" aria-label="anchor" href="#resolving-the-wrds-password"></a>
 </h2>
-<p>Once <code>db2pq</code> has resolved a WRDS username, it needs a
-password for that username to connect to the WRDS PostgreSQL
-database.</p>
+<p>Once <code>db2pq</code> has resolved a WRDS username, it needs a password for that username to connect to the WRDS PostgreSQL database.</p>
 <p>Passwords are resolved in the following order:</p>
-<ol style="list-style-type: decimal">
-<li>an explicit <code>password</code> argument, where the function
-supports one</li>
-<li>a matching entry in PostgreSQL’s <code>.pgpass</code> password
-file</li>
-<li>an existing <code>WRDS_PASSWORD</code> environment variable<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;&lt;code&gt;WRDS_PASSWORD&lt;/code&gt; is read for compatibility
-with the Tidy Finance setup. &lt;code&gt;db2pq&lt;/code&gt; does not create or
-persist this environment variable.&lt;/p&gt;"><sup>2</sup></a>
+<ol type="1">
+<li>an explicit <code>password</code> argument, where the function supports one</li>
+<li>a matching entry in PostgreSQL’s <code>.pgpass</code> password file</li>
+<li>an existing <code>WRDS_PASSWORD</code> environment variable<a class="footnote-ref" role="doc-noteref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;&lt;code&gt;WRDS_PASSWORD&lt;/code&gt; is read for compatibility with the Tidy Finance setup. &lt;code&gt;db2pq&lt;/code&gt; does not create or persist this environment variable.&lt;/p&gt;"><sup>2</sup></a>
 </li>
-<li>an interactive password prompt when no matching <code>.pgpass</code>
-entry or <code>WRDS_PASSWORD</code> is found<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;When prompting is disabled and &lt;code&gt;db2pq&lt;/code&gt; passes
-no password to the connection, PostgreSQL/libpq may still use another
-credential mechanism, such as &lt;code&gt;PGPASSWORD&lt;/code&gt;.&lt;/p&gt;"><sup>3</sup></a>
+<li>an interactive password prompt when no matching <code>.pgpass</code> entry or <code>WRDS_PASSWORD</code> is found<a class="footnote-ref" role="doc-noteref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;When prompting is disabled and &lt;code&gt;db2pq&lt;/code&gt; passes no password to the connection, PostgreSQL/libpq may still use another credential mechanism, such as &lt;code&gt;PGPASSWORD&lt;/code&gt;.&lt;/p&gt;"><sup>3</sup></a>
 </li>
 </ol>
-<p>If the username can only be resolved from credentials created by
-<code><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds::wrds_set_credentials()</a></code>, <code>db2pq</code> falls back
-to <code><a href="https://rdrr.io/pkg/wrds/man/wrds_connect.html" class="external-link">wrds::wrds_connect()</a></code>. That route lets the
-<code>wrds</code> package use its keyring credentials.</p>
-<p>The <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> function can be used to
-test the resolved WRDS username and password:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>If the username can only be resolved from credentials created by <code><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds::wrds_set_credentials()</a></code>, <code>db2pq</code> falls back to <code><a href="https://rdrr.io/pkg/wrds/man/wrds_connect.html" class="external-link">wrds::wrds_connect()</a></code>. That route lets the <code>wrds</code> package use its keyring credentials.</p>
+<p>The <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> function can be used to test the resolved WRDS username and password:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_check_credentials.html">wrds_check_credentials</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>If an interactive <code>db2pq</code> connection prompts for a
-password and the connection succeeds, the user-supplied password is
-saved to <code>.pgpass</code> for future connections. When
-<code>db2pq</code> uses an existing <code>WRDS_PASSWORD</code> because
-<code>.pgpass</code> has no matching entry, it saves that password to
-<code>.pgpass</code> after a successful connection too.</p>
+</div>
+<p>If an interactive <code>db2pq</code> connection prompts for a password and the connection succeeds, the user-supplied password is saved to <code>.pgpass</code> for future connections. When <code>db2pq</code> uses an existing <code>WRDS_PASSWORD</code> because <code>.pgpass</code> has no matching entry, it saves that password to <code>.pgpass</code> after a successful connection too.</p>
 <p>An explicit password can also be checked without saving it:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_check_credentials.html">wrds_check_credentials</a></span><span class="op">(</span>password <span class="op">=</span> <span class="st">"your_wrds_password"</span>, save <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p>PostgreSQL’s <code>.pgpass</code> mechanism is preferred to putting a
-password in R code. It also works with RPostgres/libpq and other
-PostgreSQL tools, not only <code>db2pq</code>.</p>
-<p>The default password-file path used by <code><a href="../reference/pgpass_path.html">pgpass_path()</a></code>
-is:</p>
+</div>
+<p>PostgreSQL’s <code>.pgpass</code> mechanism is preferred to putting a password in R code. It also works with RPostgres/libpq and other PostgreSQL tools, not only <code>db2pq</code>.</p>
+<p>The default password-file path used by <code><a href="../reference/pgpass_path.html">pgpass_path()</a></code> is:</p>
 <ul>
 <li>
 <code>~/.pgpass</code> on macOS and Linux</li>
 <li>
 <code>%APPDATA%/postgresql/pgpass.conf</code> on Windows</li>
 </ul>
-<p>A WRDS <code>.pgpass</code> entry has the PostgreSQL password-file
-shape:</p>
+<p>A WRDS <code>.pgpass</code> entry has the PostgreSQL password-file shape:</p>
 <pre class="text"><code><span><span class="va">wrds</span><span class="op">-</span><span class="va">pgdata.wharton.upenn.edu</span><span class="op">:</span><span class="fl">9737</span><span class="op">:</span><span class="va">wrds</span><span class="op">:</span><span class="va">your_wrds_id</span><span class="op">:</span><span class="va">your_wrds_password</span></span></code></pre>
-<p>On macOS and Linux, PostgreSQL expects the file to be readable only
-by the owner. Password entries saved by <code>db2pq</code> use that
-permission automatically; for a file created manually, set it with:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">chmod</span> 600 ~/.pgpass</span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="inspect-and-test-the-setup">Inspect and Test the Setup<a class="anchor" aria-label="anchor" href="#inspect-and-test-the-setup"></a>
+<p>On macOS and Linux, PostgreSQL expects the file to be readable only by the owner. Password entries saved by <code>db2pq</code> use that permission automatically; for a file created manually, set it with:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 600 ~/.pgpass</span></code></pre></div>
+</section><section class="level2"><h2 id="inspect-and-test-the-setup">Inspect and Test the Setup<a class="anchor" aria-label="anchor" href="#inspect-and-test-the-setup"></a>
 </h2>
-<p>Use <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> for a live connection
-test:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>Use <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> for a live connection test:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_check_credentials.html">wrds_check_credentials</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>If the matching WRDS entry is not already in <code>.pgpass</code>, an
-interactive <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> call asks for the WRDS
-PostgreSQL password. When the connection test succeeds, it writes that
-password to <code>.pgpass</code> for later libpq-backed connections. You
-can pass <code>password = ...</code> explicitly for a non-interactive
-setup check, use <code>save = FALSE</code> for a one-time check, or use
-<code>passfile = ...</code> to target a specific PostgreSQL password
-file.</p>
-<p>The returned diagnostic reports whether a small WRDS PostgreSQL
-connection succeeded and whether the matching target appears in
-<code>.pgpass</code>.</p>
 </div>
-<div class="section level2">
-<h2 id="existing-wrds-package-credentials">Existing <code>wrds</code> Package Credentials<a class="anchor" aria-label="anchor" href="#existing-wrds-package-credentials"></a>
+<p>If the matching WRDS entry is not already in <code>.pgpass</code>, an interactive <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> call asks for the WRDS PostgreSQL password. When the connection test succeeds, it writes that password to <code>.pgpass</code> for later libpq-backed connections. You can pass <code>password = ...</code> explicitly for a non-interactive setup check, use <code>save = FALSE</code> for a one-time check, or use <code>passfile = ...</code> to target a specific PostgreSQL password file.</p>
+<p>The returned diagnostic reports whether a small WRDS PostgreSQL connection succeeded and whether the matching target appears in <code>.pgpass</code>.</p>
+</section><section class="level2"><h2 id="existing-wrds-package-credentials">Existing <code>wrds</code> Package Credentials<a class="anchor" aria-label="anchor" href="#existing-wrds-package-credentials"></a>
 </h2>
-<p>If you already use the <code>wrds</code> package, its keyring-based
-setup remains a valid path:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>If you already use the <code>wrds</code> package, its keyring-based setup remains a valid path:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">wrds</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds_set_credentials</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span><span class="op">)</span></span></code></pre></div>
-<p>Use this route when you want to stay close to existing R WRDS code.
-Use the environment-variable plus <code>.pgpass</code> route when you
-want credentials to work across <code>db2pq</code>, RPostgres/libpq, and
-other PostgreSQL tools on the same machine.</p>
 </div>
-<div class="section level2">
-<h2 id="sas-based-workflows">SAS-Based Workflows<a class="anchor" aria-label="anchor" href="#sas-based-workflows"></a>
+<p>Use this route when you want to stay close to existing R WRDS code. Use the environment-variable plus <code>.pgpass</code> route when you want credentials to work across <code>db2pq</code>, RPostgres/libpq, and other PostgreSQL tools on the same machine.</p>
+</section><section class="level2"><h2 id="sas-based-workflows">SAS-Based Workflows<a class="anchor" aria-label="anchor" href="#sas-based-workflows"></a>
 </h2>
-<p>Most <code>db2pq</code> WRDS work uses WRDS PostgreSQL. If you set
-<code>use_sas = TRUE</code>, <code>db2pq</code> also retrieves metadata
-from the WRDS SAS side over SSH. That SSH setup is separate from
-PostgreSQL password handling; see the <a href="wrds-ssh.html">WRDS SSH
-setup article</a> before using SAS metadata in unattended refresh
-scripts.</p>
-</div>
-<div class="section level2">
-<h2 id="environment-variables-in-r">Environment Variables in R<a class="anchor" aria-label="anchor" href="#environment-variables-in-r"></a>
+<p>Most <code>db2pq</code> WRDS work uses WRDS PostgreSQL. If you set <code>use_sas = TRUE</code>, <code>db2pq</code> also retrieves metadata from the WRDS SAS side over SSH. That SSH setup is separate from PostgreSQL password handling; see the <a href="wrds-ssh.html">WRDS SSH setup article</a> before using SAS metadata in unattended refresh scripts.</p>
+</section><section class="level2"><h2 id="environment-variables-in-r">Environment Variables in R<a class="anchor" aria-label="anchor" href="#environment-variables-in-r"></a>
 </h2>
 <p><code><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv()</a></code> is useful for a running R session:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span></span>
 <span>  WRDS_ID <span class="op">=</span> <span class="st">"your_wrds_id"</span>,</span>
 <span>  DATA_DIR <span class="op">=</span> <span class="st">"~/Dropbox/pq_data"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>For settings you want available when R starts, use
-<code>.Renviron</code>. This is the closest R analogue to a simple
-environment-variable file for this workflow. R searches for
-<code>.Renviron</code> in the current working directory and then in the
-user’s home directory, so there are two useful patterns:</p>
+</div>
+<p>For settings you want available when R starts, use <code>.Renviron</code>. This is the closest R analogue to a simple environment-variable file for this workflow. R searches for <code>.Renviron</code> in the current working directory and then in the user’s home directory, so there are two useful patterns:</p>
 <ul>
 <li>
-<code>~/.Renviron</code>: user-level defaults that apply broadly on
-your machine</li>
+<code>~/.Renviron</code>: user-level defaults that apply broadly on your machine</li>
 <li>
-<code>.Renviron</code> in a project directory: project-local values
-for that project</li>
+<code>.Renviron</code> in a project directory: project-local values for that project</li>
 </ul>
-<p>A user-level <code>~/.Renviron</code> is a good place for a default
-WRDS username or default Parquet repository:</p>
+<p>A user-level <code>~/.Renviron</code> is a good place for a default WRDS username or default Parquet repository:</p>
 <pre class="text"><code>WRDS_ID=your_wrds_id
 DATA_DIR=~/Dropbox/pq_data</code></pre>
-<p>A project-local <code>.Renviron</code> is useful when one project
-should override the user-level defaults without changing other R work on
-the same machine. For example, it can select a project-specific Parquet
-repository:</p>
+<p>A project-local <code>.Renviron</code> is useful when one project should override the user-level defaults without changing other R work on the same machine. For example, it can select a project-specific Parquet repository:</p>
 <pre class="text"><code>DATA_DIR=~/research/project-data/pq_data</code></pre>
-<p>The environment file should not be committed if it contains private,
-machine-specific, or secret values. After editing a
-<code>.Renviron</code> file, start a new R session or load it explicitly
-with <code><a href="https://rdrr.io/r/base/readRenviron.html" class="external-link">readRenviron()</a></code>.</p>
-<p>For first-time <code>DATA_DIR</code> setup, call
-<code><a href="../reference/db2pq_data_dir.html">db2pq_data_dir()</a></code> or let a Parquet helper call it as its
-default. In an interactive session without a <code>DATA_DIR</code>, the
-helper asks for a data directory, can create a new directory if needed,
-and offers to store <code>DATA_DIR</code> in either project-level
-<code>.Renviron</code> or user-level <code>~/.Renviron</code>. That
-scope choice is useful for data repositories; the interactive WRDS
-username prompt stores <code>WRDS_ID</code> in user-level
-<code>~/.Renviron</code>.</p>
-</div>
-<div class="section level2">
-<h2 id="related-pages">Related Pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
+<p>The environment file should not be committed if it contains private, machine-specific, or secret values. After editing a <code>.Renviron</code> file, start a new R session or load it explicitly with <code><a href="https://rdrr.io/r/base/readRenviron.html" class="external-link">readRenviron()</a></code>.</p>
+<p>For first-time <code>DATA_DIR</code> setup, call <code><a href="../reference/db2pq_data_dir.html">db2pq_data_dir()</a></code> or let a Parquet helper call it as its default. In an interactive session without a <code>DATA_DIR</code>, the helper asks for a data directory, can create a new directory if needed, and offers to store <code>DATA_DIR</code> in either project-level <code>.Renviron</code> or user-level <code>~/.Renviron</code>. That scope choice is useful for data repositories; the interactive WRDS username prompt stores <code>WRDS_ID</code> in user-level <code>~/.Renviron</code>.</p>
+</section><section class="level2"><h2 id="related-pages">Related Pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
 </h2>
 <ul>
 <li>WRDS to Parquet article</li>
@@ -265,13 +191,92 @@ username prompt stores <code>WRDS_ID</code> in user-level
 <li><code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code></li>
 <li><code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code></li>
 <li><code><a href="../reference/pgpass_path.html">pgpass_path()</a></code></li>
-</ul>
-</div>
-
-  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+</ul></section><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config);
+    }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
-
 
 
     <footer><div class="pkgdown-footer-left">

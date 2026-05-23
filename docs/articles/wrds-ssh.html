@@ -10,7 +10,9 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="WRDS SSH Setup for SAS Metadata">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="wrds-ssh_files/libs/quarto-html/popper.min.js"></script><script src="wrds-ssh_files/libs/quarto-html/tippy.umd.min.js"></script><link href="wrds-ssh_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="wrds-ssh_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="WRDS SSH Setup for SAS Metadata">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -54,69 +56,53 @@
 
 
   </div>
-</nav><div class="container template-article">
-
-
-
-
+</nav><div class="container template-quarto">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>WRDS SSH Setup for SAS Metadata</h1>
-            
-      
-      <small class="dont-index">Source: <a href="https://github.com/iangow/db2pqr/blob/HEAD/vignettes/wrds-ssh.Rmd" class="external-link"><code>vignettes/wrds-ssh.Rmd</code></a></small>
-      <div class="d-none name"><code>wrds-ssh.Rmd</code></div>
+
+
+
+
+      <small class="dont-index">Source: <a href="https://github.com/iangow/db2pqr/blob/HEAD/vignettes/wrds-ssh.qmd" class="external-link"><code>vignettes/wrds-ssh.qmd</code></a></small>
+      <div class="d-none name"><code></code></div>
     </div>
 
-    
-    
-<p>Most <code>db2pq</code> WRDS work uses WRDS PostgreSQL credentials.
-SSH access is a separate setup used only when
-<code><a href="../reference/wrds_update_pq.html">wrds_update_pq()</a></code> needs metadata from the WRDS SAS side:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+
+
+
+
+
+    <p>Most <code>db2pq</code> WRDS work uses WRDS PostgreSQL credentials. SSH access is a separate setup used only when <code><a href="../reference/wrds_update_pq.html">wrds_update_pq()</a></code> needs metadata from the WRDS SAS side:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"dsi"</span>, <span class="st">"crsp"</span>, use_sas <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>With <code>use_sas = TRUE</code>, <code>db2pq</code> retrieves
-last-modified dates by running <code>PROC CONTENTS</code> on the WRDS
-SAS server over SSH. This can be useful for tables whose PostgreSQL
-comment does not carry a reliable date.</p>
-<div class="section level2">
-<h2 id="before-you-start">Before You Start<a class="anchor" aria-label="anchor" href="#before-you-start"></a>
-</h2>
-<p>The <code>processx</code> package is required for the SAS metadata
-option:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"processx"</span><span class="op">)</span></span></code></pre></div>
-<p>Configure PostgreSQL credentials separately for ordinary WRDS table
-downloads. See the <a href="authentication.html">authentication
-article</a> for the <code>WRDS_ID</code>, <code>.pgpass</code>, and
-<code><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds::wrds_set_credentials()</a></code> paths supported by
-<code>db2pq</code>.</p>
 </div>
-<div class="section level2">
-<h2 id="configure-wrds-ssh">Configure WRDS SSH<a class="anchor" aria-label="anchor" href="#configure-wrds-ssh"></a>
+<p>With <code>use_sas = TRUE</code>, <code>db2pq</code> retrieves last-modified dates by running <code>PROC CONTENTS</code> on the WRDS SAS server over SSH. This can be useful for tables whose PostgreSQL comment does not carry a reliable date.</p>
+<section class="level2"><h2 id="before-you-start">Before You Start<a class="anchor" aria-label="anchor" href="#before-you-start"></a>
 </h2>
-<p>WRDS provides a dedicated SSH endpoint for key-based authentication:
-<code>wrds-cloud-sshkey.wharton.upenn.edu</code>.</p>
-<div class="section level3">
-<h3 id="generate-an-ssh-key">Generate an SSH Key<a class="anchor" aria-label="anchor" href="#generate-an-ssh-key"></a>
+<p>The <code>processx</code> package is required for the SAS metadata option:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"processx"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>Configure PostgreSQL credentials separately for ordinary WRDS table downloads. See the <a href="authentication.html">authentication article</a> for the <code>WRDS_ID</code>, <code>.pgpass</code>, and <code><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds::wrds_set_credentials()</a></code> paths supported by <code>db2pq</code>.</p>
+</section><section class="level2"><h2 id="configure-wrds-ssh">Configure WRDS SSH<a class="anchor" aria-label="anchor" href="#configure-wrds-ssh"></a>
+</h2>
+<p>WRDS provides a dedicated SSH endpoint for key-based authentication: <code>wrds-cloud-sshkey.wharton.upenn.edu</code>.</p>
+<section class="level3"><h3 id="generate-an-ssh-key">Generate an SSH Key<a class="anchor" aria-label="anchor" href="#generate-an-ssh-key"></a>
 </h3>
 <p>The ed25519 key type is a reasonable default:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"your_wrds_id@wrds"</span></span></code></pre></div>
-<p>Accept the default location (<code>~/.ssh/id_ed25519</code>). You may
-use a passphrase if your SSH agent is running. For unattended scripts,
-an empty passphrase may be required.</p>
-</div>
-<div class="section level3">
-<h3 id="copy-the-public-key-to-wrds">Copy the Public Key to WRDS<a class="anchor" aria-label="anchor" href="#copy-the-public-key-to-wrds"></a>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"your_wrds_id@wrds"</span></span></code></pre></div>
+<p>Accept the default location (<code>~/.ssh/id_ed25519</code>). You may use a passphrase if your SSH agent is running. For unattended scripts, an empty passphrase may be required.</p>
+</section><section class="level3"><h3 id="copy-the-public-key-to-wrds">Copy the Public Key to WRDS<a class="anchor" aria-label="anchor" href="#copy-the-public-key-to-wrds"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">cat</span> ~/.ssh/id_ed25519.pub <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">ssh</span> your_wrds_id@wrds-cloud-sshkey.wharton.upenn.edu <span class="dt">\</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="st">"mkdir -p ~/.ssh &amp;&amp; chmod 700 ~/.ssh &amp;&amp; </span><span class="dt">\</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="st">   cat &gt;&gt; ~/.ssh/authorized_keys &amp;&amp; chmod 600 ~/.ssh/authorized_keys"</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="configure-ssh">Configure SSH<a class="anchor" aria-label="anchor" href="#configure-ssh"></a>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> ~/.ssh/id_ed25519.pub <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ssh</span> your_wrds_id@wrds-cloud-sshkey.wharton.upenn.edu <span class="dt">\</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"mkdir -p ~/.ssh &amp;&amp; chmod 700 ~/.ssh &amp;&amp; </span><span class="dt">\</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">   cat &gt;&gt; ~/.ssh/authorized_keys &amp;&amp; chmod 600 ~/.ssh/authorized_keys"</span></span></code></pre></div>
+</section><section class="level3"><h3 id="configure-ssh">Configure SSH<a class="anchor" aria-label="anchor" href="#configure-ssh"></a>
 </h3>
 <p>Add an entry to <code>~/.ssh/config</code>:</p>
 <pre class="text"><code>Host wrds
@@ -125,30 +111,103 @@ an empty passphrase may be required.</p>
     IdentityFile ~/.ssh/id_ed25519
     IdentitiesOnly yes</code></pre>
 <p>Verify the connection:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">ssh</span> wrds</span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> wrds</span></code></pre></div>
+</section></section><section class="level2"><h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
 </h2>
 <p>If SSH still prompts for a password, inspect the connection:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-vvv</span> wrds</span></code></pre></div>
-<p>Confirm that <code>publickey</code> appears in the list of
-authentication methods. Also check that <code>~/.ssh/config</code> uses
-the WRDS SSH endpoint and the key you copied to WRDS.</p>
-</div>
-<div class="section level2">
-<h2 id="related-pages">Related Pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-vvv</span> wrds</span></code></pre></div>
+<p>Confirm that <code>publickey</code> appears in the list of authentication methods. Also check that <code>~/.ssh/config</code> uses the WRDS SSH endpoint and the key you copied to WRDS.</p>
+</section><section class="level2"><h2 id="related-pages">Related Pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
 </h2>
 <ul>
 <li><a href="authentication.html">Authentication</a></li>
 <li><a href="wrds-to-parquet.html">WRDS to Parquet</a></li>
-</ul>
-</div>
-  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+</ul></section><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config);
+    }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
-
 
 
     <footer><div class="pkgdown-footer-left">

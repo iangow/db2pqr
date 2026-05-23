@@ -93,8 +93,8 @@ company_file <- wrds_update_pq(
   wrds_id = wrds_id
 )
 #> Updated comp.company is available.
-#> Beginning file download at 2026-05-22 19:28:53 UTC.
-#> Completed file download at 2026-05-22 19:28:54 UTC.
+#> Beginning file download at 2026-05-23 15:32:18 UTC.
+#> Completed file download at 2026-05-23 15:32:19 UTC.
 file.path("<temporary data repository>", "comp", basename(company_file))
 #> [1] "<temporary data repository>/comp/company.parquet"
 ```
@@ -301,8 +301,8 @@ renamed_company_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-22 19:28:56 UTC.
-#> Completed file download at 2026-05-22 19:28:57 UTC.
+#> Beginning file download at 2026-05-23 15:32:21 UTC.
+#> Completed file download at 2026-05-23 15:32:21 UTC.
 
 dplyr::select(
   arrow::read_parquet(renamed_company_file),
@@ -384,8 +384,8 @@ funda_sample_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-22 19:28:58 UTC.
-#> Completed file download at 2026-05-22 19:28:58 UTC.
+#> Beginning file download at 2026-05-23 15:32:22 UTC.
+#> Completed file download at 2026-05-23 15:32:23 UTC.
 
 dplyr::glimpse(arrow::read_parquet(funda_sample_file))
 #> Rows: 1,000
@@ -484,14 +484,14 @@ while still exercising the same file-management code.
 
 archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
 basename(archived_company)
-#> [1] "company_20260522T060000Z.parquet"
+#> [1] "company_20260523T060000Z.parquet"
 
 pq_last_modified("company", "comp", data_dir = doc_data_dir, archive = TRUE) |>
   dplyr::select(file_name, last_mod)
 #> # A tibble: 1 × 2
 #>   file_name                last_mod           
 #>   <chr>                    <dttm>             
-#> 1 company_20260522T060000Z 2026-05-22 06:00:00
+#> 1 company_20260523T060000Z 2026-05-23 06:00:00
 ```
 
 The archived copy can be restored, again without touching the main
@@ -507,7 +507,7 @@ pq_restore(
 )
 
 pq_last_modified("company", "comp", data_dir = doc_data_dir)
-#> [1] "Company (Updated 2026-05-22)"
+#> [1] "Company (Updated 2026-05-23)"
 ```
 
 ## Custom SQL

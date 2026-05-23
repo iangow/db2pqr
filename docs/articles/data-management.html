@@ -10,7 +10,9 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Data Management for Research">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="data-management_files/libs/quarto-html/popper.min.js"></script><script src="data-management_files/libs/quarto-html/tippy.umd.min.js"></script><link href="data-management_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="data-management_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Data Management for Research">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -54,180 +56,128 @@
 
 
   </div>
-</nav><div class="container template-article">
-
-
-
-
+</nav><div class="container template-quarto">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Data Management for Research</h1>
-            
-      
-      <small class="dont-index">Source: <a href="https://github.com/iangow/db2pqr/blob/HEAD/vignettes/data-management.Rmd" class="external-link"><code>vignettes/data-management.Rmd</code></a></small>
-      <div class="d-none name"><code>data-management.Rmd</code></div>
+
+
+
+
+      <small class="dont-index">Source: <a href="https://github.com/iangow/db2pqr/blob/HEAD/vignettes/data-management.qmd" class="external-link"><code>vignettes/data-management.qmd</code></a></small>
+      <div class="d-none name"><code></code></div>
     </div>
 
-    
-    
-<p>This article adapts a broader set of data-management ideas for the
-narrower task that <code>db2pq</code> is designed to support: building
-and maintaining a local Parquet repository from WRDS or another
-PostgreSQL database.</p>
-<p>The goal is to separate three concerns that often get mixed together
-in research code:</p>
-<ol style="list-style-type: decimal">
+
+
+
+
+
+    <div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iangow/db2pqr" class="external-link">db2pq</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>This article adapts a broader set of data-management ideas for the narrower task that <code>db2pq</code> is designed to support: building and maintaining a local Parquet repository from WRDS or another PostgreSQL database.</p>
+<p>The goal is to separate three concerns that often get mixed together in research code:</p>
+<ol type="1">
 <li>Getting data from the source system.</li>
 <li>Storing a reusable local copy in an efficient format.</li>
 <li>Running analysis code against that local copy.</li>
 </ol>
-<p><code>db2pq</code> focuses on the first two steps. Analysis code can
-then use packages such as <code>arrow</code>, <code>duckdb</code>,
-<code>dplyr</code>, or <code>polars</code> to work with the Parquet
-files.</p>
-<div class="section level2">
-<h2 id="principles">Principles<a class="anchor" aria-label="anchor" href="#principles"></a>
+<p><code>db2pq</code> focuses on the first two steps. Analysis code can then use packages such as <code>arrow</code>, <code>duckdb</code>, <code>dplyr</code>, or <code>polars</code> to work with the Parquet files.</p>
+<section class="level2"><h2 id="principles">Principles<a class="anchor" aria-label="anchor" href="#principles"></a>
 </h2>
-<p>Good research data management is mostly about making later work
-boring: scripts should be rerunnable, file locations should be
-predictable, and it should be clear which files came from an external
-source and which files were created by project code.</p>
+<p>Good research data management is mostly about making later work boring: scripts should be rerunnable, file locations should be predictable, and it should be clear which files came from an external source and which files were created by project code.</p>
 <p>Several principles are useful:</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li>Keep source data immutable where practical.</li>
 <li>Make derived data reproducible from code.</li>
 <li>Use stable, documented file locations.</li>
-<li>Record enough metadata to know when a file was created and what
-source it represents.</li>
+<li>Record enough metadata to know when a file was created and what source it represents.</li>
 <li>Avoid putting large, private, or licensed data files in Git.</li>
 </ol>
-<p><code>db2pq</code> is not a full project-management framework. It
-supplies a narrow piece of infrastructure: a repeatable way to create
-local Parquet copies of database tables and to inspect the metadata
-attached to those copies.</p>
-</div>
-<div class="section level2">
-<h2 id="prefer-portable-file-formats">Prefer Portable File Formats<a class="anchor" aria-label="anchor" href="#prefer-portable-file-formats"></a>
+<p><code>db2pq</code> is not a full project-management framework. It supplies a narrow piece of infrastructure: a repeatable way to create local Parquet copies of database tables and to inspect the metadata attached to those copies.</p>
+</section><section class="level2"><h2 id="prefer-portable-file-formats">Prefer Portable File Formats<a class="anchor" aria-label="anchor" href="#prefer-portable-file-formats"></a>
 </h2>
-<p>Research data often outlives the first tool used to analyze it.
-Parquet is a useful storage format because it is columnar, compressed,
-typed, and readable from many systems. A local Parquet repository can be
-queried from R, Python, DuckDB, Arrow, Spark, and other tools without
-repeatedly connecting to WRDS.</p>
-<p>This is especially useful when a project uses more than one language.
-A refresh script can use <code>db2pq</code> to create files, while later
-analysis can read the same files from R or Python.</p>
-</div>
-<div class="section level2">
-<h2 id="use-a-stable-data-directory">Use a Stable Data Directory<a class="anchor" aria-label="anchor" href="#use-a-stable-data-directory"></a>
+<p>Research data often outlives the first tool used to analyze it. Parquet is a useful storage format because it is columnar, compressed, typed, and readable from many systems. A local Parquet repository can be queried from R, Python, DuckDB, Arrow, Spark, and other tools without repeatedly connecting to WRDS.</p>
+<p>This is especially useful when a project uses more than one language. A refresh script can use <code>db2pq</code> to create files, while later analysis can read the same files from R or Python.</p>
+</section><section class="level2"><h2 id="use-a-stable-data-directory">Use a Stable Data Directory<a class="anchor" aria-label="anchor" href="#use-a-stable-data-directory"></a>
 </h2>
-<p>Set <code>DATA_DIR</code> once per project or machine so that scripts
-can refer to a logical data repository without hard-coding paths
-throughout the analysis.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<p>Set <code>DATA_DIR</code> once per project or machine so that scripts can refer to a logical data repository without hard-coding paths throughout the analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>DATA_DIR <span class="op">=</span> <span class="st">"~/Dropbox/pq_data"</span><span class="op">)</span></span></code></pre></div>
+</div>
 <p>Files created by <code>db2pq</code> are stored using the layout:</p>
 <pre class="text"><code>&lt;DATA_DIR&gt;/&lt;schema&gt;/&lt;table&gt;.parquet</code></pre>
 <p>For example:</p>
 <pre class="text"><code>~/Dropbox/pq_data/crsp/dsi.parquet
 ~/Dropbox/pq_data/comp/company.parquet</code></pre>
-</div>
-<div class="section level2">
-<h2 id="treat-downloads-as-a-refresh-step">Treat Downloads as a Refresh Step<a class="anchor" aria-label="anchor" href="#treat-downloads-as-a-refresh-step"></a>
+</section><section class="level2"><h2 id="treat-downloads-as-a-refresh-step">Treat Downloads as a Refresh Step<a class="anchor" aria-label="anchor" href="#treat-downloads-as-a-refresh-step"></a>
 </h2>
-<p>The scripts that download data should usually be separate from the
-scripts that analyze data. A refresh script might contain calls like
-these:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<p>The scripts that download data should usually be separate from the scripts that analyze data. A refresh script might contain calls like these:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iangow/db2pqr" class="external-link">db2pq</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"dsi"</span>, <span class="st">"crsp"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"funda"</span>, <span class="st">"comp"</span>, keep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gvkey"</span>, <span class="st">"datadate"</span>, <span class="st">"at"</span>, <span class="st">"sale"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Because <code><a href="../reference/wrds_update_pq.html">wrds_update_pq()</a></code> compares WRDS metadata with
-metadata embedded in the local Parquet file, it can be rerun without
-downloading a table that is already current.</p>
-<p>The same idea applies to non-WRDS PostgreSQL sources. Put
-source-system refresh logic in one place, then let analysis code consume
-the resulting files.</p>
 </div>
-<div class="section level2">
-<h2 id="keep-raw-and-derived-data-separate">Keep Raw and Derived Data Separate<a class="anchor" aria-label="anchor" href="#keep-raw-and-derived-data-separate"></a>
+<p>Because <code><a href="../reference/wrds_update_pq.html">wrds_update_pq()</a></code> compares WRDS metadata with metadata embedded in the local Parquet file, it can be rerun without downloading a table that is already current.</p>
+<p>The same idea applies to non-WRDS PostgreSQL sources. Put source-system refresh logic in one place, then let analysis code consume the resulting files.</p>
+</section><section class="level2"><h2 id="keep-raw-and-derived-data-separate">Keep Raw and Derived Data Separate<a class="anchor" aria-label="anchor" href="#keep-raw-and-derived-data-separate"></a>
 </h2>
-<p>A useful convention is to keep source-table exports in one repository
-and write derived research datasets somewhere else. For example:</p>
+<p>A useful convention is to keep source-table exports in one repository and write derived research datasets somewhere else. For example:</p>
 <pre class="text"><code>~/Dropbox/pq_data/          # Local source-table repository
 data/derived/               # Project-specific derived files</code></pre>
-<p>The source-table repository should be reproducible from WRDS or
-PostgreSQL. Derived files should be reproducible from project code.</p>
-<p>This separation matters because source data and derived data have
-different rules. Source exports should be refreshed deliberately and
-should preserve the database table as closely as is useful. Derived
-files can be redesigned as the research design changes.</p>
-</div>
-<div class="section level2">
-<h2 id="make-transformations-explicit">Make Transformations Explicit<a class="anchor" aria-label="anchor" href="#make-transformations-explicit"></a>
+<p>The source-table repository should be reproducible from WRDS or PostgreSQL. Derived files should be reproducible from project code.</p>
+<p>This separation matters because source data and derived data have different rules. Source exports should be refreshed deliberately and should preserve the database table as closely as is useful. Derived files can be redesigned as the research design changes.</p>
+</section><section class="level2"><h2 id="make-transformations-explicit">Make Transformations Explicit<a class="anchor" aria-label="anchor" href="#make-transformations-explicit"></a>
 </h2>
-<p>Avoid hiding important filters, joins, and sample restrictions inside
-ad hoc interactive work. Put them in scripts or functions. A useful
-pattern is:</p>
+<p>Avoid hiding important filters, joins, and sample restrictions inside ad hoc interactive work. Put them in scripts or functions. A useful pattern is:</p>
 <pre class="text"><code>source database -&gt; local Parquet repository -&gt; derived research data -&gt; tables/figures</code></pre>
-<p><code>db2pq</code> can help with the first arrow. The later arrows
-should usually live in project-specific code, where sample construction
-choices are visible to readers and coauthors.</p>
-</div>
-<div class="section level2">
-<h2 id="record-metadata">Record Metadata<a class="anchor" aria-label="anchor" href="#record-metadata"></a>
+<p><code>db2pq</code> can help with the first arrow. The later arrows should usually live in project-specific code, where sample construction choices are visible to readers and coauthors.</p>
+</section><section class="level2"><h2 id="record-metadata">Record Metadata<a class="anchor" aria-label="anchor" href="#record-metadata"></a>
 </h2>
-<p>Parquet files written by WRDS helpers include
-<code>last_modified</code> metadata when the source table provides it.
-Use <code><a href="../reference/pq_last_modified.html">pq_last_modified()</a></code> to audit a repository:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>Parquet files written by WRDS helpers include <code>last_modified</code> metadata when the source table provides it. Use <code><a href="../reference/pq_last_modified.html">pq_last_modified()</a></code> to audit a repository:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"crsp"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"comp"</span><span class="op">)</span></span></code></pre></div>
-<p>For data-management work, this is often more useful than relying only
-on local file modification times, because the metadata records what
-<code>db2pq</code> knows about the source table.</p>
-<p>Metadata will not answer every provenance question, but it gives a
-lightweight audit trail. For more complex projects, combine it with
-project logs, scripts, or a data dictionary that records table sources
-and refresh dates.</p>
-<p>When this article is rendered with access to a local Parquet
-repository, the following chunk shows the embedded source metadata for a
-real WRDS-derived file.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+</div>
+<p>For data-management work, this is often more useful than relying only on local file modification times, because the metadata records what <code>db2pq</code> knows about the source table.</p>
+<p>Metadata will not answer every provenance question, but it gives a lightweight audit trail. For more complex projects, combine it with project logs, scripts, or a data dictionary that records table sources and refresh dates.</p>
+<p>When this article is rendered with access to a local Parquet repository, the following chunk shows the embedded source metadata for a real WRDS-derived file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"DATA_DIR"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "/Users/igow/Dropbox/pq_data"</span></span>
 <span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"dsi"</span>, schema <span class="op">=</span> <span class="st">"crsp"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Stock - Market Indexes Daily NYSE/AMEX/NASDAQ/ARCA (Updated 2025-02-08)"</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="archive-before-replacing">Archive Before Replacing<a class="anchor" aria-label="anchor" href="#archive-before-replacing"></a>
+</section><section class="level2"><h2 id="archive-before-replacing">Archive Before Replacing<a class="anchor" aria-label="anchor" href="#archive-before-replacing"></a>
 </h2>
-<p>For tables where changes matter, use <code>archive = TRUE</code> so
-an existing file is moved aside before it is replaced:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>For tables where changes matter, use <code>archive = TRUE</code> so an existing file is moved aside before it is replaced:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
 <p>Archives are stored under:</p>
 <pre class="text"><code>&lt;DATA_DIR&gt;/&lt;schema&gt;/archive/</code></pre>
-<p>This gives you a simple local history without turning the data
-repository into a Git repository.</p>
-<p>Archiving is most useful for relatively small reference tables or for
-cases where source revisions may affect published results. For very
-large tables, keeping every historical copy may be too expensive; in
-those cases, record the refresh date and source metadata instead.</p>
-<p>To make the archive mechanics concrete without modifying the main
-local data repository, this article copies <code>comp.company</code>
-into a temporary documentation repository and archives/restores that
-copy.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<p>This gives you a simple local history without turning the data repository into a Git repository.</p>
+<p>Archiving is most useful for relatively small reference tables or for cases where source revisions may affect published results. For very large tables, keeping every historical copy may be too expensive; in those cases, record the refresh date and source metadata instead.</p>
+<p>To make the archive mechanics concrete without modifying the main local data repository, this article copies <code>comp.company</code> into a temporary documentation repository and archives/restores that copy.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"company"</span>, schema <span class="op">=</span> <span class="st">"comp"</span>, data_dir <span class="op">=</span> <span class="va">doc_data_dir</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] ""</span></span></code></pre></div>
-<p>Archiving moves the active file into the schema’s
-<code>archive</code> directory.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+</div>
+<p>Archiving moves the active file into the schema’s <code>archive</code> directory.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">archived_company</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pq_archive.html">pq_archive</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span>, data_dir <span class="op">=</span> <span class="va">doc_data_dir</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">archived_company</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "company_unknown_modified.parquet"</span></span>
@@ -235,49 +185,35 @@ copy.</p>
 <span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"company"</span>, schema <span class="op">=</span> <span class="st">"comp"</span>,</span>
 <span>                 data_dir <span class="op">=</span> <span class="va">doc_data_dir</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">last_mod</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 2</span></span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 2</span></span>
 <span><span class="co">#&gt;   file_name                last_mod</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> company_unknown_modified <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
+<span><span class="co">#&gt;   &lt;chr&gt;                    &lt;dttm&gt;  </span></span>
+<span><span class="co">#&gt; 1 company_unknown_modified NA</span></span></code></pre></div>
+</div>
 <p>Restoring the archived file makes it the active copy again.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_restore.html">pq_restore</a></span><span class="op">(</span><span class="fu">tools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/tools/fileutils.html" class="external-link">file_path_sans_ext</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">archived_company</span><span class="op">)</span><span class="op">)</span>, <span class="st">"comp"</span>,</span>
 <span>           data_dir <span class="op">=</span> <span class="va">doc_data_dir</span>, archive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"company"</span>, schema <span class="op">=</span> <span class="st">"comp"</span>, data_dir <span class="op">=</span> <span class="va">doc_data_dir</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] ""</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="keep-large-data-out-of-git">Keep Large Data Out of Git<a class="anchor" aria-label="anchor" href="#keep-large-data-out-of-git"></a>
+</section><section class="level2"><h2 id="keep-large-data-out-of-git">Keep Large Data Out of Git<a class="anchor" aria-label="anchor" href="#keep-large-data-out-of-git"></a>
 </h2>
-<p>Code, documentation, and small test fixtures belong in Git. Full WRDS
-exports generally do not. If a package or project needs example data,
-use a small, non-sensitive file and place it deliberately in
-<code>inst/extdata</code> or another documented location.</p>
-<p>For package documentation, build examples so they can run without
-private WRDS credentials. Longer examples can be shown with
-<code>eval = FALSE</code>, while the local rendered website can still
-refer to small local Parquet fixtures when those are safe to
-publish.</p>
-</div>
-<div class="section level2">
-<h2 id="plan-for-collaboration">Plan for Collaboration<a class="anchor" aria-label="anchor" href="#plan-for-collaboration"></a>
+<p>Code, documentation, and small test fixtures belong in Git. Full WRDS exports generally do not. If a package or project needs example data, use a small, non-sensitive file and place it deliberately in <code>inst/extdata</code> or another documented location.</p>
+<p>For package documentation, build examples so they can run without private WRDS credentials. Longer examples can be shown with <code>eval = FALSE</code>, while the local rendered website can still refer to small local Parquet fixtures when those are safe to publish.</p>
+</section><section class="level2"><h2 id="plan-for-collaboration">Plan for Collaboration<a class="anchor" aria-label="anchor" href="#plan-for-collaboration"></a>
 </h2>
-<p>Shared data workflows should minimize assumptions about one person’s
-machine. Use environment variables, relative project paths, and
-documented setup steps instead of absolute paths such as
-<code>/Users/name/...</code>.</p>
-<p>For WRDS credentials, prefer setup that each user can reproduce
-locally:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p>Shared data workflows should minimize assumptions about one person’s machine. Use environment variables, relative project paths, and documented setup steps instead of absolute paths such as <code>/Users/name/...</code>.</p>
+<p>For WRDS credentials, prefer setup that each user can reproduce locally:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>WRDS_ID <span class="op">=</span> <span class="st">"your_wrds_id"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_check_credentials.html">wrds_check_credentials</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Do not store credentials in project scripts. The package helpers are
-designed to work with environment variables, <code>.pgpass</code>, and
-the credential mechanisms used by the <code>wrds</code> package.</p>
 </div>
-<div class="section level2">
-<h2 id="suggested-project-pattern">Suggested Project Pattern<a class="anchor" aria-label="anchor" href="#suggested-project-pattern"></a>
+<p>Do not store credentials in project scripts. The package helpers are designed to work with environment variables, <code>.pgpass</code>, and the credential mechanisms used by the <code>wrds</code> package.</p>
+</section><section class="level2"><h2 id="suggested-project-pattern">Suggested Project Pattern<a class="anchor" aria-label="anchor" href="#suggested-project-pattern"></a>
 </h2>
 <p>A compact project structure might look like this:</p>
 <pre class="text"><code><span><span class="va">analysis</span><span class="op">-</span><span class="va">project</span><span class="op">/</span></span>
@@ -288,21 +224,13 @@ the credential mechanisms used by the <code>wrds</code> package.</p>
 <span>    <span class="va">derived</span><span class="op">/</span></span>
 <span>  <span class="va">reports</span><span class="op">/</span></span>
 <span>  <span class="va">renv.lock</span></span></code></pre>
-<p>The refresh script owns calls to <code>db2pq</code>. Analysis scripts
-read Parquet files from <code>DATA_DIR</code> and write project-specific
-outputs to <code>data/derived</code>.</p>
-</div>
-<div class="section level2">
-<h2 id="live-examples-with-local-parquet-files">Live Examples with Local Parquet Files<a class="anchor" aria-label="anchor" href="#live-examples-with-local-parquet-files"></a>
+<p>The refresh script owns calls to <code>db2pq</code>. Analysis scripts read Parquet files from <code>DATA_DIR</code> and write project-specific outputs to <code>data/derived</code>.</p>
+</section><section class="level2"><h2 id="live-examples-with-local-parquet-files">Live Examples with Local Parquet Files<a class="anchor" aria-label="anchor" href="#live-examples-with-local-parquet-files"></a>
 </h2>
-<p>The examples in this section are designed for the locally rendered
-documentation site. They run when <code>DATA_DIR</code> points to a
-Parquet repository that contains the relevant WRDS-derived files. If
-those files are not present, the chunks are skipped.</p>
-<p>For example, if your repository contains <code>crsp.dsf</code> and
-<code>crsp.stocknames</code>, you can query the files directly with
-DuckDB without importing the full data into R.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p>The examples in this section are designed for the locally rendered documentation site. They run when <code>DATA_DIR</code> points to a Parquet repository that contains the relevant WRDS-derived files. If those files are not present, the chunks are skipped.</p>
+<p>For example, if your repository contains <code>crsp.dsf</code> and <code>crsp.stocknames</code>, you can query the files directly with DuckDB without importing the full data into R.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dbi.r-dbi.org" class="external-link">DBI</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -335,41 +263,44 @@ DuckDB without importing the full data into R.</p>
 <span></span>
 <span><span class="va">dsf</span> <span class="op">&lt;-</span> <span class="fu">parquet_tbl</span><span class="op">(</span><span class="va">db</span>, <span class="st">"crsp"</span>, <span class="st">"dsf"</span><span class="op">)</span></span>
 <span><span class="va">stocknames</span> <span class="op">&lt;-</span> <span class="fu">parquet_tbl</span><span class="op">(</span><span class="va">db</span>, <span class="st">"crsp"</span>, <span class="st">"stocknames"</span><span class="op">)</span></span></code></pre></div>
-<p>A first check is simply to count the rows in the daily stock
-file.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+</div>
+<p>A first check is simply to count the rows in the daily stock file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dsf</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 1</span></span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 1</span></span>
 <span><span class="co">#&gt;           n</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 107<span style="text-decoration: underline;">663</span>470</span></span></code></pre></div>
-<p>Because DuckDB can query Parquet files in place, summaries can be
-computed without first reading every column into memory.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt;       &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 107663470</span></span></code></pre></div>
+</div>
+<p>Because DuckDB can query Parquet files in place, summaries can be computed without first reading every column into memory.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dsf</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strptime.html" class="external-link">strftime</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">"%Y"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 100 × 2</span></span></span>
+<span><span class="co">#&gt; # A tibble: 100 × 2</span></span>
 <span><span class="co">#&gt;     year       n</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>  <span style="text-decoration: underline;">2</span>024 2<span style="text-decoration: underline;">400</span>962</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>  <span style="text-decoration: underline;">2</span>023 2<span style="text-decoration: underline;">353</span>845</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>  <span style="text-decoration: underline;">2</span>022 2<span style="text-decoration: underline;">390</span>163</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>  <span style="text-decoration: underline;">2</span>021 2<span style="text-decoration: underline;">187</span>548</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>  <span style="text-decoration: underline;">2</span>020 1<span style="text-decoration: underline;">948</span>995</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>  <span style="text-decoration: underline;">2</span>019 1<span style="text-decoration: underline;">912</span>085</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>  <span style="text-decoration: underline;">2</span>018 1<span style="text-decoration: underline;">869</span>604</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>  <span style="text-decoration: underline;">2</span>017 1<span style="text-decoration: underline;">827</span>893</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>  <span style="text-decoration: underline;">2</span>016 1<span style="text-decoration: underline;">828</span>555</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>  <span style="text-decoration: underline;">2</span>015 1<span style="text-decoration: underline;">820</span>358</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 90 more rows</span></span></span></code></pre></div>
-<p>Filtering to one trading day reads only the rows and columns needed
-for that query.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt;    &lt;int&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1  2024 2400962</span></span>
+<span><span class="co">#&gt;  2  2023 2353845</span></span>
+<span><span class="co">#&gt;  3  2022 2390163</span></span>
+<span><span class="co">#&gt;  4  2021 2187548</span></span>
+<span><span class="co">#&gt;  5  2020 1948995</span></span>
+<span><span class="co">#&gt;  6  2019 1912085</span></span>
+<span><span class="co">#&gt;  7  2018 1869604</span></span>
+<span><span class="co">#&gt;  8  2017 1827893</span></span>
+<span><span class="co">#&gt;  9  2016 1828555</span></span>
+<span><span class="co">#&gt; 10  2015 1820358</span></span>
+<span><span class="co">#&gt; # ℹ 90 more rows</span></span></code></pre></div>
+</div>
+<p>Filtering to one trading day reads only the rows and columns needed for that query.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dsf_subset</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">dsf</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"1986-01-07"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -377,19 +308,19 @@ for that query.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dsf_subset</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 5</span></span>
 <span><span class="co">#&gt;   permno date            ret    prc   vol</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  <span style="text-decoration: underline;">10</span>000 1986-01-07 <span style="color: #BB0000;">NA</span>       -<span style="color: #BB0000;">2.56</span>   <span style="text-decoration: underline;">1</span>000</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  <span style="text-decoration: underline;">10</span>015 1986-01-07  0        9.88   <span style="text-decoration: underline;">4</span>400</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  <span style="text-decoration: underline;">10</span>031 1986-01-07  0       -<span style="color: #BB0000;">4.75</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>  <span style="text-decoration: underline;">10</span>057 1986-01-07  0.026<span style="text-decoration: underline;">5</span>  14.5   <span style="text-decoration: underline;">28</span>900</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  <span style="text-decoration: underline;">10</span>065 1986-01-07  0.006<span style="text-decoration: underline;">41</span> 19.6   <span style="text-decoration: underline;">11</span>300</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>  <span style="text-decoration: underline;">10</span>066 1986-01-07  0.064<span style="text-decoration: underline;">5</span>  -<span style="color: #BB0000;">0.516</span> <span style="text-decoration: underline;">22</span>500</span></span></code></pre></div>
-<p>The same files can be used for a small analysis. Here we identify
-Apple’s CRSP <code>permno</code> from <code>stocknames</code>, then
-compute a cumulative return series from <code>dsf</code>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt;    &lt;int&gt; &lt;date&gt;        &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1  10000 1986-01-07 NA       -2.56   1000</span></span>
+<span><span class="co">#&gt; 2  10015 1986-01-07  0        9.88   4400</span></span>
+<span><span class="co">#&gt; 3  10031 1986-01-07  0       -4.75      0</span></span>
+<span><span class="co">#&gt; 4  10057 1986-01-07  0.0265  14.5   28900</span></span>
+<span><span class="co">#&gt; 5  10065 1986-01-07  0.00641 19.6   11300</span></span>
+<span><span class="co">#&gt; 6  10066 1986-01-07  0.0645  -0.516 22500</span></span></code></pre></div>
+</div>
+<p>The same files can be used for a small analysis. Here we identify Apple’s CRSP <code>permno</code> from <code>stocknames</code>, then compute a cumulative return series from <code>dsf</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">apple_permno</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">stocknames</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^APPLE COM"</span>, <span class="va">comnam</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -409,21 +340,106 @@ compute a cumulative return series from <code>dsf</code>.</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">apple_returns</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">cumret</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Cumulative return"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="data-management_files/figure-html/live-crsp-apple-1.png" class="r-plt" alt="" width="672"></p>
-<p>These examples use a local Parquet repository as the analysis
-substrate. The refresh step that creates the files is still
-separate:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="cell-output-display">
+<div>
+<figure><p><img src="data-management_files/figure-html/live-crsp-apple-1.png" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These examples use a local Parquet repository as the analysis substrate. The refresh step that creates the files is still separate:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"dsf"</span>, <span class="st">"crsp"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"stocknames"</span>, <span class="st">"crsp"</span><span class="op">)</span></span></code></pre></div>
-<p>That separation is the main point. <code>db2pq</code> handles the
-database-to-Parquet refresh; analysis code can then operate against
-local, typed, columnar files.</p>
 </div>
-  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+<p>That separation is the main point. <code>db2pq</code> handles the database-to-Parquet refresh; analysis code can then operate against local, typed, columnar files.</p>
+</section><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config);
+    }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
-
 
 
     <footer><div class="pkgdown-footer-left">

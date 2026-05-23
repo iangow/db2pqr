@@ -86,9 +86,9 @@ wrds_update_pq("dsi", "crsp", force = TRUE)
 
     Forcing update based on user request.
 
-    Beginning file download at 2026-05-22 19:23:44 UTC.
+    Beginning file download at 2026-05-23 15:07:04 UTC.
 
-    Completed file download at 2026-05-22 19:23:44 UTC.
+    Completed file download at 2026-05-23 15:07:04 UTC.
 
 ### Using SAS metadata for updates
 
@@ -130,18 +130,34 @@ wrds_schema_to_pq("ff", views = TRUE)
 
     No comment found for ff.factors_china.
     ff.factors_china already up to date.
-    ff.factors_daily already up to date.
-    ff.factors_monthly already up to date.
-    ff.fivefactors_daily already up to date.
+    Updated ff.factors_daily is available.
+    Beginning file download at 2026-05-23 15:07:12 UTC.
+    Completed file download at 2026-05-23 15:07:12 UTC.
+    Updated ff.factors_monthly is available.
+    Beginning file download at 2026-05-23 15:07:13 UTC.
+    Completed file download at 2026-05-23 15:07:13 UTC.
+    Updated ff.fivefactors_daily is available.
+    Beginning file download at 2026-05-23 15:07:14 UTC.
+    Completed file download at 2026-05-23 15:07:14 UTC.
     No comment found for ff.fivefactors_monthly.
     ff.fivefactors_monthly already up to date.
-    ff.industry12 already up to date.
-    ff.industry48 already up to date.
+    Updated ff.industry12 is available.
+    Beginning file download at 2026-05-23 15:07:15 UTC.
+    Completed file download at 2026-05-23 15:07:16 UTC.
+    Updated ff.industry48 is available.
+    Beginning file download at 2026-05-23 15:07:16 UTC.
+    Completed file download at 2026-05-23 15:07:17 UTC.
     ff.liq_ps already up to date.
     ff.liq_sadka already up to date.
-    ff.portfolios already up to date.
-    ff.portfolios25 already up to date.
-    ff.portfolios_d already up to date.
+    Updated ff.portfolios is available.
+    Beginning file download at 2026-05-23 15:07:19 UTC.
+    Completed file download at 2026-05-23 15:07:19 UTC.
+    Updated ff.portfolios25 is available.
+    Beginning file download at 2026-05-23 15:07:20 UTC.
+    Completed file download at 2026-05-23 15:07:20 UTC.
+    Updated ff.portfolios_d is available.
+    Beginning file download at 2026-05-23 15:07:21 UTC.
+    Completed file download at 2026-05-23 15:07:21 UTC.
 
 ### Export a custom WRDS SQL query
 

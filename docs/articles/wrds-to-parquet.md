@@ -93,8 +93,8 @@ company_file <- wrds_update_pq(
   wrds_id = wrds_id
 )
 #> Updated comp.company is available.
-#> Beginning file download at 2026-05-23 15:32:18 UTC.
-#> Completed file download at 2026-05-23 15:32:19 UTC.
+#> Beginning file download at 2026-05-23 17:05:00 UTC.
+#> Completed file download at 2026-05-23 17:05:01 UTC.
 file.path("<temporary data repository>", "comp", basename(company_file))
 #> [1] "<temporary data repository>/comp/company.parquet"
 ```
@@ -301,8 +301,8 @@ renamed_company_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-23 15:32:21 UTC.
-#> Completed file download at 2026-05-23 15:32:21 UTC.
+#> Beginning file download at 2026-05-23 17:05:03 UTC.
+#> Completed file download at 2026-05-23 17:05:04 UTC.
 
 dplyr::select(
   arrow::read_parquet(renamed_company_file),
@@ -384,8 +384,8 @@ funda_sample_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-23 15:32:22 UTC.
-#> Completed file download at 2026-05-23 15:32:23 UTC.
+#> Beginning file download at 2026-05-23 17:05:04 UTC.
+#> Completed file download at 2026-05-23 17:05:05 UTC.
 
 dplyr::glimpse(arrow::read_parquet(funda_sample_file))
 #> Rows: 1,000

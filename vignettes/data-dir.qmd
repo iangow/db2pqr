@@ -1,10 +1,5 @@
 ---
 title: "Choosing a DATA_DIR"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Choosing a DATA_DIR}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}

@@ -1,10 +1,5 @@
 ---
 title: "WRDS to Parquet"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{WRDS to Parquet}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}

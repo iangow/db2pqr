@@ -93,11 +93,13 @@ wrds_schema_to_pq("ff", views = TRUE)
 
 ### Export a custom WRDS SQL query
 
-```r
-wrds_sql_to_pq(
-  "SELECT permno, date, ret FROM crsp.dsf WHERE date >= '2024-01-01'",
+```{r}
+wrds_sql_to_pq("
+  SELECT permno, date, ret 
+  FROM crsp.dsf 
+  WHERE date >= '2024-01-01'",
   table_name = "dsf_recent",
-  schema = "crsp"
+  schema = "my_project"
 )
 ```
 

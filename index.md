@@ -86,9 +86,9 @@ wrds_update_pq("dsi", "crsp", force = TRUE)
 
     Forcing update based on user request.
 
-    Beginning file download at 2026-05-23 15:07:04 UTC.
+    Beginning file download at 2026-05-23 16:09:10 UTC.
 
-    Completed file download at 2026-05-23 15:07:04 UTC.
+    Completed file download at 2026-05-23 16:09:11 UTC.
 
 ### Using SAS metadata for updates
 
@@ -129,43 +129,31 @@ wrds_schema_to_pq("ff", views = TRUE)
     Processing 12 table(s) in schema 'ff'.
 
     No comment found for ff.factors_china.
-    ff.factors_china already up to date.
-    Updated ff.factors_daily is available.
-    Beginning file download at 2026-05-23 15:07:12 UTC.
-    Completed file download at 2026-05-23 15:07:12 UTC.
-    Updated ff.factors_monthly is available.
-    Beginning file download at 2026-05-23 15:07:13 UTC.
-    Completed file download at 2026-05-23 15:07:13 UTC.
-    Updated ff.fivefactors_daily is available.
-    Beginning file download at 2026-05-23 15:07:14 UTC.
-    Completed file download at 2026-05-23 15:07:14 UTC.
+    Use `force = TRUE` to update without relying on metadata, or
+    `use_sas = TRUE` to use SAS metadata.
+    ff.factors_daily already up to date.
+    ff.factors_monthly already up to date.
+    ff.fivefactors_daily already up to date.
     No comment found for ff.fivefactors_monthly.
-    ff.fivefactors_monthly already up to date.
-    Updated ff.industry12 is available.
-    Beginning file download at 2026-05-23 15:07:15 UTC.
-    Completed file download at 2026-05-23 15:07:16 UTC.
-    Updated ff.industry48 is available.
-    Beginning file download at 2026-05-23 15:07:16 UTC.
-    Completed file download at 2026-05-23 15:07:17 UTC.
+    Use `force = TRUE` to update without relying on metadata, or
+    `use_sas = TRUE` to use SAS metadata.
+    ff.industry12 already up to date.
+    ff.industry48 already up to date.
     ff.liq_ps already up to date.
     ff.liq_sadka already up to date.
-    Updated ff.portfolios is available.
-    Beginning file download at 2026-05-23 15:07:19 UTC.
-    Completed file download at 2026-05-23 15:07:19 UTC.
-    Updated ff.portfolios25 is available.
-    Beginning file download at 2026-05-23 15:07:20 UTC.
-    Completed file download at 2026-05-23 15:07:20 UTC.
-    Updated ff.portfolios_d is available.
-    Beginning file download at 2026-05-23 15:07:21 UTC.
-    Completed file download at 2026-05-23 15:07:21 UTC.
+    ff.portfolios already up to date.
+    ff.portfolios25 already up to date.
+    ff.portfolios_d already up to date.
 
 ### Export a custom WRDS SQL query
 
 ``` r
-wrds_sql_to_pq(
-  "SELECT permno, date, ret FROM crsp.dsf WHERE date >= '2024-01-01'",
+wrds_sql_to_pq("
+  SELECT permno, date, ret 
+  FROM crsp.dsf 
+  WHERE date >= '2024-01-01'",
   table_name = "dsf_recent",
-  schema = "crsp"
+  schema = "my_project"
 )
 ```
 
@@ -187,8 +175,8 @@ pq_last_modified(schema = "crsp")
 ```
 
     # A tibble: 33 × 5
-       file_name        table            schema last_mod            last_mod_str
-       <chr>            <chr>            <chr>  <dttm>              <chr>
+       file_name        table            schema last_mod            last_mod_str    
+       <chr>            <chr>            <chr>  <dttm>              <chr>           
      1 ccmxpf_linktable ccmxpf_linktable crsp   2026-02-06 07:00:00 CRSP/COMPUSTAT …
      2 ccmxpf_lnkhist   ccmxpf_lnkhist   crsp   2026-02-06 07:00:00 Native Link usa…
      3 ccmxpf_lnkused   ccmxpf_lnkused   crsp   2026-02-06 07:00:00 LINKUSED struct…

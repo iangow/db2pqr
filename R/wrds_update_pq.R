@@ -157,9 +157,9 @@ wrds_update_pq <- function(
     if (is.null(wrds_date)) {
       if (file.exists(out_file)) {
         message(
-          "No comment found for ", tbl_label, ". ",
-          "Use `force = TRUE` to update without relying on metadata, or ",
-          "`use_sas = TRUE` to use SAS metadata."
+          "No comment found for ", tbl_label, ".\n",
+          "Use `force = TRUE` to update without relying on metadata,\n",
+          "or `use_sas = TRUE` to use SAS metadata."
         )
         return(invisible(NULL))
       }

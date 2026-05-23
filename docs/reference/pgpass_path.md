@@ -1,6 +1,6 @@
-# Default PostgreSQL password file path
+# PostgreSQL password file path
 
-Default PostgreSQL password file path
+PostgreSQL password file path
 
 ## Usage
 
@@ -10,4 +10,5 @@ pgpass_path()
 
 ## Value
 
-The platform-specific default `.pgpass` path.
+The `PGPASSFILE` path when set, otherwise the platform-specific default
+`.pgpass` path.

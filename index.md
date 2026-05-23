@@ -86,9 +86,9 @@ wrds_update_pq("dsi", "crsp", force = TRUE)
 
     Forcing update based on user request.
 
-    Beginning file download at 2026-05-22 18:05:36 UTC.
+    Beginning file download at 2026-05-22 19:23:44 UTC.
 
-    Completed file download at 2026-05-22 18:05:36 UTC.
+    Completed file download at 2026-05-22 19:23:44 UTC.
 
 ### Using SAS metadata for updates
 

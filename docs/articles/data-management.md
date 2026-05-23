@@ -194,7 +194,7 @@ documentation repository and archives/restores that copy.
 ``` r
 
 pq_last_modified(table_name = "company", schema = "comp", data_dir = doc_data_dir)
-#> [1] "Company (Updated 2026-05-22)"
+#> [1] ""
 ```
 
 Archiving moves the active file into the schema’s `archive` directory.
@@ -203,15 +203,15 @@ Archiving moves the active file into the schema’s `archive` directory.
 
 archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
 basename(archived_company)
-#> [1] "company_20260522T060000Z.parquet"
+#> [1] "company_unknown_modified.parquet"
 
 pq_last_modified(table_name = "company", schema = "comp",
                  data_dir = doc_data_dir, archive = TRUE) |>
   dplyr::select(file_name, last_mod)
 #> # A tibble: 1 × 2
-#>   file_name                last_mod           
-#>   <chr>                    <dttm>             
-#> 1 company_20260522T060000Z 2026-05-22 06:00:00
+#>   file_name                last_mod
+#>   <chr>                    <dttm>
+#> 1 company_unknown_modified NA
 ```
 
 Restoring the archived file makes it the active copy again.
@@ -222,7 +222,7 @@ pq_restore(tools::file_path_sans_ext(basename(archived_company)), "comp",
            data_dir = doc_data_dir, archive = FALSE)
 
 pq_last_modified(table_name = "company", schema = "comp", data_dir = doc_data_dir)
-#> [1] "Company (Updated 2026-05-22)"
+#> [1] ""
 ```
 
 ## Keep Large Data Out of Git
@@ -290,19 +290,19 @@ importing the full data into R.
 
 library(DBI)
 library(dplyr)
-#> 
+#>
 #> Attaching package: 'dplyr'
 #> The following objects are masked from 'package:stats':
-#> 
+#>
 #>     filter, lag
 #> The following objects are masked from 'package:base':
-#> 
+#>
 #>     intersect, setdiff, setequal, union
 library(dbplyr)
-#> 
+#>
 #> Attaching package: 'dbplyr'
 #> The following objects are masked from 'package:dplyr':
-#> 
+#>
 #>     ident, sql
 library(ggplot2)
 

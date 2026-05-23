@@ -44,8 +44,11 @@
 - [`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md)
   : Check WRDS PostgreSQL credentials
 
+- [`db2pq_data_dir()`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md)
+  : Resolve the Parquet data repository directory
+
 - [`pgpass_path()`](https://iangow.github.io/db2pqr/reference/pgpass_path.md)
-  : Default PostgreSQL password file path
+  : PostgreSQL password file path
 
 - [`pgpass_find()`](https://iangow.github.io/db2pqr/reference/pgpass_find.md)
   :

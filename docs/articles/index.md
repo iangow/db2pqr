@@ -3,6 +3,8 @@
 ### Workflows
 
 - [Authentication](https://iangow.github.io/db2pqr/articles/authentication.md):
+- [Choosing a
+  DATA_DIR](https://iangow.github.io/db2pqr/articles/data-dir.md):
 - [WRDS SSH Setup for SAS
   Metadata](https://iangow.github.io/db2pqr/articles/wrds-ssh.md):
 - [WRDS to

@@ -85,10 +85,11 @@ wrds_conninfo <- function(wrds_id = NULL, format = c("uri", "dbi"),
 #' value is a data frame so it can be printed or inspected in setup scripts.
 #'
 #' @param wrds_id Optional WRDS username override.
-#' @param password Optional password. If omitted, PostgreSQL may use `.pgpass`,
-#'   `PGPASSWORD`, or another libpq-supported mechanism. If no matching
-#'   `.pgpass` entry exists and `prompt = TRUE`, an interactive password prompt
-#'   is used.
+#' @param password Optional password. If omitted, a matching `.pgpass` entry is
+#'   preferred. When `.pgpass` has no matching entry, an existing
+#'   `WRDS_PASSWORD` environment variable is used before an interactive prompt.
+#'   PostgreSQL may also use `PGPASSWORD` or another libpq-supported mechanism
+#'   when no password is passed to the connection.
 #' @param prompt If `TRUE`, prompt interactively for a WRDS PostgreSQL password
 #'   when no password was supplied and no matching `.pgpass` entry exists.
 #' @param save If `TRUE`, save a supplied or prompted password to `.pgpass`
@@ -338,6 +339,9 @@ pgpass_has_entry <- function(host, port = 5432L, database, user,
     info$host, info$port, info$dbname, info$user, passfile = passfile
   )
   connection_password <- password
+  if (is.null(connection_password) && !has_pgpass) {
+    connection_password <- .wrds_env_password()
+  }
   if (is.null(connection_password) && !has_pgpass && isTRUE(prompt)) {
     connection_password <- .wrds_prompt_password(info$user)
   }
@@ -358,6 +362,15 @@ pgpass_has_entry <- function(host, port = 5432L, database, user,
   }
 
   con
+}
+
+.wrds_env_password <- function() {
+  password <- Sys.getenv("WRDS_PASSWORD", unset = "")
+  if (nzchar(password)) {
+    return(password)
+  }
+
+  NULL
 }
 
 .wrds_direct_username <- function(wrds_id = NULL) {

@@ -93,8 +93,8 @@ company_file <- wrds_update_pq(
   wrds_id = wrds_id
 )
 #> Updated comp.company is available.
-#> Beginning file download at 2026-05-22 14:17:19 UTC.
-#> Completed file download at 2026-05-22 14:17:21 UTC.
+#> Beginning file download at 2026-05-22 19:28:53 UTC.
+#> Completed file download at 2026-05-22 19:28:54 UTC.
 file.path("<temporary data repository>", "comp", basename(company_file))
 #> [1] "<temporary data repository>/comp/company.parquet"
 ```
@@ -154,6 +154,25 @@ You can list tables in a WRDS schema from R:
 
 wrds_get_tables("crsp")
 wrds_get_tables("comp", views = TRUE)
+```
+
+Use the PostgreSQL schema name exposed by WRDS, which can differ from a
+short product name or SAS library name. For example, the Fama-French
+PostgreSQL base-table schema is `ff_all`, so a schema download starts
+with:
+
+``` r
+
+wrds_schema_to_pq("ff_all")
+```
+
+Schemas containing views need `views = TRUE` during discovery. For
+example, relations exposed through the Fama-French `ff` schema can be
+processed with:
+
+``` r
+
+wrds_schema_to_pq("ff", views = TRUE)
 ```
 
 During a local site render, this page can show the first few tables
@@ -282,8 +301,8 @@ renamed_company_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-22 14:17:24 UTC.
-#> Completed file download at 2026-05-22 14:17:24 UTC.
+#> Beginning file download at 2026-05-22 19:28:56 UTC.
+#> Completed file download at 2026-05-22 19:28:57 UTC.
 
 dplyr::select(
   arrow::read_parquet(renamed_company_file),
@@ -365,8 +384,8 @@ funda_sample_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-22 14:17:25 UTC.
-#> Completed file download at 2026-05-22 14:17:25 UTC.
+#> Beginning file download at 2026-05-22 19:28:58 UTC.
+#> Completed file download at 2026-05-22 19:28:58 UTC.
 
 dplyr::glimpse(arrow::read_parquet(funda_sample_file))
 #> Rows: 1,000

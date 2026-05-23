@@ -25,6 +25,7 @@ are current against source table metadata."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/data-dir.html">Choosing a DATA_DIR</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
@@ -58,7 +59,8 @@ are current against source table metadata.</p>
     <h2 id="configuration">Configuration<a class="anchor" aria-label="anchor" href="#configuration"></a></h2>
 
 
-<p><code>DATA_DIR</code> controls the default root directory for Parquet output. WRDS
+<p><code>DATA_DIR</code> controls the default root directory for Parquet output;
+<code><a href="db2pq_data_dir.html">db2pq_data_dir</a></code> can guide interactive first-time setup. WRDS
 helpers resolve usernames from explicit arguments, <code>WRDS_ID</code>, <code>WRDS_USER</code>,
 and then the credential store used by the <code>wrds</code> package.</p>
     </div>

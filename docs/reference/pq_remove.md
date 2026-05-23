@@ -10,7 +10,7 @@ archive subdirectory instead.
 pq_remove(
   table_name = NULL,
   schema = NULL,
-  data_dir = Sys.getenv("DATA_DIR", "."),
+  data_dir = db2pq_data_dir(),
   file_name = NULL,
   archive = FALSE,
   archive_dir = "archive"
@@ -29,8 +29,8 @@ pq_remove(
 
 - data_dir:
 
-  Root directory of the Parquet data repository. Defaults to the
-  `DATA_DIR` environment variable, or `"."` if unset.
+  Root directory of the Parquet data repository. Defaults to
+  [`db2pq_data_dir`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md).
 
 - file_name:
 

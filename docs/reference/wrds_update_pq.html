@@ -29,6 +29,7 @@ repeatedly as part of a scheduled data refresh."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/data-dir.html">Choosing a DATA_DIR</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
@@ -64,7 +65,7 @@ repeatedly as part of a scheduled data refresh.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wrds_update_pq</span><span class="op">(</span></span>
 <span>  <span class="va">table_name</span>,</span>
 <span>  <span class="va">schema</span>,</span>
-<span>  data_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"DATA_DIR"</span>, <span class="st">"."</span><span class="op">)</span>,</span>
+<span>  data_dir <span class="op">=</span> <span class="fu"><a href="db2pq_data_dir.html">db2pq_data_dir</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  out_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  force <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  where <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -101,8 +102,8 @@ repeatedly as part of a scheduled data refresh.</p>
 
 <dt id="arg-data-dir">data_dir<a class="anchor" aria-label="anchor" href="#arg-data-dir"></a></dt>
 <dd><p>Root directory of the local Parquet data repository. Defaults
-to the <code>DATA_DIR</code> environment variable, or <code>"."</code> if unset. The
-output file is written to <code>&lt;data_dir&gt;/&lt;schema&gt;/&lt;table_name&gt;.parquet</code>.</p></dd>
+to <code><a href="db2pq_data_dir.html">db2pq_data_dir</a></code>. The output file is written to
+<code>&lt;data_dir&gt;/&lt;schema&gt;/&lt;table_name&gt;.parquet</code>.</p></dd>
 
 
 <dt id="arg-out-file">out_file<a class="anchor" aria-label="anchor" href="#arg-out-file"></a></dt>

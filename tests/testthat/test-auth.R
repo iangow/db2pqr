@@ -266,6 +266,61 @@ test_that("direct WRDS connections save prompted passwords after success", {
   ))
 })
 
+test_that("direct WRDS connections consume WRDS_PASSWORD and save pgpass", {
+  old_password <- Sys.getenv("WRDS_PASSWORD", unset = NA_character_)
+  on.exit({
+    if (is.na(old_password)) {
+      Sys.unsetenv("WRDS_PASSWORD")
+    } else {
+      Sys.setenv(WRDS_PASSWORD = old_password)
+    }
+  }, add = TRUE)
+  Sys.setenv(WRDS_PASSWORD = "env-password")
+
+  passfile <- tempfile()
+  unlink(passfile)
+  local_con <- structure(list(), class = "TestConnection")
+
+  restore_prompt <- local_rebind(
+    ".wrds_prompt_password",
+    function(...) stop("Unexpected password prompt"),
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_prompt(), add = TRUE)
+
+  restore_db_connect <- local_rebind(
+    "dbConnect",
+    function(drv, ...) {
+      info <- list(...)
+      expect_identical(info$user, "ian")
+      expect_identical(info$password, "env-password")
+      local_con
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_db_connect(), add = TRUE)
+
+  expect_message(
+    con <- db2pq:::.wrds_connect_dbi_user(
+      "ian",
+      prompt = TRUE,
+      passfile = passfile
+    ),
+    "Saved WRDS PostgreSQL credentials"
+  )
+  expect_identical(con, local_con)
+  expect_identical(
+    db2pq::pgpass_find(
+      host = "wrds-pgdata.wharton.upenn.edu",
+      port = 9737,
+      database = "wrds",
+      user = "ian",
+      passfile = passfile
+    )$password,
+    "env-password"
+  )
+})
+
 test_that("wrds_check_credentials reports saved prompted passwords", {
   passfile <- tempfile()
   unlink(passfile)

@@ -11,7 +11,7 @@ already exists at the destination, it is archived first (when
 pq_restore(
   file_basename,
   schema,
-  data_dir = Sys.getenv("DATA_DIR", "."),
+  data_dir = db2pq_data_dir(),
   archive = TRUE,
   archive_dir = "archive"
 )
@@ -30,8 +30,8 @@ pq_restore(
 
 - data_dir:
 
-  Root directory of the Parquet data repository. Defaults to the
-  `DATA_DIR` environment variable, or `"."` if unset.
+  Root directory of the Parquet data repository. Defaults to
+  [`db2pq_data_dir`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md).
 
 - archive:
 

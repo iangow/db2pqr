@@ -15,10 +15,11 @@ wrds_check_credentials(
 \arguments{
 \item{wrds_id}{Optional WRDS username override.}
 
-\item{password}{Optional password. If omitted, PostgreSQL may use \code{.pgpass},
-\code{PGPASSWORD}, or another libpq-supported mechanism. If no matching
-\code{.pgpass} entry exists and \code{prompt = TRUE}, an interactive password prompt
-is used.}
+\item{password}{Optional password. If omitted, a matching \code{.pgpass} entry is
+preferred. When \code{.pgpass} has no matching entry, an existing
+\code{WRDS_PASSWORD} environment variable is used before an interactive prompt.
+PostgreSQL may also use \code{PGPASSWORD} or another libpq-supported mechanism
+when no password is passed to the connection.}
 
 \item{prompt}{If \code{TRUE}, prompt interactively for a WRDS PostgreSQL password
 when no password was supplied and no matching \code{.pgpass} entry exists.}

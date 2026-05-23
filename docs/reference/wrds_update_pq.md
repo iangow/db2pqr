@@ -13,7 +13,7 @@ refresh.
 wrds_update_pq(
   table_name,
   schema,
-  data_dir = Sys.getenv("DATA_DIR", "."),
+  data_dir = db2pq_data_dir(),
   out_file = NULL,
   force = FALSE,
   where = NULL,
@@ -48,9 +48,10 @@ wrds_update_pq(
 
 - data_dir:
 
-  Root directory of the local Parquet data repository. Defaults to the
-  `DATA_DIR` environment variable, or `"."` if unset. The output file is
-  written to `<data_dir>/<schema>/<table_name>.parquet`.
+  Root directory of the local Parquet data repository. Defaults to
+  [`db2pq_data_dir`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md).
+  The output file is written to
+  `<data_dir>/<schema>/<table_name>.parquet`.
 
 - out_file:
 

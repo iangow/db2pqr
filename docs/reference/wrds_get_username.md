@@ -7,7 +7,11 @@ Resolves a WRDS username from, in order, an explicit argument,
 ## Usage
 
 ``` r
-wrds_get_username(wrds_id = NULL, user_key = "wrds_user")
+wrds_get_username(
+  wrds_id = NULL,
+  user_key = "wrds_user",
+  prompt = interactive()
+)
 ```
 
 ## Arguments
@@ -19,6 +23,11 @@ wrds_get_username(wrds_id = NULL, user_key = "wrds_user")
 - user_key:
 
   Keyring key used by the `wrds` package for the WRDS username.
+
+- prompt:
+
+  If `TRUE`, prompt interactively for a WRDS username when no explicit,
+  environment, or keyring username can be resolved.
 
 ## Value
 

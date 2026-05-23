@@ -7,7 +7,7 @@ Export all tables in a PostgreSQL schema to Parquet
 ``` r
 db_schema_to_pq(
   schema,
-  data_dir = Sys.getenv("DATA_DIR", "."),
+  data_dir = db2pq_data_dir(),
   force = FALSE,
   tables = NULL,
   chunk_size = 100000L,

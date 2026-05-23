@@ -23,6 +23,7 @@ wrds_update_pq."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/data-dir.html">Choosing a DATA_DIR</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
@@ -55,7 +56,7 @@ wrds_update_pq."></head><body>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pq_last_modified</span><span class="op">(</span></span>
 <span>  table_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  schema <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  data_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"DATA_DIR"</span>, <span class="st">"."</span><span class="op">)</span>,</span>
+<span>  data_dir <span class="op">=</span> <span class="fu"><a href="db2pq_data_dir.html">db2pq_data_dir</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  archive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  archive_dir <span class="op">=</span> <span class="st">"archive"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -76,7 +77,7 @@ wrds_update_pq."></head><body>
 
 <dt id="arg-data-dir">data_dir<a class="anchor" aria-label="anchor" href="#arg-data-dir"></a></dt>
 <dd><p>Root directory of the Parquet data repository. Defaults to
-the <code>DATA_DIR</code> environment variable, or <code>"."</code> if unset.</p></dd>
+<code><a href="db2pq_data_dir.html">db2pq_data_dir</a></code>.</p></dd>
 
 
 <dt id="arg-archive">archive<a class="anchor" aria-label="anchor" href="#arg-archive"></a></dt>

@@ -9,9 +9,10 @@ for each table.
 ``` r
 wrds_schema_to_pq(
   schema,
-  data_dir = Sys.getenv("DATA_DIR", "."),
+  data_dir = db2pq_data_dir(),
   force = FALSE,
   tables = NULL,
+  views = FALSE,
   chunk_size = 100000L,
   wrds_id = NULL,
   transfer_method = c("dbi", "adbc"),
@@ -37,6 +38,10 @@ wrds_schema_to_pq(
 - tables:
 
   Optional subset of table names to process.
+
+- views:
+
+  If `TRUE`, include views as well as base tables.
 
 - chunk_size:
 

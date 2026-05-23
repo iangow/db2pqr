@@ -36,6 +36,7 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/data-dir.html">Choosing a DATA_DIR</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
@@ -132,7 +133,7 @@ to summarize the active Parquet files in a schema:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> co_filedate co_filedate 2026-04-09 <span style="color: #949494;">06:00:00</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> co_hgic     co_hgic     2026-04-09 <span style="color: #949494;">06:00:00</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> co_ifndq    co_ifndq    2026-04-09 <span style="color: #949494;">06:00:00</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> company     company     2026-05-22 <span style="color: #949494;">06:00:00</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> company     company     <span style="color: #BB0000;">NA</span>                 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> funda       funda       2026-05-21 <span style="color: #949494;">06:00:00</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> funda_fncd  funda_fncd  2026-05-21 <span style="color: #949494;">06:00:00</span></span></span></code></pre></div>
 <p>If you want to inspect archived files instead:</p>
@@ -234,7 +235,7 @@ current <code>comp.company</code> file into its archive directory:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">company_archive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pq_archive.html">pq_archive</a></span><span class="op">(</span>file_name <span class="op">=</span> <span class="va">company_file</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">company_archive</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "company_20260522T060000Z.parquet"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "company_unknown_modified.parquet"</span></span></code></pre></div>
 <p>This is useful when you want to preserve the current active vintage
 before running an experimental refresh or downstream transformation.</p>
 </div>
@@ -257,7 +258,7 @@ suffix. If an active destination file already exists,
 <code>archive = TRUE</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"company"</span>, schema <span class="op">=</span> <span class="st">"comp"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Company (Updated 2026-05-22)"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] ""</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="remove-a-file-explicitly">Remove a File Explicitly<a class="anchor" aria-label="anchor" href="#remove-a-file-explicitly"></a>

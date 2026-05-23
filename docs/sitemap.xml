@@ -6,6 +6,7 @@
 <url><loc>https://iangow.github.io/db2pqr/LICENSE.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/articles/adbc.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/articles/authentication.html</loc></url>
+<url><loc>https://iangow.github.io/db2pqr/articles/data-dir.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/articles/data-management.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/articles/index.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/articles/parquet-utilities-examples.html</loc></url>
@@ -19,6 +20,7 @@
 <url><loc>https://iangow.github.io/db2pqr/reference/arrow_type.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/con_to_adbi.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/db2pq-package.html</loc></url>
+<url><loc>https://iangow.github.io/db2pqr/reference/db2pq_data_dir.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/db_schema_tables.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/db_schema_to_pq.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/db_to_pq.html</loc></url>

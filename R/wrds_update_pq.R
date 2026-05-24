@@ -202,6 +202,7 @@ wrds_update_pq <- function(
     numeric_mode = numeric_mode,
     con         = con,
     metadata    = pq_metadata,
+    use_comment = FALSE,
     col_types   = col_types,
     tz          = tz
   )

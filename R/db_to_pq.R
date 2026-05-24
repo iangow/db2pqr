@@ -29,6 +29,10 @@
 #'   without recreating decimal types. `"raw"` keeps the backend default.
 #' @param con Optional existing DBI connection.
 #' @param metadata Optional named list of Parquet schema metadata.
+#' @param use_comment If `TRUE` (the default), the PostgreSQL table comment is
+#'   fetched and stored as `last_modified` in the Parquet schema metadata. Has
+#'   no effect when the table has no comment. A `last_modified` key already
+#'   present in `metadata` takes precedence.
 #' @param col_types Optional named list of Arrow output type overrides. Names
 #'   refer to output column names after `rename`.
 #' @param tz Time zone used to interpret `TIMESTAMP WITHOUT TIME ZONE` columns.
@@ -56,6 +60,7 @@ db_to_pq <- function(
     numeric_mode = c("decimal", "float64", "text", "raw"),
     con = NULL,
     metadata = NULL,
+    use_comment = TRUE,
     col_types = NULL,
     tz = NULL) {
   transfer_method <- match.arg(transfer_method)
@@ -79,6 +84,21 @@ db_to_pq <- function(
       port     = port
     )
     on.exit(DBI::dbDisconnect(con), add = TRUE)
+  }
+
+  if (use_comment) {
+    pg_comment <- DBI::dbGetQuery(
+      con,
+      "SELECT obj_description(to_regclass($1), 'pg_class') AS comment",
+      params = list(paste0(schema, ".", table_name))
+    )$comment[[1]]
+    if (!is.null(pg_comment) && !is.na(pg_comment)) {
+      if (is.null(metadata)) {
+        metadata <- list(last_modified = pg_comment)
+      } else if (is.null(metadata[["last_modified"]])) {
+        metadata[["last_modified"]] <- pg_comment
+      }
+    }
   }
 
   plan <- .db_to_pq_plan(

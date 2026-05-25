@@ -1,5 +1,6 @@
 ---
-title: "Data Management for Research"
+title: "Creating a Parquet data repository"
+bibliography: references.bib
 ---
 
 ```{r}
@@ -35,363 +36,132 @@ if (live_repo) {
 }
 ```
 
-This article adapts a broader set of data-management ideas for the narrower
-task that `db2pq` is designed to support: building and maintaining a local
-Parquet repository from WRDS or another PostgreSQL database.
+This article outlines some ideas related to the task that `db2pq` is designed to support: 
+building and maintaining a local Parquet repository of data from WRDS and other sources.
 
 The goal is to separate three concerns that often get mixed together in
 research code:
 
 1. Getting data from the source system.
-2. Storing a reusable local copy in an efficient format.
-3. Running analysis code against that local copy.
+2. Storing data locally in an efficient format.
+3. Running analysis code against local data.
 
-`db2pq` focuses on the first two steps. Analysis code can then use packages
-such as `arrow`, `duckdb`, `dplyr`, or `polars` to work with the Parquet files.
+The `db2pq` focuses on the first two steps. 
+Analysis code can then use packages such as `arrow`, `duckdb`, `dplyr`, or `polars` to work with the Parquet files.
 
-## Principles
+##  Some concepts in data management
 
-Good research data management is mostly about making later work boring:
-scripts should be rerunnable, file locations should be predictable, and it
-should be clear which files came from an external source and which files were
-created by project code.
+### Scope
 
-Several principles are useful:
+Many datasets are **project-specific** datasets, meaning that only have use within a single project (e.g., paper).
+Examples of project-specific would include experimental data generated in a particular study.
 
-1. Keep source data immutable where practical.
-2. Make derived data reproducible from code.
-3. Use stable, documented file locations.
-4. Record enough metadata to know when a file was created and what source it
-   represents.
-5. Avoid putting large, private, or licensed data files in Git.
+Other datasets are **general-purpose** datasets, meaning that they contain data that might be relevant to many studies.
+Classic examples in a business-school context would be the [US stock price files](https://iangow.github.io/far_book/identifiers.html#the-crsp-database) offered by the Center for Research in Security Prices, LLC (CRSP) or [financial statement data](https://iangow.github.io/far_book/fin-state.html#financial-statement-data) provided by Compustat, or economic time-series data provided by various statistical offices around the world.
 
-`db2pq` is not a full project-management framework. It supplies a narrow piece
-of infrastructure: a repeatable way to create local Parquet copies of database
-tables and to inspect the metadata attached to those copies.
+Other datasets are **project-level** datasets, meaning that the particular data sets are somehow frozen for a particular project, even though the nature of the data otherwise puts them in the category of general-purpose datasets.
+For example, I might want to fix on a particular version of `comp.g_funda`, Compustat's global dataset for annual financial statements for my project, even though this dataset has relevance beyond a specific project.^[As academic researchers generally get Compustat data through Wharton Research Data Services (WRDS), I refer to this dataset using the nomenclature used by WRDS. Here "global" means "not the United States (or Canada)".]
 
-## Prefer Portable File Formats
+One reason for having project-level arises in the context of reproducibility.
+If I have published a paper, then the replication package for that paper should ideally contain the data used to produce the exact results in the paper.
+For this purpose, if the paper used `comp.g_funda` data, then the ideal replication package would include the precise *project-level* version of that data set used to produce the paper.
+Of course, in reality, one cannot simply post the project-level version of `comp.g_funda` as part of a public replication package.
+Nonetheless, the authors themselves should have a project-level version of the dataset that *they* retain.
+This much aligns with the views of @Welch:2019aa, who suggests that "the author should keep a private copy of the full data set with which the results were obtained."
 
-Research data often outlives the first tool used to analyze it. Parquet is a
-useful storage format because it is columnar, compressed, typed, and readable
-from many systems. A local Parquet repository can be queried from R, Python,
-DuckDB, Arrow, Spark, and other tools without repeatedly connecting to WRDS.
+As far as WRDS data are concerned, the `db2pq` package aims to facilitate managing WRDS data either as general-purpose data or as project-level data.^[WRDS data are not project-specific data sets pretty much by definition.]
+The  `db2pq` package can leverage the environment variable `DATA_DIR` to identify the root directory for the data repository in question.
+By default, new WRDS data will go in the matching schema (i.e., subdirectory) of the directory indicated by `DATA_DIR`.
 
-This is especially useful when a project uses more than one language. A refresh
-script can use `db2pq` to create files, while later analysis can read the same
-files from R or Python.
+So, depending on how you want to manage data for a given project, you may set `DATA_DIR` to a **project**-level directory or to a **user**-level directory.
 
-## Use a Stable Data Directory
 
-Set `DATA_DIR` once per project or machine so that scripts can refer to a
-logical data repository without hard-coding paths throughout the analysis.
 
-```{r, eval = FALSE}
-Sys.setenv(DATA_DIR = "~/Dropbox/pq_data")
+### Storage formats
+
+While there are many storage formats available for data, I think a strong case can be made for Parquet being the default storage format for many users.
+If you use R or Python, I think the case is easy to make.
+Many software packages can read Parquet data and some of them (e.g., the `arrow` package or DuckDB) will absolutely fly with Parquet data.
+
+I believe that recent editions of Stata can read Parquet files, though the way Stata operates means that Stata users are unlikely to see the performance benefits Parquet offers.^[Of course, if a user cared about performance with data manipulation, he probably wouldn't be using Stata to begin with.]
+SAS users might find the case for Parquet less compelling, though there are probably benefits in moving to a storage medium that is more compact, less proprietary, and more likely to be supported in a few years' time.
+
+Of course, an alternative to using Parquet files would be using a database, such as PostgreSQL.
+I think such systems have a lot of merit (and I have used PostgreSQL to store WRDS data since 2011), but I think they are more complicated for most users' needs and their benefits (e.g., shared access to data and rock-solid assurance) are less meaningful for most.
+
+Another alternative is the CSV file, perhaps compressed.
+I think if one were sending data on the next Voyager mission, then CSV might be the chosen format.^[Each of the two Voyager spacecraft, launched by NASA in 1977, carry the Voyager Golden Record, a gold-plated copper phonograph record intended as a message to any intelligent extraterrestrial lifeforms that might encounter the probes.
+If we wanted to give data to such lifeforms, I think it would be (quoted) CSV data and written on paper.]
+Or if you really, really wanted data novices to inspect your data in Excel or Word, then CSV might be the go-to option.
+Or perhaps you want to put your data in a written form in a book for users to type in.
+For any other purpose with serious data needs, I think Parquet dominates.
+
+One issue with CSV is that one is always dealing with type inference (string, integer, timestamp) and I think that type inference is one of those problems you want to solve once for any given dataset.
+For the WRDS data that is the focus of this note, I think CSV is to be avoided.
+
+## Setting `DATA_DIR`
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-Files created by `db2pq` are stored using the layout:
 
-```text
-<DATA_DIR>/<schema>/<table>.parquet
-```
+### First-Time Setup
 
-For example:
+The root of the data repository is set in  `DATA_DIR`, so the same refresh code can work with a repository on
+different machines or in different projects.
+When `DATA_DIR` is missing in an interactive session, you will be asked to select a directory.
+You will then be given three choices for persisting the directory you have chosen:
 
-```text
-~/Dropbox/pq_data/crsp/dsi.parquet
-~/Dropbox/pq_data/comp/company.parquet
-```
+- a **project**-level `DATA_DIR` (stored in `.Renviron`)
+- a **user**-level `DATA_DIR` (using  `~/.Renviron`)
+- no persistence
 
-## Treat Downloads as a Refresh Step
+`db2pq` writes Parquet files into a local repository.
 
-The scripts that download data should usually be separate from the scripts that
-analyze data. A refresh script might contain calls like these:
+For example, this call:
 
 ```{r, eval = FALSE}
 library(db2pq)
 
 wrds_update_pq("dsi", "crsp")
-wrds_update_pq("company", "comp")
-wrds_update_pq("funda", "comp", keep = c("gvkey", "datadate", "at", "sale"))
 ```
 
-Because `wrds_update_pq()` compares WRDS metadata with metadata embedded in the
-local Parquet file, it can be rerun without downloading a table that is already
-current.
-
-The same idea applies to non-WRDS PostgreSQL sources. Put source-system refresh
-logic in one place, then let analysis code consume the resulting files.
-
-## Keep Raw and Derived Data Separate
-
-A useful convention is to keep source-table exports in one repository and write
-derived research datasets somewhere else. For example:
+writes the active Parquet file to:
 
 ```text
-~/Dropbox/pq_data/          # Local source-table repository
-data/derived/               # Project-specific derived files
+<DATA_DIR>/crsp/dsi.parquet
 ```
 
-The source-table repository should be reproducible from WRDS or PostgreSQL.
-Derived files should be reproducible from project code.
-
-This separation matters because source data and derived data have different
-rules. Source exports should be refreshed deliberately and should preserve the
-database table as closely as is useful. Derived files can be redesigned as the
-research design changes.
-
-## Make Transformations Explicit
-
-Avoid hiding important filters, joins, and sample restrictions inside ad hoc
-interactive work. Put them in scripts or functions. A useful pattern is:
+The standard layout is:
 
 ```text
-source database -> local Parquet repository -> derived research data -> tables/figures
+<DATA_DIR>/<schema>/<table>.parquet
 ```
 
-`db2pq` can help with the first arrow. The later arrows should usually live in
-project-specific code, where sample construction choices are visible to readers
-and coauthors.
-
-## Record Metadata
-
-Parquet files written by WRDS helpers include `last_modified` metadata when the
-source table provides it. Use `pq_last_modified()` to audit a repository:
-
-```{r, eval = FALSE}
-pq_last_modified(schema = "crsp")
-pq_last_modified(schema = "comp")
-```
-
-For data-management work, this is often more useful than relying only on local
-file modification times, because the metadata records what `db2pq` knows about
-the source table.
-
-Metadata will not answer every provenance question, but it gives a lightweight
-audit trail. For more complex projects, combine it with project logs, scripts,
-or a data dictionary that records table sources and refresh dates.
-
-When this article is rendered with access to a local Parquet repository, the
-following chunk shows the embedded source metadata for a real WRDS-derived file.
-
-```{r live-metadata-dsi, eval = live_repo}
-Sys.getenv("DATA_DIR")
-pq_last_modified(table_name = "dsi", schema = "crsp")
-```
-
-## Archive Before Replacing
-
-For tables where changes matter, use `archive = TRUE` so an existing file is
-moved aside before it is replaced:
-
-```{r, eval = FALSE}
-wrds_update_pq("company", "comp", archive = TRUE)
-pq_last_modified("company", "comp", archive = TRUE)
-```
-
-Archives are stored under:
+When updates use `archive = TRUE`, replaced files are moved under:
 
 ```text
-<DATA_DIR>/<schema>/archive/
+<DATA_DIR>/<schema>/archive/<table>_<timestamp>.parquet
 ```
 
-This gives you a simple local history without turning the data repository into a
-Git repository.
+### Explicit Overrides
 
-Archiving is most useful for relatively small reference tables or for cases
-where source revisions may affect published results. For very large tables,
-keeping every historical copy may be too expensive; in those cases, record the
-refresh date and source metadata instead.
-
-To make the archive mechanics concrete without modifying the main local data
-repository, this article copies `comp.company` into a temporary documentation
-repository and archives/restores that copy.
-
-```{r live-archive-copy, eval = live_repo}
-pq_last_modified(table_name = "company", schema = "comp", data_dir = doc_data_dir)
-```
-
-Archiving moves the active file into the schema's `archive` directory.
-
-```{r live-archive-run, eval = live_repo, message = FALSE}
-archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
-basename(archived_company)
-
-pq_last_modified(table_name = "company", schema = "comp",
-                 data_dir = doc_data_dir, archive = TRUE) |>
-  dplyr::select(file_name, last_mod)
-```
-
-Restoring the archived file makes it the active copy again.
-
-```{r live-restore-run, eval = live_repo, message = FALSE}
-pq_restore(tools::file_path_sans_ext(basename(archived_company)), "comp",
-           data_dir = doc_data_dir, archive = FALSE)
-
-pq_last_modified(table_name = "company", schema = "comp", data_dir = doc_data_dir)
-```
-
-## Keep Large Data Out of Git
-
-Code, documentation, and small test fixtures belong in Git. Full WRDS exports
-generally do not. If a package or project needs example data, use a small,
-non-sensitive file and place it deliberately in `inst/extdata` or another
-documented location.
-
-For package documentation, build examples so they can run without private WRDS
-credentials. Longer examples can be shown with `eval = FALSE`, while the local
-rendered website can still refer to small local Parquet fixtures when those are
-safe to publish.
-
-## Plan for Collaboration
-
-Shared data workflows should minimize assumptions about one person's machine.
-Use environment variables, relative project paths, and documented setup steps
-instead of absolute paths such as `/Users/name/...`.
-
-For WRDS credentials, prefer setup that each user can reproduce locally:
+You do not have to use `DATA_DIR`. 
+An explicit `data_dir` argument overrides the default for a call:
 
 ```{r, eval = FALSE}
-Sys.setenv(WRDS_ID = "your_wrds_id")
-wrds_check_credentials()
+wrds_update_pq("dsi", "crsp", data_dir = "data")
 ```
 
-Do not store credentials in project scripts. The package helpers are designed to
-work with environment variables, `.pgpass`, and the credential mechanisms used
-by the `wrds` package.
+That pattern is useful when a refresh script should write a project-level copy
+while your default `DATA_DIR` still points at a shared local library.
 
-## Suggested Project Pattern
+For non-interactive code, set `DATA_DIR` or pass `data_dir` explicitly when the
+working directory is not the repository root you intend to use.
 
-A compact project structure might look like this:
+## Related Pages
 
-```text
-analysis-project/
-  R/
-  scripts/
-    refresh-data.R
-  data/
-    derived/
-  reports/
-  renv.lock
-```
-
-The refresh script owns calls to `db2pq`. Analysis scripts read Parquet files
-from `DATA_DIR` and write project-specific outputs to `data/derived`.
-
-## Live Examples with Local Parquet Files
-
-The examples in this section are designed for the locally rendered
-documentation site. They run when `DATA_DIR` points to a Parquet repository that
-contains the relevant WRDS-derived files. If those files are not present, the
-chunks are skipped.
-
-```{r local-example-setup, include = FALSE}
-live_crsp <- all(
-  identical(Sys.getenv("IN_PKGDOWN"), "true"),
-  has_pkg("DBI"),
-  has_pkg("duckdb"),
-  has_pkg("dplyr"),
-  has_pkg("dbplyr"),
-  has_pkg("ggplot2"),
-  has_pq("crsp", "dsf"),
-  has_pq("crsp", "stocknames")
-)
-```
-
-For example, if your repository contains `crsp.dsf` and `crsp.stocknames`, you
-can query the files directly with DuckDB without importing the full data into R.
-
-```{r live-crsp-connect, eval = live_crsp}
-library(DBI)
-library(dplyr)
-library(dbplyr)
-library(ggplot2)
-
-db <- dbConnect(duckdb::duckdb())
-
-parquet_tbl <- function(con, schema, table) {
-  path <- normalizePath(pq_path(schema, table), winslash = "/", mustWork = TRUE)
-  view <- paste(schema, table, sep = "_")
-  DBI::dbExecute(
-    con,
-    paste0("CREATE OR REPLACE VIEW ", view, " AS SELECT * FROM read_parquet('", path, "')")
-  )
-  tbl(con, view)
-}
-
-dsf <- parquet_tbl(db, "crsp", "dsf")
-stocknames <- parquet_tbl(db, "crsp", "stocknames")
-```
-
-A first check is simply to count the rows in the daily stock file.
-
-```{r live-crsp-count, eval = live_crsp}
-dsf |>
-  count() |>
-  collect()
-```
-
-Because DuckDB can query Parquet files in place, summaries can be computed
-without first reading every column into memory.
-
-```{r live-crsp-year-count, eval = live_crsp}
-dsf |>
-  mutate(year = as.integer(strftime(date, "%Y"))) |>
-  count(year) |>
-  arrange(desc(year)) |>
-  collect()
-```
-
-Filtering to one trading day reads only the rows and columns needed for that
-query.
-
-```{r live-crsp-one-day, eval = live_crsp}
-dsf_subset <-
-  dsf |>
-  filter(date == as.Date("1986-01-07")) |>
-  select(permno, date, ret, prc, vol) |>
-  collect()
-
-head(dsf_subset)
-```
-
-The same files can be used for a small analysis. Here we identify Apple's CRSP
-`permno` from `stocknames`, then compute a cumulative return series from
-`dsf`.
-
-```{r live-crsp-apple, eval = live_crsp, fig.width = 7, fig.height = 4}
-apple_permno <-
-  stocknames |>
-  filter(grepl("^APPLE COM", comnam)) |>
-  distinct(permno) |>
-  collect() |>
-  pull(permno) |>
-  min()
-
-apple_returns <-
-  dsf |>
-  filter(permno == apple_permno) |>
-  select(permno, date, ret) |>
-  arrange(date) |>
-  collect() |>
-  mutate(cumret = exp(cumsum(log(1 + coalesce(ret, 0)))))
-
-ggplot(apple_returns, aes(x = date, y = cumret)) +
-  geom_line() +
-  labs(x = NULL, y = "Cumulative return")
-```
-
-```{r live-crsp-disconnect, eval = live_crsp, include = FALSE}
-dbDisconnect(db, shutdown = TRUE)
-```
-
-These examples use a local Parquet repository as the analysis substrate. The
-refresh step that creates the files is still separate:
-
-```{r, eval = FALSE}
-wrds_update_pq("dsf", "crsp")
-wrds_update_pq("stocknames", "crsp")
-```
-
-That separation is the main point. `db2pq` handles the database-to-Parquet
-refresh; analysis code can then operate against local, typed, columnar files.
+- [Authentication](authentication.html) covers `WRDS_ID`, passwords, and
+  `.pgpass`.
+- [WRDS to Parquet](wrds-to-parquet.html) shows the refresh workflow.

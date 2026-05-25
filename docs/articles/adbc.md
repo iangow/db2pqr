@@ -1,4 +1,4 @@
-# ADBC Backend
+# ADBC backend
 
 The stable default transfer path uses DBI/RPostgres. The optional ADBC
 path can stream Arrow batches directly from PostgreSQL, but it depends

@@ -1,5 +1,10 @@
 # WRDS to Parquet
 
+``` r
+
+library(db2pq)
+```
+
 This is the place to start when your source data live in the WRDS
 PostgreSQL database and you want local Parquet files that can be reused
 across projects.
@@ -36,6 +41,10 @@ Related helpers are:
 
 ## Setup
 
+You need to set up your details for a WRDS connection as discussed in
+the article on [authentication
+article](https://iangow.github.io/db2pqr/articles/authentication.md).
+
 Set `DATA_DIR` to the local repository where you want Parquet files to
 live:
 
@@ -44,35 +53,14 @@ live:
 Sys.setenv(DATA_DIR = "~/Dropbox/pq_data")
 ```
 
-For WRDS credentials, `db2pq` can use credentials configured by the
-`wrds` package, and it also provides helpers for checking username and
-connection settings:
-
-``` r
-
-Sys.setenv(WRDS_ID = "your_wrds_id")
-wrds_get_username()
-wrds_conninfo(format = "uri")
-wrds_check_credentials()
-```
-
-For compatibility with Tidy Finance-style setups, `WRDS_USER` is also
-recognized. See the authentication article for more detail. SSH access
-is only needed when using SAS metadata with `use_sas = TRUE`; see the
-[WRDS SSH setup
-article](https://iangow.github.io/db2pqr/articles/wrds-ssh.md) for that
-separate setup.
-
 ## Using `wrds_update_pq()`
 
-### An Illustrative First Run
+### An illustrative first run
 
 A good first table is `comp.company`, which is small enough for a quick
 test:
 
 ``` r
-
-library(db2pq)
 
 wrds_update_pq("company", "comp")
 ```
@@ -93,8 +81,8 @@ company_file <- wrds_update_pq(
   wrds_id = wrds_id
 )
 #> Updated comp.company is available.
-#> Beginning file download at 2026-05-23 17:05:00 UTC.
-#> Completed file download at 2026-05-23 17:05:01 UTC.
+#> Beginning file download at 2026-05-25 18:58:00 UTC.
+#> Completed file download at 2026-05-25 18:58:01 UTC.
 file.path("<temporary data repository>", "comp", basename(company_file))
 #> [1] "<temporary data repository>/comp/company.parquet"
 ```
@@ -301,8 +289,8 @@ renamed_company_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-23 17:05:03 UTC.
-#> Completed file download at 2026-05-23 17:05:04 UTC.
+#> Beginning file download at 2026-05-25 18:58:04 UTC.
+#> Completed file download at 2026-05-25 18:58:04 UTC.
 
 dplyr::select(
   arrow::read_parquet(renamed_company_file),
@@ -384,8 +372,8 @@ funda_sample_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-23 17:05:04 UTC.
-#> Completed file download at 2026-05-23 17:05:05 UTC.
+#> Beginning file download at 2026-05-25 18:58:05 UTC.
+#> Completed file download at 2026-05-25 18:58:05 UTC.
 
 dplyr::glimpse(arrow::read_parquet(funda_sample_file))
 #> Rows: 1,000
@@ -484,14 +472,14 @@ while still exercising the same file-management code.
 
 archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
 basename(archived_company)
-#> [1] "company_20260523T060000Z.parquet"
+#> [1] "company_20260525T060000Z.parquet"
 
 pq_last_modified("company", "comp", data_dir = doc_data_dir, archive = TRUE) |>
   dplyr::select(file_name, last_mod)
 #> # A tibble: 1 × 2
 #>   file_name                last_mod           
 #>   <chr>                    <dttm>             
-#> 1 company_20260523T060000Z 2026-05-23 06:00:00
+#> 1 company_20260525T060000Z 2026-05-25 06:00:00
 ```
 
 The archived copy can be restored, again without touching the main
@@ -507,7 +495,7 @@ pq_restore(
 )
 
 pq_last_modified("company", "comp", data_dir = doc_data_dir)
-#> [1] "Company (Updated 2026-05-23)"
+#> [1] "Company (Updated 2026-05-25)"
 ```
 
 ## Custom SQL

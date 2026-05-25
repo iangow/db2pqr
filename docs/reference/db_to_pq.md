@@ -28,6 +28,7 @@ db_to_pq(
   numeric_mode = c("decimal", "float64", "text", "raw"),
   con = NULL,
   metadata = NULL,
+  use_comment = TRUE,
   col_types = NULL,
   tz = NULL
 )
@@ -103,6 +104,13 @@ db_to_pq(
 - metadata:
 
   Optional named list of Parquet schema metadata.
+
+- use_comment:
+
+  If `TRUE` (the default), the PostgreSQL table comment is fetched and
+  stored as `last_modified` in the Parquet schema metadata. Has no
+  effect when the table has no comment. A `last_modified` key already
+  present in `metadata` takes precedence.
 
 - col_types:
 

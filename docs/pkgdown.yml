@@ -4,13 +4,12 @@ pkgdown_sha: ~
 articles:
   adbc: adbc.html
   authentication: authentication.html
-  data-dir: data-dir.html
   data-management: data-management.html
   parquet-utilities-examples: parquet-utilities-examples.html
   postgres-to-parquet: postgres-to-parquet.html
   wrds-ssh: wrds-ssh.html
   wrds-to-parquet: wrds-to-parquet.html
-last_built: 2026-05-23T17:04Z
+last_built: 2026-05-25T18:57Z
 urls:
   reference: https://iangow.github.io/db2pqr/reference
   article: https://iangow.github.io/db2pqr/articles

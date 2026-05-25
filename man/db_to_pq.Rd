@@ -25,6 +25,7 @@ db_to_pq(
   numeric_mode = c("decimal", "float64", "text", "raw"),
   con = NULL,
   metadata = NULL,
+  use_comment = TRUE,
   col_types = NULL,
   tz = NULL
 )
@@ -69,6 +70,11 @@ without recreating decimal types. \code{"raw"} keeps the backend default.}
 \item{con}{Optional existing DBI connection.}
 
 \item{metadata}{Optional named list of Parquet schema metadata.}
+
+\item{use_comment}{If \code{TRUE} (the default), the PostgreSQL table comment is
+fetched and stored as \code{last_modified} in the Parquet schema metadata. Has
+no effect when the table has no comment. A \code{last_modified} key already
+present in \code{metadata} takes precedence.}
 
 \item{col_types}{Optional named list of Arrow output type overrides. Names
 refer to output column names after \code{rename}.}

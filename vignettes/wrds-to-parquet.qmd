@@ -2,6 +2,10 @@
 title: "WRDS to Parquet"
 ---
 
+```{r}
+library(db2pq)
+```
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 has_pkg <- function(pkg) requireNamespace(pkg, quietly = TRUE)
@@ -64,37 +68,22 @@ Related helpers are:
 
 ## Setup
 
+You need to set up your details for a WRDS connection as discussed in the article on [authentication article](authentication.html).
+
 Set `DATA_DIR` to the local repository where you want Parquet files to live:
 
 ```{r, eval = FALSE}
 Sys.setenv(DATA_DIR = "~/Dropbox/pq_data")
 ```
 
-For WRDS credentials, `db2pq` can use credentials configured by the `wrds`
-package, and it also provides helpers for checking username and connection
-settings:
-
-```{r, eval = FALSE}
-Sys.setenv(WRDS_ID = "your_wrds_id")
-wrds_get_username()
-wrds_conninfo(format = "uri")
-wrds_check_credentials()
-```
-
-For compatibility with Tidy Finance-style setups, `WRDS_USER` is also
-recognized. See the authentication article for more detail. SSH access is only
-needed when using SAS metadata with `use_sas = TRUE`; see the
-[WRDS SSH setup article](wrds-ssh.html) for that separate setup.
 
 ## Using `wrds_update_pq()`
 
-### An Illustrative First Run
+### An illustrative first run
 
 A good first table is `comp.company`, which is small enough for a quick test:
 
 ```{r, eval = FALSE}
-library(db2pq)
-
 wrds_update_pq("company", "comp")
 ```
 

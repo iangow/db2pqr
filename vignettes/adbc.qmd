@@ -1,14 +1,13 @@
 ---
-title: "ADBC Backend"
+title: "ADBC backend"
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-The stable default transfer path uses DBI/RPostgres. The optional ADBC path can
-stream Arrow batches directly from PostgreSQL, but it depends on local driver
-builds and SSL support.
+The stable default transfer path uses DBI/RPostgres.
+The optional ADBC path can stream Arrow batches directly from PostgreSQL, but it depends on local driver builds and SSL support.
 
 As of April 2026, Apache Arrow ADBC 23 is current and the R `adbcpostgresql`
 package has a 0.23.0 CRAN release. Use `adbc_diagnostics()` to inspect the

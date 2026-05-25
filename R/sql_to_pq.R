@@ -22,7 +22,7 @@ sql_to_pq <- function(con, sql, out_file, chunk_size = 100000, metadata = NULL,
         writer <- .create_parquet_writer_from_schema(schemas$writer_schema, sink)
         tab <- .coerce_arrow_table(tab, data_schema)
       } else {
-        tab <- arrow::Table$create(chunk, schema = data_schema)
+        tab <- .coerce_arrow_table(arrow::Table$create(chunk), data_schema)
       }
       rm(chunk)
 

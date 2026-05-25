@@ -235,6 +235,66 @@ test_that("string-backed PostgreSQL numerics can cast to Arrow decimals", {
   expect_match(out$schema$GetFieldByName("prc")$type$ToString(), "\\(11, 5\\)$")
 })
 
+test_that("sql_to_pq casts every chunk before writing decimal columns", {
+  local_con <- structure(list(), class = "TestConnection")
+  local_res <- new.env(parent = emptyenv())
+  local_res$i <- 0L
+
+  restore_send_query <- local_rebind(
+    "dbSendQuery",
+    function(conn, statement, ...) {
+      expect_identical(conn, local_con)
+      expect_identical(statement, "SELECT prc FROM demo")
+      local_res
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_send_query(), add = TRUE)
+
+  restore_fetch <- local_rebind(
+    "dbFetch",
+    function(res, n = -1, ...) {
+      expect_identical(res, local_res)
+      local_res$i <- local_res$i + 1L
+      switch(
+        as.character(local_res$i),
+        "1" = data.frame(prc = "123.45000", stringsAsFactors = FALSE),
+        "2" = data.frame(prc = "-0.01000", stringsAsFactors = FALSE),
+        data.frame(prc = character(), stringsAsFactors = FALSE)
+      )
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_fetch(), add = TRUE)
+
+  restore_clear <- local_rebind(
+    "dbClearResult",
+    function(res, ...) {
+      expect_identical(res, local_res)
+      TRUE
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_clear(), add = TRUE)
+
+  out_file <- tempfile(fileext = ".parquet")
+  db2pq:::sql_to_pq(
+    con = local_con,
+    sql = "SELECT prc FROM demo",
+    out_file = out_file,
+    chunk_size = 1L,
+    col_types = list(prc = arrow::decimal(precision = 11L, scale = 5L))
+  )
+
+  out_tab <- arrow::read_parquet(out_file, as_data_frame = FALSE)
+  expect_match(out_tab$schema$GetFieldByName("prc")$type$ToString(), "^decimal")
+  expect_match(out_tab$schema$GetFieldByName("prc")$type$ToString(), "\\(11, 5\\)$")
+
+  out <- as.data.frame(out_tab)
+  expect_identical(nrow(out), 2L)
+  expect_equal(as.numeric(out$prc), c(123.45, -0.01))
+})
+
 test_that("adbc_numeric_cast_map_from_column_info finds string-like result columns", {
   info <- data.frame(
     name = c("date", "vwretd", "totcnt", "usdval"),

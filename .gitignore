@@ -4,3 +4,4 @@
 *.Rcheck/
 ..Rcheck/
 *.tar.gz
+CRAN-SUBMISSION

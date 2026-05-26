@@ -5,21 +5,7 @@
 library(db2pq)
 ```
 
-This is the place to start when your source data live in the WRDS
-PostgreSQL database and you want local Parquet files that can be reused
-across projects.
-
-`db2pq` writes files using the layout:
-
-``` text
-<DATA_DIR>/<schema>/<table>.parquet
-```
-
-For example, `wrds_update_pq("company", "comp")` writes
-`<DATA_DIR>/comp/company.parquet` unless you provide `data_dir` or
-`out_file` explicitly.
-
-## Main Helpers
+## Overview
 
 The main helper on this path is
 [`wrds_update_pq()`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md).
@@ -39,68 +25,38 @@ Related helpers are:
   [`pq_restore()`](https://iangow.github.io/db2pqr/reference/pq_restore.md)
   inspect and manage local Parquet files after they have been created.
 
-## Setup
-
-You need to set up your details for a WRDS connection as discussed in
-the article on [authentication
-article](https://iangow.github.io/db2pqr/articles/authentication.md).
-
-Set `DATA_DIR` to the local repository where you want Parquet files to
-live:
-
-``` r
-
-Sys.setenv(DATA_DIR = "~/Dropbox/pq_data")
-```
-
 ## Using `wrds_update_pq()`
 
 ### An illustrative first run
 
-A good first table is `comp.company`, which is small enough for a quick
-test:
+A good table to start with is `comp.company`, which is small enough for
+testing:
 
 ``` r
 
 wrds_update_pq("company", "comp")
-```
-
-When this article is rendered locally with WRDS credentials, the same
-example runs against a temporary documentation repository rather than
-the main `DATA_DIR`.
-
-``` r
-
-library(db2pq)
-
-wrds_id <- wrds_get_username()
-company_file <- wrds_update_pq(
-  "company",
-  "comp",
-  data_dir = doc_data_dir,
-  wrds_id = wrds_id
-)
 #> Updated comp.company is available.
-#> Beginning file download at 2026-05-25 18:58:00 UTC.
-#> Completed file download at 2026-05-25 18:58:01 UTC.
-file.path("<temporary data repository>", "comp", basename(company_file))
-#> [1] "<temporary data repository>/comp/company.parquet"
+#> Beginning file download at 2026-05-26 13:29:49 UTC.
+#> Completed file download at 2026-05-26 13:29:50 UTC.
 ```
 
-Typical output from a first run looks like:
+If you run the function above and have not set up your details for a
+WRDS connection, you will be asked to provide these (e.g., your WRDS
+username and password). More discussion on this topic can be found in
+the article on
+[authentication](https://iangow.github.io/db2pqr/articles/authentication.md).
 
-``` text
-Updated comp.company is available.
-Beginning file download at 2026-04-09 17:12:41 UTC.
-Completed file download at 2026-04-09 17:12:46 UTC.
-```
+In addition, if you have not established `DATA_DIR`, as discussed in the
+article on [data
+management](https://iangow.github.io/db2pqr/articles/data-management.md),
+you will be asked to provide that.
 
 Running the same command later should usually skip the download if WRDS
 metadata indicate that the local file is already current.
 
 ``` r
 
-wrds_update_pq("company", "comp", data_dir = doc_data_dir, wrds_id = wrds_id)
+company_file <- wrds_update_pq("company", "comp")
 #> comp.company already up to date.
 ```
 
@@ -109,39 +65,46 @@ The resulting file is an ordinary Parquet file. It can be inspected with
 
 ``` r
 
-dplyr::select(
-  arrow::read_parquet(company_file),
-  gvkey, conm, sic
-) |>
-  head()
-#> # A tibble: 6 × 3
-#>   gvkey  conm                    sic  
-#>   <chr>  <chr>                   <chr>
-#> 1 001000 A & E PLASTIK PAK INC   3089 
-#> 2 001001 A & M FOOD SERVICES INC 5812 
-#> 3 001002 AAI CORP                3825 
-#> 4 001003 A.A. IMPORTING CO INC   5712 
-#> 5 001004 AAR CORP                5080 
-#> 6 001005 A.B.A. INDUSTRIES INC   3724
+library(arrow)
+library(dplyr, warn.conflicts = FALSE)
+```
+
+``` r
+
+read_parquet(company_file) |> select(gvkey, conm, sic)
+#> # A tibble: 57,608 × 3
+#>    gvkey  conm                     sic  
+#>    <chr>  <chr>                    <chr>
+#>  1 001000 A & E PLASTIK PAK INC    3089 
+#>  2 001001 A & M FOOD SERVICES INC  5812 
+#>  3 001002 AAI CORP                 3825 
+#>  4 001003 A.A. IMPORTING CO INC    5712 
+#>  5 001004 AAR CORP                 5080 
+#>  6 001005 A.B.A. INDUSTRIES INC    3724 
+#>  7 001006 ABC INDS INC             2711 
+#>  8 001007 ABKCO INDUSTRIES INC     3652 
+#>  9 001008 ABM COMPUTER SYSTEMS INC 3577 
+#> 10 001009 ABS INDUSTRIES INC       3460 
+#> # ℹ 57,598 more rows
 ```
 
 ### Identifying Table Names and Schemas
 
-WRDS uses schema names such as `crsp`, `comp`, `audit`, and `bank`. If
-existing code refers to `comp.funda`, then the schema is `comp` and the
-table is `funda`:
+WRDS uses schema names such as `crsp`, `comp`, `audit`, and `bank`.
 
 ``` r
 
-wrds_update_pq("funda", "comp")
+wrds_update_pq("funda", "comp", obs = 1000)
 ```
 
 You can list tables in a WRDS schema from R:
 
 ``` r
 
-wrds_get_tables("crsp")
-wrds_get_tables("comp", views = TRUE)
+crsp_tables <- wrds_get_tables("crsp", views = TRUE)
+crsp_tables[1:10]
+#>  [1] "acti"     "asia"     "asib"     "asic"     "asio"     "asix"    
+#>  [7] "bmdebt"   "bmheader" "bmpaymts" "bmquotes"
 ```
 
 Use the PostgreSQL schema name exposed by WRDS, which can differ from a
@@ -151,30 +114,62 @@ with:
 
 ``` r
 
-wrds_schema_to_pq("ff_all")
+wrds_get_tables("ff_all")
+#>  [1] "factors_china"       "factors_daily"       "factors_monthly"    
+#>  [4] "fivefactors_daily"   "fivefactors_monthly" "industry12"         
+#>  [7] "industry48"          "liq_ps"              "liq_sadka"          
+#> [10] "portfolios"          "portfolios25"        "portfolios_d"
 ```
 
-Schemas containing views need `views = TRUE` during discovery. For
-example, relations exposed through the Fama-French `ff` schema can be
-processed with:
+However, these tables are exposed as **views** in the database schema
+`ff`. Setting `views = TRUE` shows the underlying data made available
+there.
 
 ``` r
 
 wrds_schema_to_pq("ff", views = TRUE)
-```
-
-During a local site render, this page can show the first few tables
-returned from WRDS:
-
-``` r
-
-head(wrds_get_tables("comp", wrds_id = wrds_id))
-#> character(0)
+#> Processing 12 table(s) in schema 'ff'.
+#> No comment found for ff.factors_china.
+#> Beginning file download at 2026-05-26 13:29:54 UTC.
+#> Completed file download at 2026-05-26 13:29:55 UTC.
+#> Updated ff.factors_daily is available.
+#> Beginning file download at 2026-05-26 13:29:55 UTC.
+#> Completed file download at 2026-05-26 13:29:56 UTC.
+#> Updated ff.factors_monthly is available.
+#> Beginning file download at 2026-05-26 13:29:56 UTC.
+#> Completed file download at 2026-05-26 13:29:57 UTC.
+#> Updated ff.fivefactors_daily is available.
+#> Beginning file download at 2026-05-26 13:29:58 UTC.
+#> Completed file download at 2026-05-26 13:29:58 UTC.
+#> No comment found for ff.fivefactors_monthly.
+#> Beginning file download at 2026-05-26 13:29:59 UTC.
+#> Completed file download at 2026-05-26 13:29:59 UTC.
+#> Updated ff.industry12 is available.
+#> Beginning file download at 2026-05-26 13:30:00 UTC.
+#> Completed file download at 2026-05-26 13:30:00 UTC.
+#> Updated ff.industry48 is available.
+#> Beginning file download at 2026-05-26 13:30:01 UTC.
+#> Completed file download at 2026-05-26 13:30:01 UTC.
+#> Updated ff.liq_ps is available.
+#> Beginning file download at 2026-05-26 13:30:02 UTC.
+#> Completed file download at 2026-05-26 13:30:02 UTC.
+#> Updated ff.liq_sadka is available.
+#> Beginning file download at 2026-05-26 13:30:03 UTC.
+#> Completed file download at 2026-05-26 13:30:03 UTC.
+#> Updated ff.portfolios is available.
+#> Beginning file download at 2026-05-26 13:30:04 UTC.
+#> Completed file download at 2026-05-26 13:30:04 UTC.
+#> Updated ff.portfolios25 is available.
+#> Beginning file download at 2026-05-26 13:30:05 UTC.
+#> Completed file download at 2026-05-26 13:30:05 UTC.
+#> Updated ff.portfolios_d is available.
+#> Beginning file download at 2026-05-26 13:30:06 UTC.
+#> Completed file download at 2026-05-26 13:30:07 UTC.
 ```
 
 The WRDS web query interface can also be useful for identifying the
 underlying schema and table behind a dataset, but once the table is
-known, script the download with `db2pq` so it is reproducible.
+known, you should download with a `db2pq` script for reproducibility.
 
 ## Cleaning and Shaping Data
 
@@ -187,10 +182,12 @@ for analysis. For example, link-history identifiers in
 ``` r
 
 wrds_update_pq(
-  "ccmxpf_lnkhist",
-  "crsp",
+  "ccmxpf_lnkhist", "crsp",
   col_types = list(lpermno = "int32", lpermco = "int32")
 )
+#> Updated crsp.ccmxpf_lnkhist is available.
+#> Beginning file download at 2026-05-26 13:30:07 UTC.
+#> Completed file download at 2026-05-26 13:30:08 UTC.
 ```
 
 ### Setting Time Zones
@@ -199,8 +196,8 @@ WRDS PostgreSQL often stores timestamps without time-zone information.
 The `tz` argument tells `db2pq` how to interpret those values before
 writing normalized timestamps to Parquet.
 
-For FFIEC Call Report data in the WRDS `bank` schema, timestamps should
-be interpreted as US Eastern time:
+For example, in the FFIEC Call Report data in the WRDS `bank` schema,
+timestamps should be interpreted as US Eastern time:
 
 ``` r
 
@@ -252,12 +249,39 @@ Use `keep` when you want a small subset of columns:
 
 ``` r
 
-wrds_update_pq(
+dsf_file = wrds_update_pq(
   "dsf",
   "crsp",
-  keep = c("permno", "date", "ret")
+  obs = 100,
+  force = TRUE,
+  keep = c("permno", "date", "^ret$")
 )
+#> Forcing update based on user request.
+#> Beginning file download at 2026-05-26 13:30:08 UTC.
+#> Completed file download at 2026-05-26 13:30:09 UTC.
+
+read_parquet(dsf_file)
+#> # A tibble: 100 × 3
+#>    permno date           ret
+#>     <int> <date>       <dbl>
+#>  1  10000 1986-01-07 NA     
+#>  2  10000 1986-01-08 -0.0244
+#>  3  10000 1986-01-09  0     
+#>  4  10000 1986-01-10  0     
+#>  5  10000 1986-01-13  0.05  
+#>  6  10000 1986-01-14  0.0476
+#>  7  10000 1986-01-15  0.0455
+#>  8  10000 1986-01-16  0.0435
+#>  9  10000 1986-01-17  0     
+#> 10  10000 1986-01-20  0     
+#> # ℹ 90 more rows
 ```
+
+Note that the arguments to `keep` are evaluated as **regular
+expressions**, so you want to use `"^ret$"` to match `ret` rather than
+any column *containing* `ret`. For more on regular expressions, see
+[Chapter 9](https://iangow.github.io/far_book/web-data.html) of
+*Empirical Research in Accounting: Tools and Methods*.
 
 ### Renaming Variables
 
@@ -269,6 +293,7 @@ wrds_update_pq(
   "company",
   "comp",
   keep = c("gvkey", "conm", "sic"),
+  alt_table_name = "sic_codes",
   rename = c(conm = "company_name")
 )
 ```
@@ -281,31 +306,31 @@ the temporary repository:
 renamed_company_file <- wrds_update_pq(
   "company",
   "comp",
-  data_dir = doc_data_dir,
   alt_table_name = "company_names",
   keep = c("gvkey", "conm", "sic"),
   rename = c(conm = "company_name"),
-  wrds_id = wrds_id,
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-25 18:58:04 UTC.
-#> Completed file download at 2026-05-25 18:58:04 UTC.
+#> Beginning file download at 2026-05-26 13:30:10 UTC.
+#> Completed file download at 2026-05-26 13:30:10 UTC.
 
-dplyr::select(
-  arrow::read_parquet(renamed_company_file),
-  gvkey, company_name, sic
-) |>
-  head()
-#> # A tibble: 6 × 3
-#>   gvkey  company_name            sic  
-#>   <chr>  <chr>                   <chr>
-#> 1 001000 A & E PLASTIK PAK INC   3089 
-#> 2 001001 A & M FOOD SERVICES INC 5812 
-#> 3 001002 AAI CORP                3825 
-#> 4 001003 A.A. IMPORTING CO INC   5712 
-#> 5 001004 AAR CORP                5080 
-#> 6 001005 A.B.A. INDUSTRIES INC   3724
+read_parquet(renamed_company_file) |>
+  select(gvkey, company_name, sic)
+#> # A tibble: 57,608 × 3
+#>    gvkey  company_name             sic  
+#>    <chr>  <chr>                    <chr>
+#>  1 001000 A & E PLASTIK PAK INC    3089 
+#>  2 001001 A & M FOOD SERVICES INC  5812 
+#>  3 001002 AAI CORP                 3825 
+#>  4 001003 A.A. IMPORTING CO INC    5712 
+#>  5 001004 AAR CORP                 5080 
+#>  6 001005 A.B.A. INDUSTRIES INC    3724 
+#>  7 001006 ABC INDS INC             2711 
+#>  8 001007 ABKCO INDUSTRIES INC     3652 
+#>  9 001008 ABM COMPUTER SYSTEMS INC 3577 
+#> 10 001009 ABS INDUSTRIES INC       3460 
+#> # ℹ 57,598 more rows
 ```
 
 If `rename` and `col_types` are used together, names in `col_types`
@@ -351,16 +376,15 @@ wrds_update_pq("funda", "comp", obs = 1000)
 ```
 
 Combining `keep`, `where`, and `obs` is a useful way to produce a small
-local file while developing a refresh script:
+local file while developing a refresh script.
 
 ``` r
 
 funda_sample_file <- wrds_update_pq(
   "funda",
   "comp",
-  data_dir = doc_data_dir,
   alt_table_name = "funda_sample",
-  keep = c("gvkey", "datadate", "fyear", "at", "sale"),
+  keep = c("gvkey", "datadate", "fyear", "^at$", "^sale$"),
   where = paste(
     "indfmt = 'INDL'",
     "AND datafmt = 'STD'",
@@ -368,45 +392,20 @@ funda_sample_file <- wrds_update_pq(
     "AND popsrc = 'D'"
   ),
   obs = 1000,
-  wrds_id = wrds_id,
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-25 18:58:05 UTC.
-#> Completed file download at 2026-05-25 18:58:05 UTC.
+#> Beginning file download at 2026-05-26 13:30:11 UTC.
+#> Completed file download at 2026-05-26 13:30:11 UTC.
 
-dplyr::glimpse(arrow::read_parquet(funda_sample_file))
+read_parquet(funda_sample_file) |> glimpse()
 #> Rows: 1,000
-#> Columns: 29
+#> Columns: 5
 #> $ gvkey    <chr> "001000", "001000", "001000", "001000", "001000", "001000", "…
 #> $ datadate <date> 1961-12-31, 1962-12-31, 1963-12-31, 1964-12-31, 1965-12-31, …
 #> $ fyear    <int> 1961, 1962, 1963, 1964, 1965, 1966, 1967, 1968, 1969, 1970, 1…
-#> $ datafmt  <chr> "STD", "STD", "STD", "STD", "STD", "STD", "STD", "STD", "STD"…
-#> $ apdedate <date> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ fdate    <date> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ pdate    <date> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
 #> $ at       <dbl> NA, NA, NA, 1.416, 2.310, 2.430, 2.456, 5.922, 28.712, 33.450…
-#> $ batr     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ fatb     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ fatc     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ fatd     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ fate     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ fatl     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ fatn     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ fato     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ fatp     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ iatci    <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ iati     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ iatmi    <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ lcat     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ nat      <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ npat     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ patr     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ rati     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
 #> $ sale     <dbl> 0.900, 1.600, 1.457, 2.032, 1.688, 4.032, 3.594, 7.400, 37.39…
-#> $ salepfc  <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ salepfp  <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-#> $ costat   <chr> "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "…
 ```
 
 ## Update Logic
@@ -419,7 +418,7 @@ suggest the file is current. This is useful after changing `keep`,
 
 ``` r
 
-wrds_update_pq("funda", "comp", force = TRUE)
+wrds_update_pq("funda", "comp", force = TRUE, obs = 1000)
 ```
 
 ### Using SAS Metadata
@@ -464,22 +463,19 @@ Archives live under:
 <DATA_DIR>/<schema>/archive/
 ```
 
-For documentation and testing, archive examples should use a temporary
-data repository. This keeps the real local Parquet repository unchanged
-while still exercising the same file-management code.
-
 ``` r
 
-archived_company <- pq_archive("company", "comp", data_dir = doc_data_dir)
+archived_company <- pq_archive("company", "comp")
+#> Archived to: db2pq-wrds-to-parquet-examples/comp/archive/company_20260526T060000Z.parquet
 basename(archived_company)
-#> [1] "company_20260525T060000Z.parquet"
+#> [1] "company_20260526T060000Z.parquet"
 
-pq_last_modified("company", "comp", data_dir = doc_data_dir, archive = TRUE) |>
-  dplyr::select(file_name, last_mod)
+pq_last_modified("company", "comp", archive = TRUE) |>
+  select(file_name, last_mod)
 #> # A tibble: 1 × 2
 #>   file_name                last_mod           
 #>   <chr>                    <dttm>             
-#> 1 company_20260525T060000Z 2026-05-25 06:00:00
+#> 1 company_20260526T060000Z 2026-05-26 06:00:00
 ```
 
 The archived copy can be restored, again without touching the main
@@ -487,15 +483,17 @@ The archived copy can be restored, again without touching the main
 
 ``` r
 
+archived_company_name <- basename(archived_company)
+
 pq_restore(
-  tools::file_path_sans_ext(basename(archived_company)),
+  archived_company_name,
   "comp",
-  data_dir = doc_data_dir,
   archive = FALSE
 )
+#> Restored to: db2pq-wrds-to-parquet-examples/comp/company.parquet
 
-pq_last_modified("company", "comp", data_dir = doc_data_dir)
-#> [1] "Company (Updated 2026-05-25)"
+pq_last_modified("company", "comp")
+#> [1] "Company (Updated 2026-05-26)"
 ```
 
 ## Custom SQL
@@ -514,30 +512,29 @@ wrds_sql_to_pq(
 )
 ```
 
-For a small query result, use `LIMIT` and write to the temporary
-documentation repository:
+For a small query result, use `LIMIT`:
 
 ``` r
 
+sql_query <- "
+    SELECT gvkey, datadate, fyear, at, sale
+    FROM comp.funda
+    WHERE indfmt = 'INDL'
+    AND datafmt = 'STD'
+    AND consol = 'C'
+    AND popsrc = 'D'
+    ORDER BY gvkey, datadate
+    LIMIT 20
+  "
+
 sql_file <- wrds_sql_to_pq(
-  paste(
-    "SELECT gvkey, datadate, fyear, at, sale",
-    "FROM comp.funda",
-    "WHERE indfmt = 'INDL'",
-    "AND datafmt = 'STD'",
-    "AND consol = 'C'",
-    "AND popsrc = 'D'",
-    "ORDER BY gvkey, datadate",
-    "LIMIT 20"
-  ),
+  sql_query,
   table_name = "funda_sql_sample",
   schema = "comp",
-  data_dir = doc_data_dir,
-  wrds_id = wrds_id,
   archive = TRUE
 )
 
-arrow::read_parquet(sql_file)
+read_parquet(sql_file)
 #> # A tibble: 20 × 5
 #>    gvkey  datadate   fyear    at  sale
 #>    <chr>  <date>     <int> <dbl> <dbl>

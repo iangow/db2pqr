@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Authentication • db2pq</title>
+<title>WRDS authentication • db2pq</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="authentication_files/libs/quarto-html/popper.min.js"></script><script src="authentication_files/libs/quarto-html/tippy.umd.min.js"></script><link href="authentication_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="authentication_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Authentication">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="WRDS authentication">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -39,10 +39,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul>
 </li>
@@ -59,7 +59,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Authentication</h1>
+      <h1>WRDS authentication</h1>
 
 
 
@@ -73,7 +73,7 @@
 
 
 
-    <p>There are two elements required for a WRDS PostgreSQL authentication:</p>
+    <p>There are two elements required for authentication of a WRDS PostgreSQL connection:</p>
 <ol type="1">
 <li>the WRDS username</li>
 <li>the WRDS password for that username</li>
@@ -126,7 +126,7 @@
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_check_credentials.html">wrds_check_credentials</a></span><span class="op">(</span>password <span class="op">=</span> <span class="st">"your_wrds_password"</span>, save <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>PostgreSQL’s <code>.pgpass</code> mechanism is preferred to putting a password in R code. It also works with RPostgres/libpq and other PostgreSQL tools, not only <code>db2pq</code>.</p>
-<p>The default password-file path used by <code><a href="../reference/pgpass_path.html">pgpass_path()</a></code> is:</p>
+<p>The default PostgreSQL password-file path is:</p>
 <ul>
 <li>
 <code>~/.pgpass</code> on macOS and Linux</li>
@@ -137,7 +137,7 @@
 <pre class="text"><code><span><span class="va">wrds</span><span class="op">-</span><span class="va">pgdata.wharton.upenn.edu</span><span class="op">:</span><span class="fl">9737</span><span class="op">:</span><span class="va">wrds</span><span class="op">:</span><span class="va">your_wrds_id</span><span class="op">:</span><span class="va">your_wrds_password</span></span></code></pre>
 <p>On macOS and Linux, PostgreSQL expects the file to be readable only by the owner. Password entries saved by <code>db2pq</code> use that permission automatically; for a file created manually, set it with:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 600 ~/.pgpass</span></code></pre></div>
-</section><section class="level2"><h2 id="inspect-and-test-the-setup">Inspect and Test the Setup<a class="anchor" aria-label="anchor" href="#inspect-and-test-the-setup"></a>
+</section><section class="level2"><h2 id="inspecting-and-testing-your-setup">Inspecting and testing your setup<a class="anchor" aria-label="anchor" href="#inspecting-and-testing-your-setup"></a>
 </h2>
 <p>Use <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> for a live connection test:</p>
 <div class="cell">
@@ -146,7 +146,7 @@
 </div>
 <p>If the matching WRDS entry is not already in <code>.pgpass</code>, an interactive <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code> call asks for the WRDS PostgreSQL password. When the connection test succeeds, it writes that password to <code>.pgpass</code> for later libpq-backed connections. You can pass <code>password = ...</code> explicitly for a non-interactive setup check, use <code>save = FALSE</code> for a one-time check, or use <code>passfile = ...</code> to target a specific PostgreSQL password file.</p>
 <p>The returned diagnostic reports whether a small WRDS PostgreSQL connection succeeded and whether the matching target appears in <code>.pgpass</code>.</p>
-</section><section class="level2"><h2 id="existing-wrds-package-credentials">Existing <code>wrds</code> Package Credentials<a class="anchor" aria-label="anchor" href="#existing-wrds-package-credentials"></a>
+</section><section class="level2"><h2 id="existing-wrds-package-credentials">Existing <code>wrds</code> package credentials<a class="anchor" aria-label="anchor" href="#existing-wrds-package-credentials"></a>
 </h2>
 <p>If you already use the <code>wrds</code> package, its keyring-based setup remains a valid path:</p>
 <div class="cell">
@@ -154,11 +154,11 @@
 <code class="sourceCode R"><span><span class="fu">wrds</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/wrds/man/wrds_set_credentials.html" class="external-link">wrds_set_credentials</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"company"</span>, <span class="st">"comp"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<p>Use this route when you want to stay close to existing R WRDS code. Use the environment-variable plus <code>.pgpass</code> route when you want credentials to work across <code>db2pq</code>, RPostgres/libpq, and other PostgreSQL tools on the same machine.</p>
-</section><section class="level2"><h2 id="sas-based-workflows">SAS-Based Workflows<a class="anchor" aria-label="anchor" href="#sas-based-workflows"></a>
+<p>Use this route when you want to stay close to existing R WRDS code you may have using the <code>wrds</code> package. Use the environment-variable plus <code>.pgpass</code> route when you want credentials to work across <code>db2pq</code>, RPostgres/libpq, and other PostgreSQL tools on the same machine.</p>
+</section><section class="level2"><h2 id="sas-based-workflows">SAS-based workflows<a class="anchor" aria-label="anchor" href="#sas-based-workflows"></a>
 </h2>
 <p>Most <code>db2pq</code> WRDS work uses WRDS PostgreSQL. If you set <code>use_sas = TRUE</code>, <code>db2pq</code> also retrieves metadata from the WRDS SAS side over SSH. That SSH setup is separate from PostgreSQL password handling; see the <a href="wrds-ssh.html">WRDS SSH setup article</a> before using SAS metadata in unattended refresh scripts.</p>
-</section><section class="level2"><h2 id="environment-variables-in-r">Environment Variables in R<a class="anchor" aria-label="anchor" href="#environment-variables-in-r"></a>
+</section><section class="level2"><h2 id="environment-variables-in-r">Environment variables in R<a class="anchor" aria-label="anchor" href="#environment-variables-in-r"></a>
 </h2>
 <p><code><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv()</a></code> is useful for a running R session:</p>
 <div class="cell">
@@ -181,15 +181,14 @@ DATA_DIR=~/Dropbox/pq_data</code></pre>
 <p>A project-local <code>.Renviron</code> is useful when one project should override the user-level defaults without changing other R work on the same machine. For example, it can select a project-specific Parquet repository:</p>
 <pre class="text"><code>DATA_DIR=~/research/project-data/pq_data</code></pre>
 <p>The environment file should not be committed if it contains private, machine-specific, or secret values. After editing a <code>.Renviron</code> file, start a new R session or load it explicitly with <code><a href="https://rdrr.io/r/base/readRenviron.html" class="external-link">readRenviron()</a></code>.</p>
-<p>For first-time <code>DATA_DIR</code> setup, call <code><a href="../reference/db2pq_data_dir.html">db2pq_data_dir()</a></code> or let a Parquet helper call it as its default. In an interactive session without a <code>DATA_DIR</code>, the helper asks for a data directory, can create a new directory if needed, and offers to store <code>DATA_DIR</code> in either project-level <code>.Renviron</code> or user-level <code>~/.Renviron</code>. That scope choice is useful for data repositories; the interactive WRDS username prompt stores <code>WRDS_ID</code> in user-level <code>~/.Renviron</code>.</p>
-</section><section class="level2"><h2 id="related-pages">Related Pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
+<p>For first-time <code>DATA_DIR</code> setup, call a Parquet helper such as <code><a href="../reference/wrds_update_pq.html">wrds_update_pq()</a></code> in an interactive session and let its default data-directory handling run. In an interactive session without a <code>DATA_DIR</code>, <code>db2pq</code> asks for a data directory, can create a new directory if needed, and offers to store <code>DATA_DIR</code> in either project-level <code>.Renviron</code> or user-level <code>~/.Renviron</code>. That scope choice is useful for data repositories; the interactive WRDS username prompt stores <code>WRDS_ID</code> in user-level <code>~/.Renviron</code>.</p>
+</section><section class="level2"><h2 id="related-pages">Related pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
 </h2>
 <ul>
 <li>WRDS to Parquet article</li>
 <li>Data management article</li>
 <li><code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code></li>
 <li><code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code></li>
-<li><code><a href="../reference/pgpass_path.html">pgpass_path()</a></code></li>
 </ul></section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);

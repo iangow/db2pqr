@@ -1,6 +1,7 @@
-# Authentication
+# WRDS authentication
 
-There are two elements required for a WRDS PostgreSQL authentication:
+There are two elements required for authentication of a WRDS PostgreSQL
+connection:
 
 1.  the WRDS username
 2.  the WRDS password for that username
@@ -90,9 +91,7 @@ PostgreSQL’s `.pgpass` mechanism is preferred to putting a password in R
 code. It also works with RPostgres/libpq and other PostgreSQL tools, not
 only `db2pq`.
 
-The default password-file path used by
-[`pgpass_path()`](https://iangow.github.io/db2pqr/reference/pgpass_path.md)
-is:
+The default PostgreSQL password-file path is:
 
 - `~/.pgpass` on macOS and Linux
 - `%APPDATA%/postgresql/pgpass.conf` on Windows
@@ -111,7 +110,7 @@ automatically; for a file created manually, set it with:
 chmod 600 ~/.pgpass
 ```
 
-## Inspect and Test the Setup
+## Inspecting and testing your setup
 
 Use
 [`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md)
@@ -134,7 +133,7 @@ The returned diagnostic reports whether a small WRDS PostgreSQL
 connection succeeded and whether the matching target appears in
 `.pgpass`.
 
-## Existing `wrds` Package Credentials
+## Existing `wrds` package credentials
 
 If you already use the `wrds` package, its keyring-based setup remains a
 valid path:
@@ -145,12 +144,12 @@ wrds::wrds_set_credentials()
 wrds_update_pq("company", "comp")
 ```
 
-Use this route when you want to stay close to existing R WRDS code. Use
-the environment-variable plus `.pgpass` route when you want credentials
-to work across `db2pq`, RPostgres/libpq, and other PostgreSQL tools on
-the same machine.
+Use this route when you want to stay close to existing R WRDS code you
+may have using the `wrds` package. Use the environment-variable plus
+`.pgpass` route when you want credentials to work across `db2pq`,
+RPostgres/libpq, and other PostgreSQL tools on the same machine.
 
-## SAS-Based Workflows
+## SAS-based workflows
 
 Most `db2pq` WRDS work uses WRDS PostgreSQL. If you set
 `use_sas = TRUE`, `db2pq` also retrieves metadata from the WRDS SAS side
@@ -159,7 +158,7 @@ see the [WRDS SSH setup
 article](https://iangow.github.io/db2pqr/articles/wrds-ssh.md) before
 using SAS metadata in unattended refresh scripts.
 
-## Environment Variables in R
+## Environment variables in R
 
 [`Sys.setenv()`](https://rdrr.io/r/base/Sys.setenv.html) is useful for a
 running R session:
@@ -203,22 +202,22 @@ machine-specific, or secret values. After editing a `.Renviron` file,
 start a new R session or load it explicitly with
 [`readRenviron()`](https://rdrr.io/r/base/readRenviron.html).
 
-For first-time `DATA_DIR` setup, call
-[`db2pq_data_dir()`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md)
-or let a Parquet helper call it as its default. In an interactive
-session without a `DATA_DIR`, the helper asks for a data directory, can
-create a new directory if needed, and offers to store `DATA_DIR` in
-either project-level `.Renviron` or user-level `~/.Renviron`. That scope
-choice is useful for data repositories; the interactive WRDS username
-prompt stores `WRDS_ID` in user-level `~/.Renviron`.
+For first-time `DATA_DIR` setup, call a Parquet helper such as
+[`wrds_update_pq()`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md)
+in an interactive session and let its default data-directory handling
+run. In an interactive session without a `DATA_DIR`, `db2pq` asks for a
+data directory, can create a new directory if needed, and offers to
+store `DATA_DIR` in either project-level `.Renviron` or user-level
+`~/.Renviron`. That scope choice is useful for data repositories; the
+interactive WRDS username prompt stores `WRDS_ID` in user-level
+`~/.Renviron`.
 
-## Related Pages
+## Related pages
 
 - WRDS to Parquet article
 - Data management article
 - [`wrds_get_username()`](https://iangow.github.io/db2pqr/reference/wrds_get_username.md)
 - [`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md)
-- [`pgpass_path()`](https://iangow.github.io/db2pqr/reference/pgpass_path.md)
 
 [^1]: `WRDS_USER` is accepted mainly for compatibility with the Tidy
     Finance setup.

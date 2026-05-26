@@ -15,7 +15,7 @@ db_to_pq(
   user = Sys.getenv("PGUSER", Sys.info()[["user"]]),
   password = Sys.getenv("PGPASSWORD", ""),
   port = as.integer(Sys.getenv("PGPORT", 5432)),
-  data_dir = db2pq_data_dir(),
+  data_dir = NULL,
   out_file = NULL,
   where = NULL,
   obs = NULL,
@@ -50,8 +50,8 @@ db_to_pq(
 
 - data_dir:
 
-  Root directory of the local Parquet data repository. Defaults to
-  [`db2pq_data_dir`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md).
+  Root directory of the local Parquet data repository. Defaults to the
+  `DATA_DIR` environment variable, with interactive setup when needed.
 
 - out_file:
 

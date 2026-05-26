@@ -230,10 +230,10 @@ For example:
 
 The `DATA_DIR` environment variable sets the root directory. It can also
 be passed directly as `data_dir` to any function. For first-time setup,
-an interactive Parquet helper can call
-[`db2pq_data_dir()`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md)
-to select or create the directory and save `DATA_DIR` in project-level
-or user-level `.Renviron`.
+an interactive Parquet helper can select or create the directory and
+save `DATA_DIR` in project-level or user-level `.Renviron`. Use
+[`pq_data_dir()`](https://iangow.github.io/db2pqr/reference/pq_data_dir.md)
+to inspect or resolve the directory that `db2pq` will use by default.
 
 When `archive = TRUE`, replaced files are moved to:
 
@@ -247,10 +247,18 @@ MIT License. See `LICENSE.md`.
 
 # Package index
 
-## PostgreSQL and WRDS to Parquet
+## PostgreSQL to Parquet
+
+Functions for creating Parquet data from PostgreSQL sources.
 
 - [`db_to_pq()`](https://iangow.github.io/db2pqr/reference/db_to_pq.md)
   : Export a PostgreSQL table to Parquet
+
+- [`db_schema_to_pq()`](https://iangow.github.io/db2pqr/reference/db_schema_to_pq.md)
+  : Export all tables in a PostgreSQL schema to Parquet
+
+- [`db_schema_tables()`](https://iangow.github.io/db2pqr/reference/db_schema_tables.md)
+  : List PostgreSQL relations in a schema
 
 - [`lazy_tbl_to_pq()`](https://iangow.github.io/db2pqr/reference/lazy_tbl_to_pq.md)
   :
@@ -262,56 +270,36 @@ MIT License. See `LICENSE.md`.
 
   Export a lazy `dbplyr` table to Parquet via ADBC
 
+## WRDS to Parquet
+
+Functions for creating Parquet data from WRDS.
+
 - [`wrds_update_pq()`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md)
   : Export a WRDS table to Parquet, skipping if already up to date
-
 - [`wrds_schema_to_pq()`](https://iangow.github.io/db2pqr/reference/wrds_schema_to_pq.md)
   : Export all tables in a WRDS schema to Parquet
-
 - [`wrds_sql_to_pq()`](https://iangow.github.io/db2pqr/reference/wrds_sql_to_pq.md)
   : Export a WRDS SQL query to Parquet
-
-- [`db_schema_to_pq()`](https://iangow.github.io/db2pqr/reference/db_schema_to_pq.md)
-  : Export all tables in a PostgreSQL schema to Parquet
-
-- [`db_schema_tables()`](https://iangow.github.io/db2pqr/reference/db_schema_tables.md)
-  : List PostgreSQL relations in a schema
-
 - [`wrds_get_tables()`](https://iangow.github.io/db2pqr/reference/wrds_get_tables.md)
   : List WRDS relations in a schema
 
-## Authentication and configuration
+## WRDS authentication and configuration
 
 - [`wrds_get_username()`](https://iangow.github.io/db2pqr/reference/wrds_get_username.md)
   : Resolve a WRDS username
-
 - [`wrds_conninfo()`](https://iangow.github.io/db2pqr/reference/wrds_conninfo.md)
   : Build WRDS PostgreSQL connection information
-
+- [`wrds_connect_dbi()`](https://iangow.github.io/db2pqr/reference/wrds_connect_dbi.md)
+  : Connect to WRDS PostgreSQL with DBI
 - [`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md)
   : Check WRDS PostgreSQL credentials
 
-- [`db2pq_data_dir()`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md)
-  : Resolve the Parquet data repository directory
-
-- [`pgpass_path()`](https://iangow.github.io/db2pqr/reference/pgpass_path.md)
-  : PostgreSQL password file path
-
-- [`pgpass_find()`](https://iangow.github.io/db2pqr/reference/pgpass_find.md)
-  :
-
-  Find a matching `.pgpass` entry
-
-- [`pgpass_has_entry()`](https://iangow.github.io/db2pqr/reference/pgpass_has_entry.md)
-  :
-
-  Check for a matching `.pgpass` entry
-
-- [`adbc_diagnostics()`](https://iangow.github.io/db2pqr/reference/adbc_diagnostics.md)
-  : Report optional ADBC dependency status
-
 ## Parquet file utilities
 
+Some useful functions for managing Parquet data repositories.
+
+- [`pq_data_dir()`](https://iangow.github.io/db2pqr/reference/pq_data_dir.md)
+  : Resolve the Parquet data repository directory
 - [`pq_last_modified()`](https://iangow.github.io/db2pqr/reference/pq_last_modified.md)
   : Get last-modified metadata for Parquet data files
 - [`pq_archive()`](https://iangow.github.io/db2pqr/reference/pq_archive.md)
@@ -320,11 +308,14 @@ MIT License. See `LICENSE.md`.
   : Restore an archived Parquet file to the active schema directory
 - [`pq_remove()`](https://iangow.github.io/db2pqr/reference/pq_remove.md)
   : Remove a Parquet file from active or archive storage
-- [`arrow_type()`](https://iangow.github.io/db2pqr/reference/arrow_type.md)
-  : Resolve an Arrow data type from a string or pass through an existing
-  type
 
 ## ADBC development helpers
+
+ADBC support is experimental, as ABDC drivers are still early in their
+development.
+
+- [`adbc_diagnostics()`](https://iangow.github.io/db2pqr/reference/adbc_diagnostics.md)
+  : Report optional ADBC dependency status
 
 - [`con_to_adbi()`](https://iangow.github.io/db2pqr/reference/con_to_adbi.md)
   :
@@ -344,11 +335,12 @@ MIT License. See `LICENSE.md`.
   repository](https://iangow.github.io/db2pqr/articles/data-management.md):
 - [WRDS to
   Parquet](https://iangow.github.io/db2pqr/articles/wrds-to-parquet.md):
-- [Authentication](https://iangow.github.io/db2pqr/articles/authentication.md):
-- [WRDS SSH Setup for SAS
-  Metadata](https://iangow.github.io/db2pqr/articles/wrds-ssh.md):
+- [WRDS
+  authentication](https://iangow.github.io/db2pqr/articles/authentication.md):
+- [WRDS: Setting up SSH for SAS
+  metadata](https://iangow.github.io/db2pqr/articles/wrds-ssh.md):
 - [PostgreSQL to
   Parquet](https://iangow.github.io/db2pqr/articles/postgres-to-parquet.md):
-- [Examples Demonstrating Parquet Utility
-  Functions](https://iangow.github.io/db2pqr/articles/parquet-utilities-examples.md):
+- [Parquet utility
+  functions](https://iangow.github.io/db2pqr/articles/parquet-utilities-examples.md):
 - [ADBC backend](https://iangow.github.io/db2pqr/articles/adbc.md):

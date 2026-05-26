@@ -9,7 +9,7 @@
 #' @param host,database,user,password,port PostgreSQL connection parameters
 #'   used when `con` is not supplied.
 #' @param data_dir Root directory of the local Parquet data repository. Defaults
-#'   to \code{\link{db2pq_data_dir}}.
+#'   to the `DATA_DIR` environment variable, with interactive setup when needed.
 #' @param out_file Optional full output path. Overrides `data_dir`, `schema`,
 #'   and `table_name`.
 #' @param where Optional SQL `WHERE` clause without the `WHERE` keyword.
@@ -47,7 +47,7 @@ db_to_pq <- function(
     user = Sys.getenv("PGUSER", Sys.info()[["user"]]),
     password = Sys.getenv("PGPASSWORD", ""),
     port = as.integer(Sys.getenv("PGPORT", 5432)),
-    data_dir = db2pq_data_dir(),
+    data_dir = NULL,
     out_file = NULL,
     where = NULL,
     obs = NULL,
@@ -65,6 +65,7 @@ db_to_pq <- function(
     tz = NULL) {
   transfer_method <- match.arg(transfer_method)
   numeric_mode <- match.arg(numeric_mode)
+  data_dir <- pq_data_dir(data_dir)
 
   # Build output path: <data_dir>/<schema>/<table>.parquet
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name

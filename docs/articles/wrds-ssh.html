@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>WRDS SSH Setup for SAS Metadata • db2pq</title>
+<title>WRDS: Setting up SSH for SAS metadata • db2pq</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="wrds-ssh_files/libs/quarto-html/popper.min.js"></script><script src="wrds-ssh_files/libs/quarto-html/tippy.umd.min.js"></script><link href="wrds-ssh_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="wrds-ssh_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="WRDS SSH Setup for SAS Metadata">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="WRDS: Setting up SSH for SAS metadata">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -39,10 +39,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul>
 </li>
@@ -59,7 +59,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>WRDS SSH Setup for SAS Metadata</h1>
+      <h1>WRDS: Setting up SSH for SAS metadata</h1>
 
 
 
@@ -79,7 +79,7 @@
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"dsi"</span>, <span class="st">"crsp"</span>, use_sas <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>With <code>use_sas = TRUE</code>, <code>db2pq</code> retrieves last-modified dates by running <code>PROC CONTENTS</code> on the WRDS SAS server over SSH. This can be useful for tables whose PostgreSQL comment does not carry a reliable date.</p>
-<section class="level2"><h2 id="before-you-start">Before You Start<a class="anchor" aria-label="anchor" href="#before-you-start"></a>
+<section class="level2"><h2 id="before-you-start">Before you start<a class="anchor" aria-label="anchor" href="#before-you-start"></a>
 </h2>
 <p>The <code>processx</code> package is required for the SAS metadata option:</p>
 <div class="cell">
@@ -90,12 +90,12 @@
 </section><section class="level2"><h2 id="configure-wrds-ssh">Configure WRDS SSH<a class="anchor" aria-label="anchor" href="#configure-wrds-ssh"></a>
 </h2>
 <p>WRDS provides a dedicated SSH endpoint for key-based authentication: <code>wrds-cloud-sshkey.wharton.upenn.edu</code>.</p>
-<section class="level3"><h3 id="generate-an-ssh-key">Generate an SSH Key<a class="anchor" aria-label="anchor" href="#generate-an-ssh-key"></a>
+<section class="level3"><h3 id="generate-an-ssh-key">Generate an SSH key<a class="anchor" aria-label="anchor" href="#generate-an-ssh-key"></a>
 </h3>
 <p>The ed25519 key type is a reasonable default:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"your_wrds_id@wrds"</span></span></code></pre></div>
 <p>Accept the default location (<code>~/.ssh/id_ed25519</code>). You may use a passphrase if your SSH agent is running. For unattended scripts, an empty passphrase may be required.</p>
-</section><section class="level3"><h3 id="copy-the-public-key-to-wrds">Copy the Public Key to WRDS<a class="anchor" aria-label="anchor" href="#copy-the-public-key-to-wrds"></a>
+</section><section class="level3"><h3 id="copy-the-public-key-to-wrds">Copy the public key to WRDS<a class="anchor" aria-label="anchor" href="#copy-the-public-key-to-wrds"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> ~/.ssh/id_ed25519.pub <span class="kw">|</span> <span class="dt">\</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ssh</span> your_wrds_id@wrds-cloud-sshkey.wharton.upenn.edu <span class="dt">\</span></span>
@@ -116,7 +116,7 @@
 <p>If SSH still prompts for a password, inspect the connection:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-vvv</span> wrds</span></code></pre></div>
 <p>Confirm that <code>publickey</code> appears in the list of authentication methods. Also check that <code>~/.ssh/config</code> uses the WRDS SSH endpoint and the key you copied to WRDS.</p>
-</section><section class="level2"><h2 id="related-pages">Related Pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
+</section><section class="level2"><h2 id="related-pages">Related pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
 </h2>
 <ul>
 <li><a href="authentication.html">Authentication</a></li>

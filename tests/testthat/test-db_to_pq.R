@@ -65,6 +65,7 @@ test_that("db_to_pq routes ADBC transfer through sql_to_pq_dev", {
       transfer_method = "adbc",
       con = local_con,
       metadata = list(source = "test"),
+      use_comment = FALSE,
       tz = NULL
     ),
     "out.parquet"
@@ -116,6 +117,7 @@ test_that("db_to_pq float64 numeric_mode casts numeric columns for adbc transfer
       transfer_method = "adbc",
       numeric_mode = "float64",
       con = local_con,
+      use_comment = FALSE,
       tz = NULL
     ),
     "out.parquet"
@@ -166,6 +168,7 @@ test_that("db_to_pq raw numeric_mode skips adbc numeric casts", {
       transfer_method = "adbc",
       numeric_mode = "raw",
       con = local_con,
+      use_comment = FALSE,
       tz = NULL
     ),
     "out.parquet"
@@ -475,7 +478,7 @@ test_that("wrds_update_pq forwards transfer_method to db_to_pq", {
     "db_to_pq",
     function(table_name, schema, data_dir, out_file, where, obs, keep, drop, rename,
              alt_table_name, chunk_size, transfer_method, numeric_mode, con, metadata,
-             col_types, tz) {
+             use_comment, col_types, tz) {
       expect_identical(table_name, "dsi")
       expect_identical(schema, "crsp")
       expect_identical(out_file, "out.parquet")
@@ -484,6 +487,7 @@ test_that("wrds_update_pq forwards transfer_method to db_to_pq", {
       expect_identical(numeric_mode, "decimal")
       expect_identical(con, local_con)
       expect_identical(metadata, list(last_modified = "Last modified: 03/15/2024 14:30:00"))
+      expect_false(use_comment)
       expect_null(col_types)
       expect_identical(tz, "UTC")
 
@@ -502,6 +506,67 @@ test_that("wrds_update_pq forwards transfer_method to db_to_pq", {
     ),
     "out.parquet"
   )
+})
+
+test_that("wrds_update_pq returns output path when already up to date", {
+  local_con <- structure(list(), class = "TestConnection")
+
+  restore_wrds_connect_dbi <- local_rebind(
+    ".wrds_connect_dbi",
+    function(...) local_con,
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_wrds_connect_dbi(), add = TRUE)
+
+  restore_disconnect <- local_rebind(
+    "dbDisconnect",
+    function(conn, ...) {
+      expect_identical(conn, local_con)
+      invisible(TRUE)
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_disconnect(), add = TRUE)
+
+  restore_get_query <- local_rebind(
+    "dbGetQuery",
+    function(conn, statement, params = NULL, ...) {
+      expect_identical(conn, local_con)
+      expect_match(statement, "obj_description")
+      expect_identical(params, list("comp.company"))
+      data.frame(comment = "Last modified: 03/15/2024 14:30:00")
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_get_query(), add = TRUE)
+
+  restore_get_pq_date <- local_rebind(
+    ".get_pq_date",
+    function(path) {
+      expect_identical(path, "out.parquet")
+      as.Date("2024-03-16")
+    },
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_get_pq_date(), add = TRUE)
+
+  restore_db_to_pq <- local_rebind(
+    "db_to_pq",
+    function(...) stop("db_to_pq should not be called for an up-to-date file."),
+    env = asNamespace("db2pq")
+  )
+  on.exit(restore_db_to_pq(), add = TRUE)
+
+  expect_message(
+    out <- db2pq::wrds_update_pq(
+      table_name = "company",
+      schema = "comp",
+      out_file = "out.parquet"
+    ),
+    "comp.company already up to date.",
+    fixed = TRUE
+  )
+  expect_identical(out, "out.parquet")
 })
 
 test_that("wrds_update_pq uses native ADBC connection for adbc transfer", {
@@ -549,11 +614,12 @@ test_that("wrds_update_pq uses native ADBC connection for adbc transfer", {
     "db_to_pq",
     function(table_name, schema, data_dir, out_file, where, obs, keep, drop, rename,
              alt_table_name, chunk_size, transfer_method, numeric_mode, con, metadata,
-             col_types, tz) {
+             use_comment, col_types, tz) {
       expect_identical(transfer_method, "adbc")
       expect_identical(chunk_size, 250000L)
       expect_identical(numeric_mode, "decimal")
       expect_identical(con, adbc_con)
+      expect_false(use_comment)
       invisible(out_file)
     },
     env = asNamespace("db2pq")
@@ -608,10 +674,11 @@ test_that("wrds_update_pq respects explicit chunk_size override for adbc", {
     "db_to_pq",
     function(table_name, schema, data_dir, out_file, where, obs, keep, drop, rename,
              alt_table_name, chunk_size, transfer_method, numeric_mode, con, metadata,
-             col_types, tz) {
+             use_comment, col_types, tz) {
       expect_identical(transfer_method, "adbc")
       expect_identical(chunk_size, 12345L)
       expect_identical(numeric_mode, "decimal")
+      expect_false(use_comment)
       invisible(out_file)
     },
     env = asNamespace("db2pq")
@@ -667,9 +734,10 @@ test_that("wrds_update_pq forwards raw numeric_mode for adbc", {
     "db_to_pq",
     function(table_name, schema, data_dir, out_file, where, obs, keep, drop, rename,
              alt_table_name, chunk_size, transfer_method, numeric_mode, con, metadata,
-             col_types, tz) {
+             use_comment, col_types, tz) {
       expect_identical(transfer_method, "adbc")
       expect_identical(numeric_mode, "raw")
+      expect_false(use_comment)
       invisible(out_file)
     },
     env = asNamespace("db2pq")

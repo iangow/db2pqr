@@ -10,6 +10,14 @@ Use the Python package for `pg_update_pq()`.
 library(db2pq)
 ```
 
+## Database connections
+
+The `db_to_pq()` function accepts arguments for `host`, `database`, `user`, `password`, and `port`.
+The default values for these are taken from environment variables `PGHOST`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`, and `PGPORT`, respectively.
+Values for these arguments can also be given to `db_schema_to_pq()`, which will pass them along to the `db_to_pq()` calls it makes.
+
+## Using `db_to_pq()`
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
@@ -28,6 +36,8 @@ db_to_pq(
 )
 ```
 
+## Using other functions
+
 Use `db_schema_tables()` to inspect available relations and `db_schema_to_pq()` to export an entire schema.
 
 ```{r}
@@ -38,7 +48,7 @@ db_schema_tables("ff")
 db_schema_to_pq("ff", data_dir = "~/pq_data")
 ```
 
-## PostgreSQL Numeric Columns
+## PostgreSQL numeric columns
 
 With the default `numeric_mode = "decimal"`, table exports preserve bounded PostgreSQL `NUMERIC(p, s)` columns as Parquet decimal columns.
 
@@ -83,8 +93,3 @@ While the R package does not implement general "update logic" of the WRDS-facing
 pq_last_modified("dsi", "crsp", data_dir = "~/pq_data")
 ```
 
-## Database connections
-
-The `db_to_pq()` function accepts arguments for `host`, `database`, `user`, `password`, and `port`.
-The default values for these are taken from environment variables `PGHOST`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`, and `PGPORT`, respectively.
-Values for these arguments can also be given to `db_schema_to_pq()`, which will pass them along to the `db_to_pq()` calls it makes.

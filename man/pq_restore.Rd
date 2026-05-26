@@ -7,7 +7,7 @@
 pq_restore(
   file_basename,
   schema,
-  data_dir = db2pq_data_dir(),
+  data_dir = NULL,
   archive = TRUE,
   archive_dir = "archive"
 )
@@ -19,7 +19,7 @@ pq_restore(
 \item{schema}{Schema name.}
 
 \item{data_dir}{Root directory of the Parquet data repository. Defaults to
-\code{\link{db2pq_data_dir}}.}
+the \code{DATA_DIR} environment variable, with interactive setup when needed.}
 
 \item{archive}{If \code{TRUE} (default), any existing file at the
 destination is archived before the restore. If \code{FALSE}, the function

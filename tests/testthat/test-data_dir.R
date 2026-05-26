@@ -11,7 +11,7 @@ local_rebind <- function(name, value, env) {
   }
 }
 
-test_that("db2pq_data_dir resolves explicit, environment, and fallback paths", {
+test_that("pq_data_dir resolves explicit, environment, and fallback paths", {
   old_data_dir <- Sys.getenv("DATA_DIR", unset = NA_character_)
   on.exit({
     if (is.na(old_data_dir)) {
@@ -22,11 +22,11 @@ test_that("db2pq_data_dir resolves explicit, environment, and fallback paths", {
   }, add = TRUE)
 
   Sys.unsetenv("DATA_DIR")
-  expect_identical(db2pq::db2pq_data_dir("~", prompt = FALSE), path.expand("~"))
-  expect_identical(db2pq::db2pq_data_dir(prompt = FALSE), ".")
+  expect_identical(db2pq::pq_data_dir("~", prompt = FALSE), path.expand("~"))
+  expect_identical(db2pq::pq_data_dir(prompt = FALSE), ".")
 
   Sys.setenv(DATA_DIR = "~/pq-data")
-  expect_identical(db2pq::db2pq_data_dir(prompt = FALSE), path.expand("~/pq-data"))
+  expect_identical(db2pq::pq_data_dir(prompt = FALSE), path.expand("~/pq-data"))
 })
 
 test_that("prompted DATA_DIR can create and persist a selected directory", {
@@ -80,7 +80,7 @@ test_that("prompted DATA_DIR can create and persist a selected directory", {
   on.exit(restore_renviron_path(), add = TRUE)
 
   expect_message(
-    data_dir <- db2pq::db2pq_data_dir(prompt = TRUE),
+    data_dir <- db2pq::pq_data_dir(prompt = TRUE),
     "Stored DATA_DIR"
   )
   expect_identical(data_dir, selected)
@@ -139,7 +139,7 @@ test_that("prompted DATA_DIR can skip the chooser for a new path", {
   on.exit(restore_scope(), add = TRUE)
 
   expect_message(
-    data_dir <- db2pq::db2pq_data_dir(prompt = TRUE),
+    data_dir <- db2pq::pq_data_dir(prompt = TRUE),
     "DATA_DIR has not been set"
   )
   expect_identical(data_dir, selected)

@@ -25,7 +25,7 @@
 #' @param schema Optional. Name of the schema (subdirectory under
 #'   \code{data_dir}).
 #' @param data_dir Root directory of the Parquet data repository. Defaults to
-#'   \code{\link{db2pq_data_dir}}.
+#'   the `DATA_DIR` environment variable, with interactive setup when needed.
 #' @param archive If \code{TRUE}, look in the archive subdirectory instead of
 #'   the main schema directory.
 #' @param archive_dir Name of the archive subdirectory. Defaults to
@@ -56,9 +56,10 @@
 pq_last_modified <- function(
     table_name = NULL,
     schema = NULL,
-    data_dir = db2pq_data_dir(),
+    data_dir = NULL,
     archive = FALSE,
     archive_dir = "archive") {
+  data_dir <- pq_data_dir(data_dir)
 
   if (!is.null(table_name)) {
     if (is.null(schema)) stop("schema is required when table_name is provided.")

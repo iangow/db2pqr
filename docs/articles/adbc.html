@@ -39,10 +39,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul>
 </li>
@@ -73,14 +73,22 @@
 
 
 
-    <p>The stable default transfer path uses DBI/RPostgres. The optional ADBC path can stream Arrow batches directly from PostgreSQL, but it depends on local driver builds and SSL support.</p>
-<p>As of April 2026, Apache Arrow ADBC 23 is current and the R <code>adbcpostgresql</code> package has a 0.23.0 CRAN release. Use <code><a href="../reference/adbc_diagnostics.html">adbc_diagnostics()</a></code> to inspect the optional packages installed in your R library:</p>
+    <p>The stable default transfer path uses DBI/RPostgres. The optional <em>experimental</em> ADBC path can stream Arrow batches directly from PostgreSQL, but it depends on local driver builds and SSL support, which the CRAN version of <code>adbcpostgresql</code> does not provide.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iangow/db2pqr" class="external-link">db2pq</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/adbc_diagnostics.html">adbc_diagnostics</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"dsi"</span>, <span class="st">"crsp"</span>, transfer_method <span class="op">=</span> <span class="st">"adbc"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>If the ADBC path reports an SSL/libpq error, use <code>transfer_method = "dbi"</code> or use an ADBC PostgreSQL driver that is built against an SSL-capable <code>libpq</code>. WRDS requires SSL, and the stable WRDS path remains DBI/RPostgres.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/con_to_adbi.html">con_to_adbi</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>Create an ADBC PostgreSQL connection from an RPostgres connection tbl_to_pq_debug() Debug the ADBC chunk fetch path for a lazy dbplyr table</p>
 
 
 

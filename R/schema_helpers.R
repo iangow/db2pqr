@@ -78,7 +78,7 @@ wrds_get_tables <- function(schema, wrds_id = NULL, views = FALSE) {
 #'
 #' @return Invisibly returns a named list of output paths.
 #' @export
-db_schema_to_pq <- function(schema, data_dir = db2pq_data_dir(),
+db_schema_to_pq <- function(schema, data_dir = NULL,
                             force = FALSE, tables = NULL, chunk_size = 100000L,
                             transfer_method = c("dbi", "adbc"),
                             numeric_mode = c("decimal", "float64", "text", "raw"),
@@ -86,6 +86,7 @@ db_schema_to_pq <- function(schema, data_dir = db2pq_data_dir(),
                             con = NULL, ...) {
   transfer_method <- match.arg(transfer_method)
   numeric_mode <- match.arg(numeric_mode)
+  data_dir <- pq_data_dir(data_dir)
 
   own_con <- is.null(con)
   if (own_con) {

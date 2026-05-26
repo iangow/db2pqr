@@ -13,6 +13,21 @@ Use the Python package for `pg_update_pq()`.
 library(db2pq)
 ```
 
+## Database connections
+
+The
+[`db_to_pq()`](https://iangow.github.io/db2pqr/reference/db_to_pq.md)
+function accepts arguments for `host`, `database`, `user`, `password`,
+and `port`. The default values for these are taken from environment
+variables `PGHOST`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`, and `PGPORT`,
+respectively. Values for these arguments can also be given to
+[`db_schema_to_pq()`](https://iangow.github.io/db2pqr/reference/db_schema_to_pq.md),
+which will pass them along to the
+[`db_to_pq()`](https://iangow.github.io/db2pqr/reference/db_to_pq.md)
+calls it makes.
+
+## Using `db_to_pq()`
+
 [`db_to_pq()`](https://iangow.github.io/db2pqr/reference/db_to_pq.md)
 exports PostgreSQL tables to Parquet using a DBI connection. It can
 filter rows, select columns, rename outputs, and apply Arrow type
@@ -29,6 +44,8 @@ db_to_pq(
   col_types = list(company_name = "string")
 )
 ```
+
+## Using other functions
 
 Use
 [`db_schema_tables()`](https://iangow.github.io/db2pqr/reference/db_schema_tables.md)
@@ -50,7 +67,7 @@ db_schema_tables("ff")
 db_schema_to_pq("ff", data_dir = "~/pq_data")
 ```
 
-## PostgreSQL Numeric Columns
+## PostgreSQL numeric columns
 
 With the default `numeric_mode = "decimal"`, table exports preserve
 bounded PostgreSQL `NUMERIC(p, s)` columns as Parquet decimal columns.
@@ -137,16 +154,3 @@ WRDS-facing functions, table comments are retained as Parquet metadata.
 pq_last_modified("dsi", "crsp", data_dir = "~/pq_data")
 #> [1] "Stock - Market Indexes Daily NYSE/AMEX/NASDAQ/ARCA (Updated 2025-02-08)"
 ```
-
-## Database connections
-
-The
-[`db_to_pq()`](https://iangow.github.io/db2pqr/reference/db_to_pq.md)
-function accepts arguments for `host`, `database`, `user`, `password`,
-and `port`. The default values for these are taken from environment
-variables `PGHOST`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`, and `PGPORT`,
-respectively. Values for these arguments can also be given to
-[`db_schema_to_pq()`](https://iangow.github.io/db2pqr/reference/db_schema_to_pq.md),
-which will pass them along to the
-[`db_to_pq()`](https://iangow.github.io/db2pqr/reference/db_to_pq.md)
-calls it makes.

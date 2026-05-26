@@ -29,12 +29,14 @@
 <url><loc>https://iangow.github.io/db2pqr/reference/pgpass_has_entry.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/pgpass_path.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/pq_archive.html</loc></url>
+<url><loc>https://iangow.github.io/db2pqr/reference/pq_data_dir.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/pq_last_modified.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/pq_remove.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/pq_restore.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/tbl_to_pq.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/tbl_to_pq_debug.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_check_credentials.html</loc></url>
+<url><loc>https://iangow.github.io/db2pqr/reference/wrds_connect_dbi.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_conninfo.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_get_tables.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_get_username.html</loc></url>

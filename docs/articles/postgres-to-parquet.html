@@ -39,10 +39,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul>
 </li>
@@ -78,6 +78,12 @@
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iangow/db2pqr" class="external-link">db2pq</a></span><span class="op">)</span></span></code></pre></div>
 </div>
+<section class="level2"><h2 id="database-connections">Database connections<a class="anchor" aria-label="anchor" href="#database-connections"></a>
+</h2>
+<p>The <code><a href="../reference/db_to_pq.html">db_to_pq()</a></code> function accepts arguments for <code>host</code>, <code>database</code>, <code>user</code>, <code>password</code>, and <code>port</code>. The default values for these are taken from environment variables <code>PGHOST</code>, <code>PGDATABASE</code>, <code>PGUSER</code>, <code>PGPASSWORD</code>, and <code>PGPORT</code>, respectively. Values for these arguments can also be given to <code><a href="../reference/db_schema_to_pq.html">db_schema_to_pq()</a></code>, which will pass them along to the <code><a href="../reference/db_to_pq.html">db_to_pq()</a></code> calls it makes.</p>
+</section><section class="level2"><h2 id="using-db_to_pq">Using <code>db_to_pq()</code>
+<a class="anchor" aria-label="anchor" href="#using-db_to_pq"></a>
+</h2>
 <p><code><a href="../reference/db_to_pq.html">db_to_pq()</a></code> exports PostgreSQL tables to Parquet using a DBI connection. It can filter rows, select columns, rename outputs, and apply Arrow type overrides.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
@@ -90,6 +96,8 @@
 <span>  col_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>company_name <span class="op">=</span> <span class="st">"string"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
+</section><section class="level2"><h2 id="using-other-functions">Using other functions<a class="anchor" aria-label="anchor" href="#using-other-functions"></a>
+</h2>
 <p>Use <code><a href="../reference/db_schema_tables.html">db_schema_tables()</a></code> to inspect available relations and <code><a href="../reference/db_schema_to_pq.html">db_schema_to_pq()</a></code> to export an entire schema.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
@@ -103,7 +111,7 @@
 <div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/db_schema_to_pq.html">db_schema_to_pq</a></span><span class="op">(</span><span class="st">"ff"</span>, data_dir <span class="op">=</span> <span class="st">"~/pq_data"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<section class="level2"><h2 id="postgresql-numeric-columns">PostgreSQL Numeric Columns<a class="anchor" aria-label="anchor" href="#postgresql-numeric-columns"></a>
+</section><section class="level2"><h2 id="postgresql-numeric-columns">PostgreSQL numeric columns<a class="anchor" aria-label="anchor" href="#postgresql-numeric-columns"></a>
 </h2>
 <p>With the default <code>numeric_mode = "decimal"</code>, table exports preserve bounded PostgreSQL <code>NUMERIC(p, s)</code> columns as Parquet decimal columns.</p>
 <div class="cell">
@@ -176,9 +184,6 @@
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span><span class="st">"dsi"</span>, <span class="st">"crsp"</span>, data_dir <span class="op">=</span> <span class="st">"~/pq_data"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Stock - Market Indexes Daily NYSE/AMEX/NASDAQ/ARCA (Updated 2025-02-08)"</span></span></code></pre></div>
 </div>
-</section><section class="level2"><h2 id="database-connections">Database connections<a class="anchor" aria-label="anchor" href="#database-connections"></a>
-</h2>
-<p>The <code><a href="../reference/db_to_pq.html">db_to_pq()</a></code> function accepts arguments for <code>host</code>, <code>database</code>, <code>user</code>, <code>password</code>, and <code>port</code>. The default values for these are taken from environment variables <code>PGHOST</code>, <code>PGDATABASE</code>, <code>PGUSER</code>, <code>PGPASSWORD</code>, and <code>PGPORT</code>, respectively. Values for these arguments can also be given to <code><a href="../reference/db_schema_to_pq.html">db_schema_to_pq()</a></code>, which will pass them along to the <code><a href="../reference/db_to_pq.html">db_to_pq()</a></code> calls it makes.</p>
 </section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);

@@ -1,30 +1,30 @@
-# Examples Demonstrating Parquet Utility Functions
+# Parquet utility functions
 
 This page groups together examples for the Parquet utility helpers:
+[`pq_data_dir()`](https://iangow.github.io/db2pqr/reference/pq_data_dir.md),
 [`pq_last_modified()`](https://iangow.github.io/db2pqr/reference/pq_last_modified.md),
 [`pq_archive()`](https://iangow.github.io/db2pqr/reference/pq_archive.md),
 [`pq_restore()`](https://iangow.github.io/db2pqr/reference/pq_restore.md),
 and
 [`pq_remove()`](https://iangow.github.io/db2pqr/reference/pq_remove.md).
 
-The goal is different from the API reference. The API pages document
-arguments and return values. This page shows how the utilities fit
-together in the practical workflow of maintaining a local Parquet
-repository.
+This page shows how the utilities fit together in the practical workflow
+of maintaining a local Parquet repository.
 
-## When to Use This Page
+## When to use these helpers
 
-Use these helpers when you already have a Parquet repository and want
-to:
+These functions generally help when you already have a Parquet
+repository and want to:
 
 - inspect what is in it
 - check which vintage of a table you currently have
 - archive a current active file before replacing it
 - restore an archived vintage
-- remove active or archived files explicitly
+- remove files
 
 The related API pages are:
 
+- [`pq_data_dir()`](https://iangow.github.io/db2pqr/reference/pq_data_dir.md)
 - [`pq_last_modified()`](https://iangow.github.io/db2pqr/reference/pq_last_modified.md)
 - [`pq_archive()`](https://iangow.github.io/db2pqr/reference/pq_archive.md)
 - [`pq_restore()`](https://iangow.github.io/db2pqr/reference/pq_restore.md)
@@ -47,6 +47,15 @@ Set `DATA_DIR` to the Parquet repository you want to inspect:
 Sys.setenv(DATA_DIR = "~/Dropbox/pq_data")
 ```
 
+Use
+[`pq_data_dir()`](https://iangow.github.io/db2pqr/reference/pq_data_dir.md)
+when you want to confirm which repository `db2pq` will use by default:
+
+``` r
+
+pq_data_dir(prompt = FALSE)
+```
+
 The examples below are rendered from a local Parquet repository. The
 examples that move files run only during a local `pkgdown` render when
 the repository contains `comp.company` and `crsp.dsi`.
@@ -63,18 +72,18 @@ pq_last_modified(schema = "comp") |>
   select(file_name, table, last_mod) |>
   head(10)
 #> # A tibble: 10 × 3
-#>    file_name   table       last_mod           
-#>    <chr>       <chr>       <dttm>             
-#>  1 aco_pnfnda  aco_pnfnda  2026-05-21 06:00:00
-#>  2 adsprate    adsprate    2026-04-09 06:00:00
-#>  3 co_adesind  co_adesind  2026-04-09 06:00:00
-#>  4 co_afnd2    co_afnd2    2026-04-09 06:00:00
-#>  5 co_filedate co_filedate 2026-04-09 06:00:00
-#>  6 co_hgic     co_hgic     2026-04-09 06:00:00
-#>  7 co_ifndq    co_ifndq    2026-04-09 06:00:00
-#>  8 company     company     NA                 
-#>  9 funda       funda       2026-05-21 06:00:00
-#> 10 funda_fncd  funda_fncd  2026-05-21 06:00:00
+#>    file_name     table         last_mod           
+#>    <chr>         <chr>         <dttm>             
+#>  1 aco_pnfnda    aco_pnfnda    2026-05-25 06:00:00
+#>  2 adsprate      adsprate      2026-04-09 06:00:00
+#>  3 co_adesind    co_adesind    2026-04-09 06:00:00
+#>  4 co_afnd2      co_afnd2      2026-04-09 06:00:00
+#>  5 co_filedate   co_filedate   2026-04-09 06:00:00
+#>  6 co_hgic       co_hgic       2026-04-09 06:00:00
+#>  7 co_ifndq      co_ifndq      2026-04-09 06:00:00
+#>  8 company       company       2026-05-26 06:00:00
+#>  9 company_names company_names 2026-05-26 06:00:00
+#> 10 funda         funda         2026-05-25 06:00:00
 ```
 
 If you want to inspect archived files instead:
@@ -198,7 +207,7 @@ current `comp.company` file into its archive directory:
 
 company_archive <- pq_archive(file_name = company_file)
 basename(company_archive)
-#> [1] "company_unknown_modified.parquet"
+#> [1] "company_20260526T060000Z.parquet"
 ```
 
 This is useful when you want to preserve the current active vintage
@@ -227,7 +236,7 @@ can archive that file first with its default `archive = TRUE`.
 ``` r
 
 pq_last_modified(table_name = "company", schema = "comp")
-#> [1] ""
+#> [1] "Company (Updated 2026-05-26)"
 ```
 
 ## Remove a File Explicitly

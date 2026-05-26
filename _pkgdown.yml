@@ -9,36 +9,44 @@ navbar:
     right: [github]
 
 reference:
-  - title: PostgreSQL and WRDS to Parquet
+  - title: PostgreSQL to Parquet
+    desc: >
+      Functions for creating Parquet data from PostgreSQL sources.
     contents:
       - db_to_pq
+      - db_schema_to_pq
+      - db_schema_tables
       - lazy_tbl_to_pq
       - tbl_to_pq
+  - title: WRDS to Parquet
+    desc: >
+      Functions for creating Parquet data from WRDS.
+    contents:
       - wrds_update_pq
       - wrds_schema_to_pq
       - wrds_sql_to_pq
-      - db_schema_to_pq
-      - db_schema_tables
       - wrds_get_tables
-  - title: Authentication and configuration
+  - title: WRDS authentication and configuration
     contents:
       - wrds_get_username
       - wrds_conninfo
+      - wrds_connect_dbi
       - wrds_check_credentials
-      - db2pq_data_dir
-      - pgpass_path
-      - pgpass_find
-      - pgpass_has_entry
-      - adbc_diagnostics
   - title: Parquet file utilities
+    desc: >
+      Some useful functions for managing Parquet data repositories.
     contents:
+      - pq_data_dir
       - pq_last_modified
       - pq_archive
       - pq_restore
       - pq_remove
-      - arrow_type
   - title: ADBC development helpers
+    desc: >
+      ADBC support is experimental, as ABDC drivers are still 
+      early in their development.
     contents:
+      - adbc_diagnostics
       - con_to_adbi
       - tbl_to_pq_debug
 

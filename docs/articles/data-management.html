@@ -39,10 +39,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul>
 </li>
@@ -78,13 +78,6 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iangow/db2pqr" class="external-link">db2pq</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>This article outlines some ideas related to the task that <code>db2pq</code> is designed to support: building and maintaining a local Parquet repository of data from WRDS and other sources.</p>
-<p>The goal is to separate three concerns that often get mixed together in research code:</p>
-<ol type="1">
-<li>Getting data from the source system.</li>
-<li>Storing data locally in an efficient format.</li>
-<li>Running analysis code against local data.</li>
-</ol>
-<p>The <code>db2pq</code> focuses on the first two steps. Analysis code can then use packages such as <code>arrow</code>, <code>duckdb</code>, <code>dplyr</code>, or <code>polars</code> to work with the Parquet files.</p>
 <section class="level2"><h2 id="some-concepts-in-data-management">Some concepts in data management<a class="anchor" aria-label="anchor" href="#some-concepts-in-data-management"></a>
 </h2>
 <section class="level3"><h3 id="scope">Scope<a class="anchor" aria-label="anchor" href="#scope"></a>
@@ -102,26 +95,28 @@
 <p>Of course, an alternative to using Parquet files would be using a database, such as PostgreSQL. I think such systems have a lot of merit (and I have used PostgreSQL to store WRDS data since 2011), but I think they are more complicated for most users’ needs and their benefits (e.g., shared access to data and rock-solid assurance) are less meaningful for most.</p>
 <p>Another alternative is the CSV file, perhaps compressed. I think if one were sending data on the next Voyager mission, then CSV might be the chosen format.<a class="footnote-ref" role="doc-noteref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Each of the two Voyager spacecraft, launched by NASA in 1977, carry the Voyager Golden Record, a gold-plated copper phonograph record intended as a message to any intelligent extraterrestrial lifeforms that might encounter the probes. If we wanted to give data to such lifeforms, I think it would be (quoted) CSV data and written on paper.&lt;/p&gt;"><sup>4</sup></a> Or if you really, really wanted data novices to inspect your data in Excel or Word, then CSV might be the go-to option. Or perhaps you want to put your data in a written form in a book for users to type in. For any other purpose with serious data needs, I think Parquet dominates.</p>
 <p>One issue with CSV is that one is always dealing with type inference (string, integer, timestamp) and I think that type inference is one of those problems you want to solve once for any given dataset. For the WRDS data that is the focus of this note, I think CSV is to be avoided.</p>
+<p>In any case, <code>db2pq</code> is focused on creating and managing a Parquet data repository.</p>
 </section></section><section class="level2"><h2 id="setting-data_dir">Setting <code>DATA_DIR</code>
 <a class="anchor" aria-label="anchor" href="#setting-data_dir"></a>
 </h2>
+<p>A key idea of the approach used by <code>db2pq</code> is that the Parquet data repository has a root directory under which the data are organized into schemas. It is perhaps easiest to refer to this root directory as <code>DATA_DIR</code>. When the environment variable <code>DATA_DIR</code> is set, then <code>db2pq</code> function will organize data under that directory. Similarly, functions such as <code>load_parquet()</code> from the <code>farr</code> package will look for data in schemas under that directory. In this way, the same code can work with a repository in different folders on different machines.</p>
 <section class="level3"><h3 id="first-time-setup">First-Time Setup<a class="anchor" aria-label="anchor" href="#first-time-setup"></a>
 </h3>
-<p>The root of the data repository is set in <code>DATA_DIR</code>, so the same refresh code can work with a repository on different machines or in different projects. When <code>DATA_DIR</code> is missing in an interactive session, you will be asked to select a directory. You will then be given three choices for persisting the directory you have chosen:</p>
+<p>If you run a function like <code><a href="../reference/wrds_update_pq.html">wrds_update_pq()</a></code> without setting <code>DATA_DIR</code>, you will be asked to select a directory. You will then be given three choices for persisting the directory you have chosen:</p>
 <ul>
 <li>a <strong>project</strong>-level <code>DATA_DIR</code> (stored in <code>.Renviron</code>)</li>
 <li>a <strong>user</strong>-level <code>DATA_DIR</code> (using <code>~/.Renviron</code>)</li>
 <li>no persistence</li>
 </ul>
 <p><code>db2pq</code> writes Parquet files into a local repository.</p>
-<p>For example, this call:</p>
+<p>For example, this call will, if the file does not exist need to be updated write a Parquet file using data from the WRDS database.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iangow/db2pqr" class="external-link">db2pq</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"dsi"</span>, <span class="st">"crsp"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<p>writes the active Parquet file to:</p>
+<p>The data are written to the Parquet file in:</p>
 <pre class="text"><code>&lt;DATA_DIR&gt;/crsp/dsi.parquet</code></pre>
 <p>The standard layout is:</p>
 <pre class="text"><code>&lt;DATA_DIR&gt;/&lt;schema&gt;/&lt;table&gt;.parquet</code></pre>
@@ -129,20 +124,18 @@
 <pre class="text"><code>&lt;DATA_DIR&gt;/&lt;schema&gt;/archive/&lt;table&gt;_&lt;timestamp&gt;.parquet</code></pre>
 </section><section class="level3"><h3 id="explicit-overrides">Explicit Overrides<a class="anchor" aria-label="anchor" href="#explicit-overrides"></a>
 </h3>
-<p>You do not have to use <code>DATA_DIR</code>. An explicit <code>data_dir</code> argument overrides the default for a call:</p>
+<p>An explicit <code>data_dir</code> argument will override the default for a call:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"dsi"</span>, <span class="st">"crsp"</span>, data_dir <span class="op">=</span> <span class="st">"data"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<p>That pattern is useful when a refresh script should write a project-level copy while your default <code>DATA_DIR</code> still points at a shared local library.</p>
-<p>For non-interactive code, set <code>DATA_DIR</code> or pass <code>data_dir</code> explicitly when the working directory is not the repository root you intend to use.</p>
 </section></section><section class="level2"><h2 id="related-pages">Related Pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>
 </h2>
 <ul>
 <li>
-<a href="authentication.html">Authentication</a> covers <code>WRDS_ID</code>, passwords, and <code>.pgpass</code>.</li>
-<li>
 <a href="wrds-to-parquet.html">WRDS to Parquet</a> shows the refresh workflow.</li>
+<li>
+<a href="authentication.html">Authentication</a> covers <code>WRDS_ID</code>, passwords, and <code>.pgpass</code>.</li>
 </ul>
 <div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-Welch:2019aa" class="csl-entry" role="listitem">

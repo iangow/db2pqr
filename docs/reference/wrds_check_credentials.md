@@ -12,7 +12,7 @@ wrds_check_credentials(
   password = NULL,
   prompt = interactive(),
   save = TRUE,
-  passfile = pgpass_path()
+  passfile = NULL
 )
 ```
 
@@ -44,8 +44,7 @@ wrds_check_credentials(
 - passfile:
 
   PostgreSQL password-file path. Defaults to `PGPASSFILE` when set,
-  otherwise the platform default from
-  [`pgpass_path`](https://iangow.github.io/db2pqr/reference/pgpass_path.md).
+  otherwise the platform default password-file path.
 
 ## Value
 

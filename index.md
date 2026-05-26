@@ -201,9 +201,9 @@ For example:
 
 The `DATA_DIR` environment variable sets the root directory. It can also
 be passed directly as `data_dir` to any function. For first-time setup,
-an interactive Parquet helper can call `db2pq_data_dir()` to select or
-create the directory and save `DATA_DIR` in project-level or user-level
-`.Renviron`.
+an interactive Parquet helper can select or create the directory and save
+`DATA_DIR` in project-level or user-level `.Renviron`. Use `pq_data_dir()`
+to inspect or resolve the directory that `db2pq` will use by default.
 
 When `archive = TRUE`, replaced files are moved to:
 

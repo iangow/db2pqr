@@ -6,9 +6,9 @@
 #'
 #' @section Configuration:
 #' `DATA_DIR` controls the default root directory for Parquet output;
-#' \code{\link{db2pq_data_dir}} can guide interactive first-time setup. WRDS
-#' helpers resolve usernames from explicit arguments, `WRDS_ID`, `WRDS_USER`,
-#' and then the credential store used by the `wrds` package.
+#' \code{\link{pq_data_dir}} shows or resolves the default Parquet repository
+#' location. WRDS helpers resolve usernames from explicit arguments, `WRDS_ID`,
+#' `WRDS_USER`, and then the credential store used by the `wrds` package.
 #'
 #' @keywords internal
 "_PACKAGE"

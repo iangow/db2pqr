@@ -7,7 +7,7 @@
 pq_last_modified(
   table_name = NULL,
   schema = NULL,
-  data_dir = db2pq_data_dir(),
+  data_dir = NULL,
   archive = FALSE,
   archive_dir = "archive"
 )
@@ -19,7 +19,7 @@ pq_last_modified(
 \code{data_dir}).}
 
 \item{data_dir}{Root directory of the Parquet data repository. Defaults to
-\code{\link{db2pq_data_dir}}.}
+the \code{DATA_DIR} environment variable, with interactive setup when needed.}
 
 \item{archive}{If \code{TRUE}, look in the archive subdirectory instead of
 the main schema directory.}

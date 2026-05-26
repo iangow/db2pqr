@@ -12,7 +12,7 @@ db_to_pq(
   user = Sys.getenv("PGUSER", Sys.info()[["user"]]),
   password = Sys.getenv("PGPASSWORD", ""),
   port = as.integer(Sys.getenv("PGPORT", 5432)),
-  data_dir = db2pq_data_dir(),
+  data_dir = NULL,
   out_file = NULL,
   where = NULL,
   obs = NULL,
@@ -39,7 +39,7 @@ db_to_pq(
 used when \code{con} is not supplied.}
 
 \item{data_dir}{Root directory of the local Parquet data repository. Defaults
-to \code{\link{db2pq_data_dir}}.}
+to the \code{DATA_DIR} environment variable, with interactive setup when needed.}
 
 \item{out_file}{Optional full output path. Overrides \code{data_dir}, \code{schema},
 and \code{table_name}.}

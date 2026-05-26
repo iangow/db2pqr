@@ -78,17 +78,7 @@
 #'
 #' @return An Arrow \code{DataType} object.
 #'
-#' @examples
-#' \dontrun{
-#' arrow_type("int32")$ToString()    # "int32"
-#' arrow_type("double")$ToString()   # "double"
-#' arrow_type("date")$ToString()     # "date32"
-#'
-#' # Passing an already-resolved type is a no-op
-#' arrow_type(arrow::float32())$ToString()
-#' }
-#'
-#' @export
+#' @noRd
 arrow_type <- function(x) {
   if (inherits(x, "DataType")) return(x)
   if (!is.character(x) || length(x) != 1L) {
@@ -97,7 +87,7 @@ arrow_type <- function(x) {
   constructor <- .ARROW_TYPE_MAP[[x]]
   if (is.null(constructor)) {
     stop("Unknown Arrow type name: \"", x, "\". ",
-         "See ?arrow_type for supported names.")
+         "Supported names include: ", paste(names(.ARROW_TYPE_MAP), collapse = ", "), ".")
   }
   constructor()
 }

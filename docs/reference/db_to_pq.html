@@ -26,10 +26,10 @@ timestamp normalization."></head><body>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -63,7 +63,7 @@ timestamp normalization.</p>
 <span>  user <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"PGUSER"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info</a></span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="st">"user"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>  password <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"PGPASSWORD"</span>, <span class="st">""</span><span class="op">)</span>,</span>
 <span>  port <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"PGPORT"</span>, <span class="fl">5432</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  data_dir <span class="op">=</span> <span class="fu"><a href="db2pq_data_dir.html">db2pq_data_dir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  data_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  out_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  where <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  obs <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -101,7 +101,7 @@ used when <code>con</code> is not supplied.</p></dd>
 
 <dt id="arg-data-dir">data_dir<a class="anchor" aria-label="anchor" href="#arg-data-dir"></a></dt>
 <dd><p>Root directory of the local Parquet data repository. Defaults
-to <code><a href="db2pq_data_dir.html">db2pq_data_dir</a></code>.</p></dd>
+to the <code>DATA_DIR</code> environment variable, with interactive setup when needed.</p></dd>
 
 
 <dt id="arg-out-file">out_file<a class="anchor" aria-label="anchor" href="#arg-out-file"></a></dt>

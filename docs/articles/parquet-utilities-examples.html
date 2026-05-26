@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Examples Demonstrating Parquet Utility Functions • db2pq</title>
+<title>Parquet utility functions • db2pq</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="parquet-utilities-examples_files/libs/quarto-html/popper.min.js"></script><script src="parquet-utilities-examples_files/libs/quarto-html/tippy.umd.min.js"></script><link href="parquet-utilities-examples_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="parquet-utilities-examples_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Examples Demonstrating Parquet Utility Functions">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Parquet utility functions">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -39,10 +39,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul>
 </li>
@@ -59,7 +59,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Examples Demonstrating Parquet Utility Functions</h1>
+      <h1>Parquet utility functions</h1>
 
 
 
@@ -73,20 +73,21 @@
 
 
 
-    <p>This page groups together examples for the Parquet utility helpers: <code><a href="../reference/pq_last_modified.html">pq_last_modified()</a></code>, <code><a href="../reference/pq_archive.html">pq_archive()</a></code>, <code><a href="../reference/pq_restore.html">pq_restore()</a></code>, and <code><a href="../reference/pq_remove.html">pq_remove()</a></code>.</p>
-<p>The goal is different from the API reference. The API pages document arguments and return values. This page shows how the utilities fit together in the practical workflow of maintaining a local Parquet repository.</p>
-<section class="level2"><h2 id="when-to-use-this-page">When to Use This Page<a class="anchor" aria-label="anchor" href="#when-to-use-this-page"></a>
+    <p>This page groups together examples for the Parquet utility helpers: <code><a href="../reference/pq_data_dir.html">pq_data_dir()</a></code>, <code><a href="../reference/pq_last_modified.html">pq_last_modified()</a></code>, <code><a href="../reference/pq_archive.html">pq_archive()</a></code>, <code><a href="../reference/pq_restore.html">pq_restore()</a></code>, and <code><a href="../reference/pq_remove.html">pq_remove()</a></code>.</p>
+<p>This page shows how the utilities fit together in the practical workflow of maintaining a local Parquet repository.</p>
+<section class="level2"><h2 id="when-to-use-these-helpers">When to use these helpers<a class="anchor" aria-label="anchor" href="#when-to-use-these-helpers"></a>
 </h2>
-<p>Use these helpers when you already have a Parquet repository and want to:</p>
+<p>These functions generally help when you already have a Parquet repository and want to:</p>
 <ul>
 <li>inspect what is in it</li>
 <li>check which vintage of a table you currently have</li>
 <li>archive a current active file before replacing it</li>
 <li>restore an archived vintage</li>
-<li>remove active or archived files explicitly</li>
+<li>remove files</li>
 </ul>
 <p>The related API pages are:</p>
 <ul>
+<li><code><a href="../reference/pq_data_dir.html">pq_data_dir()</a></code></li>
 <li><code><a href="../reference/pq_last_modified.html">pq_last_modified()</a></code></li>
 <li><code><a href="../reference/pq_archive.html">pq_archive()</a></code></li>
 <li><code><a href="../reference/pq_restore.html">pq_restore()</a></code></li>
@@ -104,32 +105,37 @@
 <div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>DATA_DIR <span class="op">=</span> <span class="st">"~/Dropbox/pq_data"</span><span class="op">)</span></span></code></pre></div>
 </div>
+<p>Use <code><a href="../reference/pq_data_dir.html">pq_data_dir()</a></code> when you want to confirm which repository <code>db2pq</code> will use by default:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_data_dir.html">pq_data_dir</a></span><span class="op">(</span>prompt <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+</div>
 <p>The examples below are rendered from a local Parquet repository. The examples that move files run only during a local <code>pkgdown</code> render when the repository contains <code>comp.company</code> and <code>crsp.dsi</code>.</p>
 </section><section class="level2"><h2 id="inspect-a-schema-directory">Inspect a Schema Directory<a class="anchor" aria-label="anchor" href="#inspect-a-schema-directory"></a>
 </h2>
 <p>Use <code><a href="../reference/pq_last_modified.html">pq_last_modified()</a></code> without <code>table_name</code> to summarize the active Parquet files in a schema:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"comp"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 10 × 3</span></span>
-<span><span class="co">#&gt;    file_name   table       last_mod           </span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;       &lt;chr&gt;       &lt;dttm&gt;             </span></span>
-<span><span class="co">#&gt;  1 aco_pnfnda  aco_pnfnda  2026-05-21 06:00:00</span></span>
-<span><span class="co">#&gt;  2 adsprate    adsprate    2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  3 co_adesind  co_adesind  2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  4 co_afnd2    co_afnd2    2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  5 co_filedate co_filedate 2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  6 co_hgic     co_hgic     2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  7 co_ifndq    co_ifndq    2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  8 company     company     NA                 </span></span>
-<span><span class="co">#&gt;  9 funda       funda       2026-05-21 06:00:00</span></span>
-<span><span class="co">#&gt; 10 funda_fncd  funda_fncd  2026-05-21 06:00:00</span></span></code></pre></div>
+<span><span class="co">#&gt;    file_name     table         last_mod           </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;         &lt;chr&gt;         &lt;dttm&gt;             </span></span>
+<span><span class="co">#&gt;  1 aco_pnfnda    aco_pnfnda    2026-05-25 06:00:00</span></span>
+<span><span class="co">#&gt;  2 adsprate      adsprate      2026-04-09 06:00:00</span></span>
+<span><span class="co">#&gt;  3 co_adesind    co_adesind    2026-04-09 06:00:00</span></span>
+<span><span class="co">#&gt;  4 co_afnd2      co_afnd2      2026-04-09 06:00:00</span></span>
+<span><span class="co">#&gt;  5 co_filedate   co_filedate   2026-04-09 06:00:00</span></span>
+<span><span class="co">#&gt;  6 co_hgic       co_hgic       2026-04-09 06:00:00</span></span>
+<span><span class="co">#&gt;  7 co_ifndq      co_ifndq      2026-04-09 06:00:00</span></span>
+<span><span class="co">#&gt;  8 company       company       2026-05-26 06:00:00</span></span>
+<span><span class="co">#&gt;  9 company_names company_names 2026-05-26 06:00:00</span></span>
+<span><span class="co">#&gt; 10 funda         funda         2026-05-25 06:00:00</span></span></code></pre></div>
 </div>
 <p>If you want to inspect archived files instead:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
@@ -149,7 +155,7 @@
 </div>
 <p>If your project uses a repository outside the default <code>DATA_DIR</code>, pass <code>data_dir</code> explicitly:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"crsp"</span>, data_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"DATA_DIR"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
@@ -166,7 +172,7 @@
 </h2>
 <p>With <code>table_name</code> and <code>schema</code>, <code><a href="../reference/pq_last_modified.html">pq_last_modified()</a></code> returns the raw embedded <code>last_modified</code> metadata string for the active file:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"dsi"</span>, schema <span class="op">=</span> <span class="st">"crsp"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Stock - Market Indexes Daily NYSE/AMEX/NASDAQ/ARCA (Updated 2025-02-08)"</span></span></code></pre></div>
 </div>
@@ -175,7 +181,7 @@
 </h2>
 <p>If you archive replaced files, you can ask for the archived versions of a table:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"company"</span>, schema <span class="op">=</span> <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span>, <span class="va">last_mod_str</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
@@ -195,7 +201,7 @@
 </div>
 <p>That returns a table-like summary of the archived vintages for the requested dataset. To inspect archived files for a whole schema, use <code>schema</code> without <code>table_name</code>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
@@ -217,22 +223,22 @@
 </h2>
 <p>You can archive a file manually even outside an update workflow:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_archive.html">pq_archive</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"company"</span>, schema <span class="op">=</span> <span class="st">"comp"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>Or archive an exact file path. During the live render, this moves the current <code>comp.company</code> file into its archive directory:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">company_archive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pq_archive.html">pq_archive</a></span><span class="op">(</span>file_name <span class="op">=</span> <span class="va">company_file</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">company_archive</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "company_unknown_modified.parquet"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "company_20260526T060000Z.parquet"</span></span></code></pre></div>
 </div>
 <p>This is useful when you want to preserve the current active vintage before running an experimental refresh or downstream transformation.</p>
 </section><section class="level2"><h2 id="restore-an-archived-vintage">Restore an Archived Vintage<a class="anchor" aria-label="anchor" href="#restore-an-archived-vintage"></a>
 </h2>
 <p>To promote an archived file back into the active schema directory:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">restored_company</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pq_restore.html">pq_restore</a></span><span class="op">(</span></span>
 <span>  <span class="fu">tools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/tools/fileutils.html" class="external-link">file_path_sans_ext</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">company_archive</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="st">"comp"</span>,</span>
@@ -243,20 +249,20 @@
 </div>
 <p>The archived basename may include or omit the <code>.parquet</code> suffix. If an active destination file already exists, <code><a href="../reference/pq_restore.html">pq_restore()</a></code> can archive that file first with its default <code>archive = TRUE</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"company"</span>, schema <span class="op">=</span> <span class="st">"comp"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] ""</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Company (Updated 2026-05-26)"</span></span></code></pre></div>
 </div>
 </section><section class="level2"><h2 id="remove-a-file-explicitly">Remove a File Explicitly<a class="anchor" aria-label="anchor" href="#remove-a-file-explicitly"></a>
 </h2>
 <p>Use <code><a href="../reference/pq_remove.html">pq_remove()</a></code> when you want to delete an active or archived file rather than archive it. The removal examples below are shown but not run during the documentation build. For an active file:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_remove.html">pq_remove</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"dsi"</span>, schema <span class="op">=</span> <span class="st">"crsp"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>To remove an archived file:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_remove.html">pq_remove</a></span><span class="op">(</span></span>
 <span>  table_name <span class="op">=</span> <span class="st">"company_20260407T060000Z"</span>,</span>
 <span>  schema <span class="op">=</span> <span class="st">"comp"</span>,</span>
@@ -265,7 +271,7 @@
 </div>
 <p>Or remove a file by exact path:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_remove.html">pq_remove</a></span><span class="op">(</span>file_name <span class="op">=</span> <span class="va">company_archive</span><span class="op">)</span></span></code></pre></div>
 </div>
 </section><section class="level2"><h2 id="related-pages">Related Pages<a class="anchor" aria-label="anchor" href="#related-pages"></a>

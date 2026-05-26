@@ -9,7 +9,8 @@
 #' @param table_name Name of the table in the WRDS PostgreSQL database.
 #' @param schema Name of the database schema (e.g. \code{"crsp"}, \code{"comp"}).
 #' @param data_dir Root directory of the local Parquet data repository. Defaults
-#'   to \code{\link{db2pq_data_dir}}. The output file is written to
+#'   to the `DATA_DIR` environment variable, with interactive setup when needed.
+#'   The output file is written to
 #'   \code{<data_dir>/<schema>/<table_name>.parquet}.
 #' @param out_file Optional. Full path for the output Parquet file. Overrides
 #'   the path derived from \code{data_dir}, \code{schema}, and \code{table_name}.
@@ -32,8 +33,9 @@
 #'   may be string type names (e.g. \code{"int32"}, \code{"float32"},
 #'   \code{"date"}) or Arrow \code{DataType} objects. Only columns that need to
 #'   differ from their inferred types need to be supplied. See
-#'   \code{\link{arrow_type}} for supported names. For example,
 #'   \code{col_types = list(permno = "int32", ret = "float32")}.
+#'   String names such as \code{"int32"}, \code{"float32"}, \code{"date"},
+#'   \code{"timestamp"}, and \code{"timestamptz"} are supported.
 #' @param tz Time zone used to interpret \code{TIMESTAMP WITHOUT TIME ZONE}
 #'   columns. Such columns are cast to \code{TIMESTAMPTZ} in the SQL query using
 #'   \code{AT TIME ZONE}, so they are written as UTC-normalised timestamps in the
@@ -73,8 +75,9 @@
 #'   fetching, \code{"text"} to retain text values, or \code{"raw"} to keep
 #'   the transfer backend's default representation.
 #'
-#' @return Invisibly returns the path to the Parquet file if written, or
-#'   \code{NULL} if the update was skipped.
+#' @return Invisibly returns the path to the active Parquet file. If the local
+#'   file is already current, no download is performed but the same path is
+#'   returned.
 #'
 #' @examples
 #' \dontrun{
@@ -93,7 +96,7 @@
 wrds_update_pq <- function(
     table_name,
     schema,
-    data_dir = db2pq_data_dir(),
+    data_dir = NULL,
     out_file = NULL,
     force = FALSE,
     where = NULL,
@@ -116,6 +119,7 @@ wrds_update_pq <- function(
   transfer_method <- match.arg(transfer_method)
   numeric_mode <- match.arg(numeric_mode)
   chunk_size <- .resolve_wrds_chunk_size(chunk_size, transfer_method)
+  data_dir <- pq_data_dir(data_dir)
 
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name
   if (is.null(out_file)) {
@@ -161,12 +165,12 @@ wrds_update_pq <- function(
           "Use `force = TRUE` to update without relying on metadata,\n",
           "or `use_sas = TRUE` to use SAS metadata."
         )
-        return(invisible(NULL))
+        return(invisible(out_file))
       }
       message("No comment found for ", tbl_label, ".")
     } else if (!is.null(pq_date) && wrds_date <= pq_date) {
       message(tbl_label, " already up to date.")
-      return(invisible(NULL))
+      return(invisible(out_file))
     } else {
       message("Updated ", tbl_label, " is available.")
     }

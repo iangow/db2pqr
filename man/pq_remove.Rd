@@ -7,7 +7,7 @@
 pq_remove(
   table_name = NULL,
   schema = NULL,
-  data_dir = db2pq_data_dir(),
+  data_dir = NULL,
   file_name = NULL,
   archive = FALSE,
   archive_dir = "archive"
@@ -20,7 +20,7 @@ provided.}
 \item{schema}{Schema name. Required if \code{file_name} is not provided.}
 
 \item{data_dir}{Root directory of the Parquet data repository. Defaults to
-\code{\link{db2pq_data_dir}}.}
+the \code{DATA_DIR} environment variable, with interactive setup when needed.}
 
 \item{file_name}{Full path to the Parquet file to remove. If provided,
 \code{table_name}, \code{schema}, \code{data_dir}, and \code{archive} are

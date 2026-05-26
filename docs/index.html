@@ -39,10 +39,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="articles/adbc.html">ADBC backend</a></li>
   </ul>
 </li>
@@ -204,7 +204,7 @@
 <div class="sourceCode" id="cb16"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="sc">&lt;</span>DATA_DIR<span class="sc">&gt;</span><span class="er">/&lt;</span>schema<span class="sc">&gt;</span><span class="er">/&lt;</span>table<span class="sc">&gt;</span>.parquet</span></code></pre></div>
 <p>For example:</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="sc">~</span><span class="er">/</span>pq_data<span class="sc">/</span>crsp<span class="sc">/</span>dsi.parquet</span></code></pre></div>
-<p>The <code>DATA_DIR</code> environment variable sets the root directory. It can also be passed directly as <code>data_dir</code> to any function. For first-time setup, an interactive Parquet helper can call <code><a href="reference/db2pq_data_dir.html">db2pq_data_dir()</a></code> to select or create the directory and save <code>DATA_DIR</code> in project-level or user-level <code>.Renviron</code>.</p>
+<p>The <code>DATA_DIR</code> environment variable sets the root directory. It can also be passed directly as <code>data_dir</code> to any function. For first-time setup, an interactive Parquet helper can select or create the directory and save <code>DATA_DIR</code> in project-level or user-level <code>.Renviron</code>. Use <code><a href="reference/pq_data_dir.html">pq_data_dir()</a></code> to inspect or resolve the directory that <code>db2pq</code> will use by default.</p>
 <p>When <code>archive = TRUE</code>, replaced files are moved to:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="sc">&lt;</span>DATA_DIR<span class="sc">&gt;</span><span class="er">/&lt;</span>schema<span class="sc">&gt;</span><span class="er">/</span>archive<span class="sc">/</span><span class="er">&lt;</span>table<span class="sc">&gt;</span>_<span class="sc">&lt;</span>timestamp<span class="sc">&gt;</span>.parquet</span></code></pre></div>
 </div>

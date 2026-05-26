@@ -1,5 +1,5 @@
 ---
-title: "Examples Demonstrating Parquet Utility Functions"
+title: "Parquet utility functions"
 ---
 
 ```{r, include = FALSE}
@@ -22,24 +22,24 @@ company_file <- file.path(
 ```
 
 This page groups together examples for the Parquet utility helpers:
-`pq_last_modified()`, `pq_archive()`, `pq_restore()`, and `pq_remove()`.
+`pq_data_dir()`, `pq_last_modified()`, `pq_archive()`, `pq_restore()`, and
+`pq_remove()`.
 
-The goal is different from the API reference. The API pages document arguments
-and return values. This page shows how the utilities fit together in the
-practical workflow of maintaining a local Parquet repository.
+This page shows how the utilities fit together in the practical workflow of maintaining a local Parquet repository.
 
-## When to Use This Page
+## When to use these helpers
 
-Use these helpers when you already have a Parquet repository and want to:
+These functions generally help when you already have a Parquet repository and want to:
 
 - inspect what is in it
 - check which vintage of a table you currently have
 - archive a current active file before replacing it
 - restore an archived vintage
-- remove active or archived files explicitly
+- remove files
 
 The related API pages are:
 
+- `pq_data_dir()`
 - `pq_last_modified()`
 - `pq_archive()`
 - `pq_restore()`
@@ -59,6 +59,14 @@ Set `DATA_DIR` to the Parquet repository you want to inspect:
 ```{r, eval = FALSE}
 Sys.setenv(DATA_DIR = "~/Dropbox/pq_data")
 ```
+
+Use `pq_data_dir()` when you want to confirm which repository `db2pq` will use
+by default:
+
+```{r parquet-utils-data-dir, eval = FALSE}
+pq_data_dir(prompt = FALSE)
+```
+
 
 The examples below are rendered from a local Parquet repository. The examples
 that move files run only during a local `pkgdown` render when the repository

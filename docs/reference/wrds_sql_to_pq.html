@@ -26,10 +26,10 @@ wrds_update_pq."></head><body>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -60,7 +60,7 @@ using the same DBI or ADBC transfer paths as
 <span>  <span class="va">table_name</span>,</span>
 <span>  <span class="va">schema</span>,</span>
 <span>  wrds_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  data_dir <span class="op">=</span> <span class="fu"><a href="db2pq_data_dir.html">db2pq_data_dir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  data_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  out_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  modified <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alt_table_name <span class="op">=</span> <span class="cn">NULL</span>,</span>

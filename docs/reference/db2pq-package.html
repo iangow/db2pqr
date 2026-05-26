@@ -26,10 +26,10 @@ are current against source table metadata."></head><body>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -59,9 +59,9 @@ are current against source table metadata.</p>
 
 
 <p><code>DATA_DIR</code> controls the default root directory for Parquet output;
-<code><a href="db2pq_data_dir.html">db2pq_data_dir</a></code> can guide interactive first-time setup. WRDS
-helpers resolve usernames from explicit arguments, <code>WRDS_ID</code>, <code>WRDS_USER</code>,
-and then the credential store used by the <code>wrds</code> package.</p>
+<code><a href="pq_data_dir.html">pq_data_dir</a></code> shows or resolves the default Parquet repository
+location. WRDS helpers resolve usernames from explicit arguments, <code>WRDS_ID</code>,
+<code>WRDS_USER</code>, and then the credential store used by the <code>wrds</code> package.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

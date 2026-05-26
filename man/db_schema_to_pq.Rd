@@ -6,7 +6,7 @@
 \usage{
 db_schema_to_pq(
   schema,
-  data_dir = db2pq_data_dir(),
+  data_dir = NULL,
   force = FALSE,
   tables = NULL,
   chunk_size = 100000L,

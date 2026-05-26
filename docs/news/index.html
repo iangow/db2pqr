@@ -22,10 +22,10 @@
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
     <li><a class="dropdown-item" href="../articles/data-management.html">Creating a Parquet data repository</a></li>
     <li><a class="dropdown-item" href="../articles/wrds-to-parquet.html">WRDS to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/authentication.html">Authentication</a></li>
-    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS SSH Setup for SAS Metadata</a></li>
+    <li><a class="dropdown-item" href="../articles/authentication.html">WRDS authentication</a></li>
+    <li><a class="dropdown-item" href="../articles/wrds-ssh.html">WRDS: Setting up SSH for SAS metadata</a></li>
     <li><a class="dropdown-item" href="../articles/postgres-to-parquet.html">PostgreSQL to Parquet</a></li>
-    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Examples Demonstrating Parquet Utility Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/parquet-utilities-examples.html">Parquet utility functions</a></li>
     <li><a class="dropdown-item" href="../articles/adbc.html">ADBC backend</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -44,8 +44,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.3.9000" id="db2pq-0039000">db2pq 0.0.3.9000<a class="anchor" aria-label="anchor" href="#db2pq-0039000"></a></h2>
-<ul><li>Added first-class WRDS credential helpers: <code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code>, <code><a href="../reference/wrds_conninfo.html">wrds_conninfo()</a></code>, <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code>, <code><a href="../reference/pgpass_path.html">pgpass_path()</a></code>, <code><a href="../reference/pgpass_find.html">pgpass_find()</a></code>, and <code><a href="../reference/pgpass_has_entry.html">pgpass_has_entry()</a></code>.</li>
+<ul><li>Added first-class WRDS credential helpers: <code><a href="../reference/wrds_get_username.html">wrds_get_username()</a></code>, <code><a href="../reference/wrds_conninfo.html">wrds_conninfo()</a></code>, and <code><a href="../reference/wrds_check_credentials.html">wrds_check_credentials()</a></code>.</li>
 <li>Added Parquet-first public helpers for schema/table listing and WRDS SQL exports: <code><a href="../reference/db_schema_tables.html">db_schema_tables()</a></code>, <code><a href="../reference/wrds_get_tables.html">wrds_get_tables()</a></code>, <code><a href="../reference/db_schema_to_pq.html">db_schema_to_pq()</a></code>, and <code><a href="../reference/wrds_sql_to_pq.html">wrds_sql_to_pq()</a></code>.</li>
+<li>Added <code><a href="../reference/pq_data_dir.html">pq_data_dir()</a></code> to inspect or resolve the default Parquet repository directory.</li>
 <li>Added <code>rename</code> support to <code><a href="../reference/db_to_pq.html">db_to_pq()</a></code> and <code><a href="../reference/wrds_update_pq.html">wrds_update_pq()</a></code>.</li>
 <li>Added <code>pkgdown</code> site configuration and workflow-oriented vignettes.</li>
 <li>Added ADBC diagnostics and clearer SSL-related error messages for the optional ADBC PostgreSQL path.</li>

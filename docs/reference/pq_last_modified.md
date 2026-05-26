@@ -9,7 +9,7 @@ Retrieves the `last_modified` metadata embedded in Parquet files by
 pq_last_modified(
   table_name = NULL,
   schema = NULL,
-  data_dir = db2pq_data_dir(),
+  data_dir = NULL,
   archive = FALSE,
   archive_dir = "archive"
 )
@@ -27,8 +27,8 @@ pq_last_modified(
 
 - data_dir:
 
-  Root directory of the Parquet data repository. Defaults to
-  [`db2pq_data_dir`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md).
+  Root directory of the Parquet data repository. Defaults to the
+  `DATA_DIR` environment variable, with interactive setup when needed.
 
 - archive:
 

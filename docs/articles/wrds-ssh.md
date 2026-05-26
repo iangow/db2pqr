@@ -1,4 +1,4 @@
-# WRDS SSH Setup for SAS Metadata
+# WRDS: Setting up SSH for SAS metadata
 
 Most `db2pq` WRDS work uses WRDS PostgreSQL credentials. SSH access is a
 separate setup used only when
@@ -14,7 +14,7 @@ With `use_sas = TRUE`, `db2pq` retrieves last-modified dates by running
 `PROC CONTENTS` on the WRDS SAS server over SSH. This can be useful for
 tables whose PostgreSQL comment does not carry a reliable date.
 
-## Before You Start
+## Before you start
 
 The `processx` package is required for the SAS metadata option:
 
@@ -35,7 +35,7 @@ paths supported by `db2pq`.
 WRDS provides a dedicated SSH endpoint for key-based authentication:
 `wrds-cloud-sshkey.wharton.upenn.edu`.
 
-### Generate an SSH Key
+### Generate an SSH key
 
 The ed25519 key type is a reasonable default:
 
@@ -47,7 +47,7 @@ Accept the default location (`~/.ssh/id_ed25519`). You may use a
 passphrase if your SSH agent is running. For unattended scripts, an
 empty passphrase may be required.
 
-### Copy the Public Key to WRDS
+### Copy the public key to WRDS
 
 ``` sh
 cat ~/.ssh/id_ed25519.pub | \
@@ -86,7 +86,7 @@ Confirm that `publickey` appears in the list of authentication methods.
 Also check that `~/.ssh/config` uses the WRDS SSH endpoint and the key
 you copied to WRDS.
 
-## Related Pages
+## Related pages
 
 - [Authentication](https://iangow.github.io/db2pqr/articles/authentication.md)
 - [WRDS to

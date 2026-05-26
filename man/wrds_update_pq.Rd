@@ -7,7 +7,7 @@
 wrds_update_pq(
   table_name,
   schema,
-  data_dir = db2pq_data_dir(),
+  data_dir = NULL,
   out_file = NULL,
   force = FALSE,
   where = NULL,
@@ -35,7 +35,8 @@ wrds_update_pq(
 \item{schema}{Name of the database schema (e.g. \code{"crsp"}, \code{"comp"}).}
 
 \item{data_dir}{Root directory of the local Parquet data repository. Defaults
-to \code{\link{db2pq_data_dir}}. The output file is written to
+to the \code{DATA_DIR} environment variable, with interactive setup when needed.
+The output file is written to
 \code{<data_dir>/<schema>/<table_name>.parquet}.}
 
 \item{out_file}{Optional. Full path for the output Parquet file. Overrides
@@ -73,8 +74,9 @@ defaults to \code{100000} for \code{transfer_method = "dbi"} and
 may be string type names (e.g. \code{"int32"}, \code{"float32"},
 \code{"date"}) or Arrow \code{DataType} objects. Only columns that need to
 differ from their inferred types need to be supplied. See
-\code{\link{arrow_type}} for supported names. For example,
-\code{col_types = list(permno = "int32", ret = "float32")}.}
+\code{col_types = list(permno = "int32", ret = "float32")}.
+String names such as \code{"int32"}, \code{"float32"}, \code{"date"},
+\code{"timestamp"}, and \code{"timestamptz"} are supported.}
 
 \item{tz}{Time zone used to interpret \code{TIMESTAMP WITHOUT TIME ZONE}
 columns. Such columns are cast to \code{TIMESTAMPTZ} in the SQL query using
@@ -119,8 +121,9 @@ fetching, \code{"text"} to retain text values, or \code{"raw"} to keep
 the transfer backend's default representation.}
 }
 \value{
-Invisibly returns the path to the Parquet file if written, or
-\code{NULL} if the update was skipped.
+Invisibly returns the path to the active Parquet file. If the local
+file is already current, no download is performed but the same path is
+returned.
 }
 \description{
 Exports a table from the WRDS PostgreSQL database to a Parquet file. Before

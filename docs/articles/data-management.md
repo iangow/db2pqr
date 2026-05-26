@@ -9,17 +9,6 @@ This article outlines some ideas related to the task that `db2pq` is
 designed to support: building and maintaining a local Parquet repository
 of data from WRDS and other sources.
 
-The goal is to separate three concerns that often get mixed together in
-research code:
-
-1.  Getting data from the source system.
-2.  Storing data locally in an efficient format.
-3.  Running analysis code against local data.
-
-The `db2pq` focuses on the first two steps. Analysis code can then use
-packages such as `arrow`, `duckdb`, `dplyr`, or `polars` to work with
-the Parquet files.
-
 ## Some concepts in data management
 
 ### Scope
@@ -107,15 +96,27 @@ One issue with CSV is that one is always dealing with type inference
 those problems you want to solve once for any given dataset. For the
 WRDS data that is the focus of this note, I think CSV is to be avoided.
 
+In any case, `db2pq` is focused on creating and managing a Parquet data
+repository.
+
 ## Setting `DATA_DIR`
+
+A key idea of the approach used by `db2pq` is that the Parquet data
+repository has a root directory under which the data are organized into
+schemas. It is perhaps easiest to refer to this root directory as
+`DATA_DIR`. When the environment variable `DATA_DIR` is set, then
+`db2pq` function will organize data under that directory. Similarly,
+functions such as `load_parquet()` from the `farr` package will look for
+data in schemas under that directory. In this way, the same code can
+work with a repository in different folders on different machines.
 
 ### First-Time Setup
 
-The root of the data repository is set in `DATA_DIR`, so the same
-refresh code can work with a repository on different machines or in
-different projects. When `DATA_DIR` is missing in an interactive
-session, you will be asked to select a directory. You will then be given
-three choices for persisting the directory you have chosen:
+If you run a function like
+[`wrds_update_pq()`](https://iangow.github.io/db2pqr/reference/wrds_update_pq.md)
+without setting `DATA_DIR`, you will be asked to select a directory. You
+will then be given three choices for persisting the directory you have
+chosen:
 
 - a **project**-level `DATA_DIR` (stored in `.Renviron`)
 - a **user**-level `DATA_DIR` (using `~/.Renviron`)
@@ -123,7 +124,8 @@ three choices for persisting the directory you have chosen:
 
 `db2pq` writes Parquet files into a local repository.
 
-For example, this call:
+For example, this call will, if the file does not exist need to be
+updated write a Parquet file using data from the WRDS database.
 
 ``` r
 
@@ -132,7 +134,7 @@ library(db2pq)
 wrds_update_pq("dsi", "crsp")
 ```
 
-writes the active Parquet file to:
+The data are written to the Parquet file in:
 
 ``` text
 <DATA_DIR>/crsp/dsi.parquet
@@ -152,28 +154,20 @@ When updates use `archive = TRUE`, replaced files are moved under:
 
 ### Explicit Overrides
 
-You do not have to use `DATA_DIR`. An explicit `data_dir` argument
-overrides the default for a call:
+An explicit `data_dir` argument will override the default for a call:
 
 ``` r
 
 wrds_update_pq("dsi", "crsp", data_dir = "data")
 ```
 
-That pattern is useful when a refresh script should write a
-project-level copy while your default `DATA_DIR` still points at a
-shared local library.
-
-For non-interactive code, set `DATA_DIR` or pass `data_dir` explicitly
-when the working directory is not the repository root you intend to use.
-
 ## Related Pages
 
-- [Authentication](https://iangow.github.io/db2pqr/articles/authentication.md)
-  covers `WRDS_ID`, passwords, and `.pgpass`.
 - [WRDS to
   Parquet](https://iangow.github.io/db2pqr/articles/wrds-to-parquet.md)
   shows the refresh workflow.
+- [Authentication](https://iangow.github.io/db2pqr/articles/authentication.md)
+  covers `WRDS_ID`, passwords, and `.pgpass`.
 
 Welch, Ivo. 2019. “Editorial: An Opinionated FAQ.” *Critical Finance
 Review* 8 (1-2): 19–24. <https://doi.org/10.1561/104.00000077>.

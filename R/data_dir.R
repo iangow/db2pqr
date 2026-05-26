@@ -14,8 +14,8 @@
 #'
 #' @return A directory path as a character string.
 #' @export
-db2pq_data_dir <- function(data_dir = NULL, prompt = interactive(),
-                           fallback = ".") {
+pq_data_dir <- function(data_dir = NULL, prompt = interactive(),
+                        fallback = ".") {
   if (!is.null(data_dir) && nzchar(data_dir)) {
     return(path.expand(data_dir))
   }

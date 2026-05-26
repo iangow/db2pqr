@@ -1,13 +1,14 @@
 # ADBC backend
 
-The stable default transfer path uses DBI/RPostgres. The optional ADBC
-path can stream Arrow batches directly from PostgreSQL, but it depends
-on local driver builds and SSL support.
+The stable default transfer path uses DBI/RPostgres. The optional
+*experimental* ADBC path can stream Arrow batches directly from
+PostgreSQL, but it depends on local driver builds and SSL support, which
+the CRAN version of `adbcpostgresql` does not provide.
 
-As of April 2026, Apache Arrow ADBC 23 is current and the R
-`adbcpostgresql` package has a 0.23.0 CRAN release. Use
-[`adbc_diagnostics()`](https://iangow.github.io/db2pqr/reference/adbc_diagnostics.md)
-to inspect the optional packages installed in your R library:
+``` r
+
+library(db2pq)
+```
 
 ``` r
 
@@ -19,3 +20,12 @@ If the ADBC path reports an SSL/libpq error, use
 `transfer_method = "dbi"` or use an ADBC PostgreSQL driver that is built
 against an SSL-capable `libpq`. WRDS requires SSL, and the stable WRDS
 path remains DBI/RPostgres.
+
+``` r
+
+db <- con_to_adbi(db)
+```
+
+Create an ADBC PostgreSQL connection from an RPostgres connection
+tbl_to_pq_debug() Debug the ADBC chunk fetch path for a lazy dbplyr
+table

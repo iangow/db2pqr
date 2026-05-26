@@ -83,6 +83,30 @@ test_that("DBI WRDS connections prefer explicit and environment usernames", {
   expect_identical(users, c("from_id", "explicit", "from_user"))
 })
 
+test_that("public DBI WRDS connection uses db2pq authentication", {
+  passfile <- tempfile()
+  unlink(passfile)
+  local_con <- structure(list(), class = "TestConnection")
+  users <- character()
+
+  restore_db_connect <- local_rebind(
+    "dbConnect",
+    function(drv, ...) {
+      info <- list(...)
+      users <<- c(users, info$user)
+      local_con
+    },
+    env = asNamespace("DBI")
+  )
+  on.exit(restore_db_connect(), add = TRUE)
+
+  expect_identical(
+    db2pq::wrds_connect_dbi("explicit", prompt = FALSE, passfile = passfile),
+    local_con
+  )
+  expect_identical(users, "explicit")
+})
+
 test_that("DBI WRDS connections fall back to wrds keyring connection", {
   old_id <- Sys.getenv("WRDS_ID", unset = NA_character_)
   old_user <- Sys.getenv("WRDS_USER", unset = NA_character_)
@@ -184,7 +208,7 @@ test_that("pgpass_path honors PGPASSFILE", {
 
   Sys.setenv(PGPASSFILE = "~/db2pq-test-pgpass")
   expect_identical(
-    db2pq::pgpass_path(),
+    db2pq:::pgpass_path(),
     path.expand("~/db2pq-test-pgpass")
   )
 })
@@ -210,7 +234,7 @@ test_that("pgpass entries escape and replace exact targets", {
     "Saved WRDS PostgreSQL credentials"
   )
 
-  wrds <- db2pq::pgpass_find(
+  wrds <- db2pq:::pgpass_find(
     "wrds-pgdata.wharton.upenn.edu",
     9737,
     "wrds",
@@ -257,7 +281,7 @@ test_that("direct WRDS connections save prompted passwords after success", {
     "Saved WRDS PostgreSQL credentials"
   )
   expect_identical(con, local_con)
-  expect_true(db2pq::pgpass_has_entry(
+  expect_true(db2pq:::pgpass_has_entry(
     host = "wrds-pgdata.wharton.upenn.edu",
     port = 9737,
     database = "wrds",
@@ -310,7 +334,7 @@ test_that("direct WRDS connections consume WRDS_PASSWORD and save pgpass", {
   )
   expect_identical(con, local_con)
   expect_identical(
-    db2pq::pgpass_find(
+    db2pq:::pgpass_find(
       host = "wrds-pgdata.wharton.upenn.edu",
       port = 9737,
       database = "wrds",
@@ -374,10 +398,10 @@ test_that("pgpass_find matches wildcard and escaped entries", {
     "host\\:name:1111:db:user:colon-secret"
   ), passfile)
 
-  local <- db2pq::pgpass_find("localhost", 5432, "demo", "ian", passfile = passfile)
+  local <- db2pq:::pgpass_find("localhost", 5432, "demo", "ian", passfile = passfile)
   expect_identical(local$password, "secret")
 
-  wrds <- db2pq::pgpass_find(
+  wrds <- db2pq:::pgpass_find(
     "wrds-pgdata.wharton.upenn.edu",
     9737,
     "wrds",
@@ -386,5 +410,5 @@ test_that("pgpass_find matches wildcard and escaped entries", {
   )
   expect_identical(wrds$password, "wrds-secret")
 
-  expect_true(db2pq::pgpass_has_entry("host:name", 1111, "db", "user", passfile = passfile))
+  expect_true(db2pq:::pgpass_has_entry("host:name", 1111, "db", "user", passfile = passfile))
 })

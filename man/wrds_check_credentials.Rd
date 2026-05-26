@@ -9,7 +9,7 @@ wrds_check_credentials(
   password = NULL,
   prompt = interactive(),
   save = TRUE,
-  passfile = pgpass_path()
+  passfile = NULL
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ when no password was supplied and no matching \code{.pgpass} entry exists.}
 after a successful WRDS connection test.}
 
 \item{passfile}{PostgreSQL password-file path. Defaults to \code{PGPASSFILE} when
-set, otherwise the platform default from \code{\link{pgpass_path}}.}
+set, otherwise the platform default password-file path.}
 }
 \value{
 A one-row tibble with \code{ok}, \code{method}, and \code{message} columns.

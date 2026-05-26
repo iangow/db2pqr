@@ -22,7 +22,7 @@
 #' @export
 wrds_schema_to_pq <- function(
     schema,
-    data_dir = db2pq_data_dir(),
+    data_dir = NULL,
     force = FALSE,
     tables = NULL,
     views = FALSE,
@@ -33,6 +33,7 @@ wrds_schema_to_pq <- function(
     ...) {
   transfer_method <- match.arg(transfer_method)
   numeric_mode <- match.arg(numeric_mode)
+  data_dir <- pq_data_dir(data_dir)
 
   all_tables <- wrds_get_tables(schema, wrds_id = wrds_id, views = views)
 

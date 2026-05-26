@@ -7,10 +7,10 @@ files are current against source table metadata.
 ## Configuration
 
 `DATA_DIR` controls the default root directory for Parquet output;
-[`db2pq_data_dir`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md)
-can guide interactive first-time setup. WRDS helpers resolve usernames
-from explicit arguments, `WRDS_ID`, `WRDS_USER`, and then the credential
-store used by the `wrds` package.
+[`pq_data_dir`](https://iangow.github.io/db2pqr/reference/pq_data_dir.md)
+shows or resolves the default Parquet repository location. WRDS helpers
+resolve usernames from explicit arguments, `WRDS_ID`, `WRDS_USER`, and
+then the credential store used by the `wrds` package.
 
 ## See also
 

@@ -95,13 +95,14 @@ wrds_conninfo <- function(wrds_id = NULL, format = c("uri", "dbi"),
 #' @param save If `TRUE`, save a supplied or prompted password to `.pgpass`
 #'   after a successful WRDS connection test.
 #' @param passfile PostgreSQL password-file path. Defaults to `PGPASSFILE` when
-#'   set, otherwise the platform default from \code{\link{pgpass_path}}.
+#'   set, otherwise the platform default password-file path.
 #'
 #' @return A one-row tibble with `ok`, `method`, and `message` columns.
 #' @export
 wrds_check_credentials <- function(wrds_id = NULL, password = NULL,
                                    prompt = interactive(), save = TRUE,
-                                   passfile = pgpass_path()) {
+                                   passfile = NULL) {
+  passfile <- if (is.null(passfile)) pgpass_path() else path.expand(passfile)
   info <- wrds_conninfo(wrds_id, format = "dbi")
   used_pgpass <- pgpass_has_entry(
     info$host, info$port, info$dbname, info$user, passfile = passfile
@@ -131,11 +132,38 @@ wrds_check_credentials <- function(wrds_id = NULL, password = NULL,
   )
 }
 
+#' Connect to WRDS PostgreSQL with DBI
+#'
+#' Opens a `DBI` connection to the WRDS PostgreSQL database using `RPostgres`
+#' and the `db2pq` WRDS authentication flow.
+#'
+#' The username is resolved from `wrds_id`, `WRDS_ID`, `WRDS_USER`, or the
+#' keyring entry written by `wrds::wrds_set_credentials()`. Password handling
+#' prefers a matching PostgreSQL `.pgpass` entry, then `WRDS_PASSWORD`, then an
+#' interactive password prompt when `prompt = TRUE`. When a supplied, prompted,
+#' or `WRDS_PASSWORD` password is used successfully and `save = TRUE`, it is
+#' saved to `.pgpass` for future connections.
+#'
+#' @inheritParams wrds_check_credentials
+#'
+#' @return A `DBIConnection` object.
+#' @export
+wrds_connect_dbi <- function(wrds_id = NULL, prompt = interactive(),
+                             save = TRUE, passfile = NULL) {
+  passfile <- if (is.null(passfile)) pgpass_path() else path.expand(passfile)
+  .wrds_connect_dbi(
+    wrds_id = wrds_id,
+    prompt = prompt,
+    save = save,
+    passfile = passfile
+  )
+}
+
 #' PostgreSQL password file path
 #'
 #' @return The `PGPASSFILE` path when set, otherwise the platform-specific
 #'   default `.pgpass` path.
-#' @export
+#' @noRd
 pgpass_path <- function() {
   pgpassfile <- Sys.getenv("PGPASSFILE", unset = "")
   if (nzchar(pgpassfile)) {
@@ -156,7 +184,7 @@ pgpass_path <- function() {
 #'
 #' @return A tibble with matching entries. The `password` column is included
 #'   because this is a low-level credential helper; avoid printing it in logs.
-#' @export
+#' @noRd
 pgpass_find <- function(host, port = 5432L, database, user,
                         passfile = pgpass_path()) {
   entries <- .pgpass_read(passfile)
@@ -186,7 +214,7 @@ pgpass_find <- function(host, port = 5432L, database, user,
 #' @inheritParams pgpass_find
 #'
 #' @return `TRUE` if a matching entry exists, otherwise `FALSE`.
-#' @export
+#' @noRd
 pgpass_has_entry <- function(host, port = 5432L, database, user,
                              passfile = pgpass_path()) {
   nrow(pgpass_find(host, port, database, user, passfile)) > 0L

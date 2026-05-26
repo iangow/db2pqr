@@ -22,7 +22,7 @@
 #' @return Invisibly returns the output file path.
 #' @export
 wrds_sql_to_pq <- function(sql, table_name, schema, wrds_id = NULL,
-                           data_dir = db2pq_data_dir(),
+                           data_dir = NULL,
                            out_file = NULL, modified = NULL,
                            alt_table_name = NULL, chunk_size = NULL,
                            transfer_method = c("dbi", "adbc"),
@@ -30,6 +30,7 @@ wrds_sql_to_pq <- function(sql, table_name, schema, wrds_id = NULL,
                            col_types = NULL) {
   transfer_method <- match.arg(transfer_method)
   chunk_size <- .resolve_wrds_chunk_size(chunk_size, transfer_method)
+  data_dir <- pq_data_dir(data_dir)
 
   out_name <- if (!is.null(alt_table_name)) alt_table_name else table_name
   if (is.null(out_file)) {

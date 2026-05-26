@@ -5,11 +5,8 @@
 - Added first-class WRDS credential helpers:
   [`wrds_get_username()`](https://iangow.github.io/db2pqr/reference/wrds_get_username.md),
   [`wrds_conninfo()`](https://iangow.github.io/db2pqr/reference/wrds_conninfo.md),
-  [`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md),
-  [`pgpass_path()`](https://iangow.github.io/db2pqr/reference/pgpass_path.md),
-  [`pgpass_find()`](https://iangow.github.io/db2pqr/reference/pgpass_find.md),
   and
-  [`pgpass_has_entry()`](https://iangow.github.io/db2pqr/reference/pgpass_has_entry.md).
+  [`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md).
 - Added Parquet-first public helpers for schema/table listing and WRDS
   SQL exports:
   [`db_schema_tables()`](https://iangow.github.io/db2pqr/reference/db_schema_tables.md),
@@ -17,6 +14,9 @@
   [`db_schema_to_pq()`](https://iangow.github.io/db2pqr/reference/db_schema_to_pq.md),
   and
   [`wrds_sql_to_pq()`](https://iangow.github.io/db2pqr/reference/wrds_sql_to_pq.md).
+- Added
+  [`pq_data_dir()`](https://iangow.github.io/db2pqr/reference/pq_data_dir.md)
+  to inspect or resolve the default Parquet repository directory.
 - Added `rename` support to
   [`db_to_pq()`](https://iangow.github.io/db2pqr/reference/db_to_pq.md)
   and

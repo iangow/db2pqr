@@ -13,7 +13,7 @@ refresh.
 wrds_update_pq(
   table_name,
   schema,
-  data_dir = db2pq_data_dir(),
+  data_dir = NULL,
   out_file = NULL,
   force = FALSE,
   where = NULL,
@@ -48,8 +48,8 @@ wrds_update_pq(
 
 - data_dir:
 
-  Root directory of the local Parquet data repository. Defaults to
-  [`db2pq_data_dir`](https://iangow.github.io/db2pqr/reference/db2pq_data_dir.md).
+  Root directory of the local Parquet data repository. Defaults to the
+  `DATA_DIR` environment variable, with interactive setup when needed.
   The output file is written to
   `<data_dir>/<schema>/<table_name>.parquet`.
 
@@ -105,9 +105,9 @@ wrds_update_pq(
   string type names (e.g. `"int32"`, `"float32"`, `"date"`) or Arrow
   `DataType` objects. Only columns that need to differ from their
   inferred types need to be supplied. See
-  [`arrow_type`](https://iangow.github.io/db2pqr/reference/arrow_type.md)
-  for supported names. For example,
-  `col_types = list(permno = "int32", ret = "float32")`.
+  `col_types = list(permno = "int32", ret = "float32")`. String names
+  such as `"int32"`, `"float32"`, `"date"`, `"timestamp"`, and
+  `"timestamptz"` are supported.
 
 - tz:
 
@@ -169,8 +169,9 @@ wrds_update_pq(
 
 ## Value
 
-Invisibly returns the path to the Parquet file if written, or `NULL` if
-the update was skipped.
+Invisibly returns the path to the active Parquet file. If the local file
+is already current, no download is performed but the same path is
+returned.
 
 ## See also
 

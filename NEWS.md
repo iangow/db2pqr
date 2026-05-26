@@ -1,4 +1,4 @@
-# db2pq 0.0.3.9000
+# db2pq 0.0.4
 
 * Added first-class WRDS credential helpers: `wrds_get_username()`,
   `wrds_conninfo()`, and `wrds_check_credentials()`.

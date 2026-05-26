@@ -92,4 +92,3 @@ While the R package does not implement general "update logic" of the WRDS-facing
 ```{r}
 pq_last_modified("dsi", "crsp", data_dir = "~/pq_data")
 ```
-

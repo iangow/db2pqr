@@ -152,4 +152,3 @@ wrds_update_pq("dsi", "crsp", data_dir = "data")
 - [WRDS to Parquet](wrds-to-parquet.html) shows the refresh workflow.
 - [Authentication](authentication.html) covers `WRDS_ID`, passwords, and
   `.pgpass`.
-

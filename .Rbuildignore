@@ -12,6 +12,12 @@
 ^ADBC_SSL_NOTES\.md$
 ^cran-comments\.md$
 ^LICENSE\.md$
+^index\.md$
+^index\.qmd$
 ^crsp_msf\.parquet$
 ^db2pqr\.Rproj$
 ^\.claude$
+^vignettes$
+^vignettes/\.quarto$
+^vignettes/.*_files$
+^vignettes/data$

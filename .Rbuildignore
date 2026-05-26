@@ -21,3 +21,4 @@
 ^vignettes/\.quarto$
 ^vignettes/.*_files$
 ^vignettes/data$
+^CRAN-SUBMISSION$

@@ -36,8 +36,8 @@ testing:
 
 wrds_update_pq("company", "comp")
 #> Updated comp.company is available.
-#> Beginning file download at 2026-05-26 13:29:49 UTC.
-#> Completed file download at 2026-05-26 13:29:50 UTC.
+#> Beginning file download at 2026-05-26 13:55:34 UTC.
+#> Completed file download at 2026-05-26 13:55:35 UTC.
 ```
 
 If you run the function above and have not set up your details for a
@@ -130,41 +130,41 @@ there.
 wrds_schema_to_pq("ff", views = TRUE)
 #> Processing 12 table(s) in schema 'ff'.
 #> No comment found for ff.factors_china.
-#> Beginning file download at 2026-05-26 13:29:54 UTC.
-#> Completed file download at 2026-05-26 13:29:55 UTC.
+#> Beginning file download at 2026-05-26 13:55:39 UTC.
+#> Completed file download at 2026-05-26 13:55:39 UTC.
 #> Updated ff.factors_daily is available.
-#> Beginning file download at 2026-05-26 13:29:55 UTC.
-#> Completed file download at 2026-05-26 13:29:56 UTC.
+#> Beginning file download at 2026-05-26 13:55:40 UTC.
+#> Completed file download at 2026-05-26 13:55:40 UTC.
 #> Updated ff.factors_monthly is available.
-#> Beginning file download at 2026-05-26 13:29:56 UTC.
-#> Completed file download at 2026-05-26 13:29:57 UTC.
+#> Beginning file download at 2026-05-26 13:55:41 UTC.
+#> Completed file download at 2026-05-26 13:55:41 UTC.
 #> Updated ff.fivefactors_daily is available.
-#> Beginning file download at 2026-05-26 13:29:58 UTC.
-#> Completed file download at 2026-05-26 13:29:58 UTC.
+#> Beginning file download at 2026-05-26 13:55:42 UTC.
+#> Completed file download at 2026-05-26 13:55:43 UTC.
 #> No comment found for ff.fivefactors_monthly.
-#> Beginning file download at 2026-05-26 13:29:59 UTC.
-#> Completed file download at 2026-05-26 13:29:59 UTC.
+#> Beginning file download at 2026-05-26 13:55:43 UTC.
+#> Completed file download at 2026-05-26 13:55:44 UTC.
 #> Updated ff.industry12 is available.
-#> Beginning file download at 2026-05-26 13:30:00 UTC.
-#> Completed file download at 2026-05-26 13:30:00 UTC.
+#> Beginning file download at 2026-05-26 13:55:44 UTC.
+#> Completed file download at 2026-05-26 13:55:45 UTC.
 #> Updated ff.industry48 is available.
-#> Beginning file download at 2026-05-26 13:30:01 UTC.
-#> Completed file download at 2026-05-26 13:30:01 UTC.
+#> Beginning file download at 2026-05-26 13:55:45 UTC.
+#> Completed file download at 2026-05-26 13:55:46 UTC.
 #> Updated ff.liq_ps is available.
-#> Beginning file download at 2026-05-26 13:30:02 UTC.
-#> Completed file download at 2026-05-26 13:30:02 UTC.
+#> Beginning file download at 2026-05-26 13:55:47 UTC.
+#> Completed file download at 2026-05-26 13:55:47 UTC.
 #> Updated ff.liq_sadka is available.
-#> Beginning file download at 2026-05-26 13:30:03 UTC.
-#> Completed file download at 2026-05-26 13:30:03 UTC.
+#> Beginning file download at 2026-05-26 13:55:48 UTC.
+#> Completed file download at 2026-05-26 13:55:48 UTC.
 #> Updated ff.portfolios is available.
-#> Beginning file download at 2026-05-26 13:30:04 UTC.
-#> Completed file download at 2026-05-26 13:30:04 UTC.
+#> Beginning file download at 2026-05-26 13:55:49 UTC.
+#> Completed file download at 2026-05-26 13:55:49 UTC.
 #> Updated ff.portfolios25 is available.
-#> Beginning file download at 2026-05-26 13:30:05 UTC.
-#> Completed file download at 2026-05-26 13:30:05 UTC.
+#> Beginning file download at 2026-05-26 13:55:50 UTC.
+#> Completed file download at 2026-05-26 13:55:51 UTC.
 #> Updated ff.portfolios_d is available.
-#> Beginning file download at 2026-05-26 13:30:06 UTC.
-#> Completed file download at 2026-05-26 13:30:07 UTC.
+#> Beginning file download at 2026-05-26 13:55:51 UTC.
+#> Completed file download at 2026-05-26 13:55:52 UTC.
 ```
 
 The WRDS web query interface can also be useful for identifying the
@@ -186,8 +186,8 @@ wrds_update_pq(
   col_types = list(lpermno = "int32", lpermco = "int32")
 )
 #> Updated crsp.ccmxpf_lnkhist is available.
-#> Beginning file download at 2026-05-26 13:30:07 UTC.
-#> Completed file download at 2026-05-26 13:30:08 UTC.
+#> Beginning file download at 2026-05-26 13:55:53 UTC.
+#> Completed file download at 2026-05-26 13:55:54 UTC.
 ```
 
 ### Setting Time Zones
@@ -257,8 +257,8 @@ dsf_file = wrds_update_pq(
   keep = c("permno", "date", "^ret$")
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-26 13:30:08 UTC.
-#> Completed file download at 2026-05-26 13:30:09 UTC.
+#> Beginning file download at 2026-05-26 13:55:54 UTC.
+#> Completed file download at 2026-05-26 13:55:55 UTC.
 
 read_parquet(dsf_file)
 #> # A tibble: 100 × 3
@@ -312,8 +312,8 @@ renamed_company_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-26 13:30:10 UTC.
-#> Completed file download at 2026-05-26 13:30:10 UTC.
+#> Beginning file download at 2026-05-26 13:55:56 UTC.
+#> Completed file download at 2026-05-26 13:55:56 UTC.
 
 read_parquet(renamed_company_file) |>
   select(gvkey, company_name, sic)
@@ -395,8 +395,8 @@ funda_sample_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-26 13:30:11 UTC.
-#> Completed file download at 2026-05-26 13:30:11 UTC.
+#> Beginning file download at 2026-05-26 13:55:57 UTC.
+#> Completed file download at 2026-05-26 13:55:57 UTC.
 
 read_parquet(funda_sample_file) |> glimpse()
 #> Rows: 1,000

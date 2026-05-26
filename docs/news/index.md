@@ -1,6 +1,6 @@
 # Changelog
 
-## db2pq 0.0.3.9000
+## db2pq 0.0.4
 
 - Added first-class WRDS credential helpers:
   [`wrds_get_username()`](https://iangow.github.io/db2pqr/reference/wrds_get_username.md),

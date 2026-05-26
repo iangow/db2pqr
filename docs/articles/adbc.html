@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">db2pq</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,11 +84,6 @@
 <span><span class="fu"><a href="../reference/wrds_update_pq.html">wrds_update_pq</a></span><span class="op">(</span><span class="st">"dsi"</span>, <span class="st">"crsp"</span>, transfer_method <span class="op">=</span> <span class="st">"adbc"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>If the ADBC path reports an SSL/libpq error, use <code>transfer_method = "dbi"</code> or use an ADBC PostgreSQL driver that is built against an SSL-capable <code>libpq</code>. WRDS requires SSL, and the stable WRDS path remains DBI/RPostgres.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/con_to_adbi.html">con_to_adbi</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></code></pre></div>
-</div>
-<p>Create an ADBC PostgreSQL connection from an RPostgres connection tbl_to_pq_debug() Debug the ADBC chunk fetch path for a lazy dbplyr table</p>
 
 
 

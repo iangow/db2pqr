@@ -20,12 +20,3 @@ If the ADBC path reports an SSL/libpq error, use
 `transfer_method = "dbi"` or use an ADBC PostgreSQL driver that is built
 against an SSL-capable `libpq`. WRDS requires SSL, and the stable WRDS
 path remains DBI/RPostgres.
-
-``` r
-
-db <- con_to_adbi(db)
-```
-
-Create an ADBC PostgreSQL connection from an RPostgres connection
-tbl_to_pq_debug() Debug the ADBC chunk fetch path for a lazy dbplyr
-table

@@ -62,9 +62,8 @@ db_schema_tables <- function(schema, views = FALSE, con = NULL,
 #'
 #' @return A character vector of relation names.
 #' @examples
-#' \dontrun{
-#' # Requires WRDS credentials and network access to WRDS PostgreSQL
-#' wrds_get_tables("crsp")
+#' if (wrds_credentials_available(prompt = FALSE)) {
+#'   wrds_get_tables("crsp")
 #' }
 #' @export
 wrds_get_tables <- function(schema, wrds_id = NULL, views = FALSE) {

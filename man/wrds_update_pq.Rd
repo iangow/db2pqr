@@ -133,16 +133,15 @@ if the local file is already up to date, making this function safe to call
 repeatedly as part of a scheduled data refresh.
 }
 \examples{
-\dontrun{
-# Requires WRDS credentials and network access to WRDS PostgreSQL
-wrds_update_pq("dsi", "crsp")
-wrds_update_pq("feed21_bankruptcy_notification", "audit")
+if (wrds_credentials_available(prompt = FALSE)) {
+  wrds_update_pq("dsi", "crsp")
+  wrds_update_pq("feed21_bankruptcy_notification", "audit")
 
-# Force re-download even if local file is current
-wrds_update_pq("dsi", "crsp", force = TRUE)
+  # Force re-download even if local file is current
+  wrds_update_pq("dsi", "crsp", force = TRUE)
 
-# Limit columns and rows (useful for testing)
-wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
+  # Limit columns and rows (useful for testing)
+  wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
 }
 
 }

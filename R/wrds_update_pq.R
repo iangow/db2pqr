@@ -80,16 +80,15 @@
 #'   returned.
 #'
 #' @examples
-#' \dontrun{
-#' # Requires WRDS credentials and network access to WRDS PostgreSQL
-#' wrds_update_pq("dsi", "crsp")
-#' wrds_update_pq("feed21_bankruptcy_notification", "audit")
+#' if (wrds_credentials_available(prompt = FALSE)) {
+#'   wrds_update_pq("dsi", "crsp")
+#'   wrds_update_pq("feed21_bankruptcy_notification", "audit")
 #'
-#' # Force re-download even if local file is current
-#' wrds_update_pq("dsi", "crsp", force = TRUE)
+#'   # Force re-download even if local file is current
+#'   wrds_update_pq("dsi", "crsp", force = TRUE)
 #'
-#' # Limit columns and rows (useful for testing)
-#' wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
+#'   # Limit columns and rows (useful for testing)
+#'   wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
 #' }
 #'
 #' @seealso \code{\link{pq_last_modified}}, \code{\link{pq_archive}}, \code{\link{pq_restore}}

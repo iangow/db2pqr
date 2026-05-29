@@ -104,21 +104,20 @@ wrds_conninfo <- function(wrds_id = NULL, format = c("uri", "dbi"),
 #'
 #' @return A one-row tibble with `ok`, `method`, and `message` columns.
 #' @examples
-#' \dontrun{
-#' # Requires WRDS credentials and network access to WRDS PostgreSQL
-#' wrds_check_credentials()
-#' }
+#' wrds_check_credentials(prompt = FALSE, save = FALSE)
 #' @export
 wrds_check_credentials <- function(wrds_id = NULL, password = NULL,
                                    prompt = interactive(), save = TRUE,
                                    passfile = NULL) {
   passfile <- if (is.null(passfile)) pgpass_path() else path.expand(passfile)
-  info <- wrds_conninfo(wrds_id, format = "dbi")
-  used_pgpass <- pgpass_has_entry(
-    info$host, info$port, info$dbname, info$user, passfile = passfile
-  )
+  info <- NULL
+  used_pgpass <- FALSE
 
   result <- tryCatch({
+    info <- wrds_conninfo(wrds_id, format = "dbi")
+    used_pgpass <- pgpass_has_entry(
+      info$host, info$port, info$dbname, info$user, passfile = passfile
+    )
     con <- .wrds_connect_dbi_info(
       info,
       password = password,
@@ -135,11 +134,32 @@ wrds_check_credentials <- function(wrds_id = NULL, password = NULL,
 
   tibble::tibble(
     ok = result$ok,
-    method = if (used_pgpass || pgpass_has_entry(
+    method = if (!is.null(info) && (used_pgpass || pgpass_has_entry(
       info$host, info$port, info$dbname, info$user, passfile = passfile
-    )) ".pgpass/libpq" else "libpq/keyring/env",
+    ))) ".pgpass/libpq" else "libpq/keyring/env",
     message = result$message
   )
+}
+
+#' Check whether WRDS credentials are available
+#'
+#' @inheritParams wrds_check_credentials
+#'
+#' @return `TRUE` if `wrds_check_credentials()` can open a WRDS PostgreSQL
+#'   connection, otherwise `FALSE`.
+#' @examples
+#' wrds_credentials_available(prompt = FALSE)
+#' @export
+wrds_credentials_available <- function(wrds_id = NULL, password = NULL,
+                                       prompt = interactive(),
+                                       passfile = NULL) {
+  isTRUE(wrds_check_credentials(
+    wrds_id = wrds_id,
+    password = password,
+    prompt = prompt,
+    save = FALSE,
+    passfile = passfile
+  )$ok)
 }
 
 #' Connect to WRDS PostgreSQL with DBI
@@ -158,10 +178,9 @@ wrds_check_credentials <- function(wrds_id = NULL, password = NULL,
 #'
 #' @return A `DBIConnection` object.
 #' @examples
-#' \dontrun{
-#' # Requires WRDS credentials and network access to WRDS PostgreSQL
-#' con <- wrds_connect_dbi()
-#' DBI::dbDisconnect(con)
+#' if (wrds_credentials_available(prompt = FALSE)) {
+#'   con <- wrds_connect_dbi()
+#'   DBI::dbDisconnect(con)
 #' }
 #' @export
 wrds_connect_dbi <- function(wrds_id = NULL, prompt = interactive(),

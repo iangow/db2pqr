@@ -20,13 +20,12 @@
 #' @return Invisibly returns a named list of output paths or `NULL` values for
 #'   skipped/failed tables.
 #' @examples
-#' \dontrun{
-#' # Requires WRDS credentials and network access to WRDS PostgreSQL
-#' wrds_schema_to_pq("crsp", data_dir = "~/pq_data")
+#' if (wrds_credentials_available(prompt = FALSE)) {
+#'   wrds_schema_to_pq("crsp", data_dir = "~/pq_data")
 #'
-#' # Process a specific subset of tables
-#' wrds_schema_to_pq("crsp", data_dir = "~/pq_data",
-#'                   tables = c("dsi", "dsf"))
+#'   # Process a specific subset of tables
+#'   wrds_schema_to_pq("crsp", data_dir = "~/pq_data",
+#'                     tables = c("dsi", "dsf"))
 #' }
 #' @export
 wrds_schema_to_pq <- function(

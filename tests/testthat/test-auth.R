@@ -390,6 +390,28 @@ test_that("wrds_check_credentials reports saved prompted passwords", {
   expect_identical(result$method, ".pgpass/libpq")
 })
 
+test_that("wrds_check_credentials is safe when username is unavailable", {
+  old_id <- Sys.getenv("WRDS_ID", unset = NA_character_)
+  old_user <- Sys.getenv("WRDS_USER", unset = NA_character_)
+  on.exit({
+    if (is.na(old_id)) Sys.unsetenv("WRDS_ID") else Sys.setenv(WRDS_ID = old_id)
+    if (is.na(old_user)) Sys.unsetenv("WRDS_USER") else Sys.setenv(WRDS_USER = old_user)
+  }, add = TRUE)
+  Sys.unsetenv("WRDS_ID")
+  Sys.unsetenv("WRDS_USER")
+
+  restore_key_get <- local_rebind(
+    "key_get",
+    function(...) stop("no keyring username"),
+    env = asNamespace("keyring")
+  )
+  on.exit(restore_key_get(), add = TRUE)
+
+  result <- db2pq::wrds_check_credentials(prompt = FALSE, save = FALSE)
+  expect_false(result$ok)
+  expect_false(db2pq::wrds_credentials_available(prompt = FALSE))
+})
+
 test_that("pgpass_find matches wildcard and escaped entries", {
   passfile <- tempfile()
   writeLines(c(

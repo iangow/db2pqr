@@ -50,12 +50,11 @@ Iterates over tables in a WRDS PostgreSQL schema and calls
 \code{\link{wrds_update_pq}} for each table.
 }
 \examples{
-\dontrun{
-# Requires WRDS credentials and network access to WRDS PostgreSQL
-wrds_schema_to_pq("crsp", data_dir = "~/pq_data")
+if (wrds_credentials_available(prompt = FALSE)) {
+  wrds_schema_to_pq("crsp", data_dir = "~/pq_data")
 
-# Process a specific subset of tables
-wrds_schema_to_pq("crsp", data_dir = "~/pq_data",
-                  tables = c("dsi", "dsf"))
+  # Process a specific subset of tables
+  wrds_schema_to_pq("crsp", data_dir = "~/pq_data",
+                    tables = c("dsi", "dsf"))
 }
 }

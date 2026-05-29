@@ -39,9 +39,8 @@ or \code{WRDS_PASSWORD} password is used successfully and \code{save = TRUE}, it
 saved to \code{.pgpass} for future connections.
 }
 \examples{
-\dontrun{
-# Requires WRDS credentials and network access to WRDS PostgreSQL
-con <- wrds_connect_dbi()
-DBI::dbDisconnect(con)
+if (wrds_credentials_available(prompt = FALSE)) {
+  con <- wrds_connect_dbi()
+  DBI::dbDisconnect(con)
 }
 }

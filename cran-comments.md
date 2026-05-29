@@ -1,16 +1,23 @@
 ## R CMD check results
 
-This package is preparing for an initial CRAN submission.
+This is a resubmission. In this version I have:
 
-Local checks to run before submission:
+* quoted software and data format names in `Title` and `Description`;
+* added a method reference with DOI to `Description`;
+* added executable examples for exported functions;
+* guarded examples requiring WRDS credentials with
+  `wrds_credentials_available(prompt = FALSE)`; and
+* added comments explaining examples that remain in `\dontrun{}` because they
+  require external database connections or existing local data files.
+
+Local checks:
 
 * `devtools::document()`
-* `devtools::test()`
-* `devtools::check()`
-* `urlchecker::url_check()`
-* rhub / GitHub Actions checks on macOS, Windows, and Linux
+* `devtools::test()`: 197 passed
+* `devtools::check()`: 0 errors, 0 warnings, 0 notes
 
 ## Notes
 
-Networked WRDS examples are wrapped in `\dontrun{}` because they require a WRDS
-account and PostgreSQL credentials.
+WRDS examples that require network access and credentials are guarded by
+`wrds_credentials_available(prompt = FALSE)`, which returns `FALSE` without
+prompting when credentials are unavailable.

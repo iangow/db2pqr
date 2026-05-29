@@ -18,11 +18,13 @@
 #' @return Invisibly returns `out_file`.
 #' @examples
 #' \dontrun{
+#' # Requires a PostgreSQL connection with the target schema and table
 #' con <- DBI::dbConnect(RPostgres::Postgres())
 #' qry <- dplyr::tbl(con, DBI::Id(schema = "crsp", table = "dsi")) |>
 #'   dplyr::filter(date >= as.Date("2020-01-01"))
 #'
 #' lazy_tbl_to_pq(qry, "~/pq_data/crsp/dsi_recent.parquet")
+#' DBI::dbDisconnect(con)
 #' }
 #' @export
 lazy_tbl_to_pq <- function(tbl, out_file, chunk_size = 100000L, metadata = NULL,

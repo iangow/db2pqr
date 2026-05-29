@@ -21,6 +21,14 @@
 #'   `DataType` objects.
 #'
 #' @return Invisibly returns `out_file`.
+#' @examples
+#' \dontrun{
+#' # Requires a PostgreSQL connection with the ADBC driver installed
+#' con <- DBI::dbConnect(RPostgres::Postgres())
+#' qry <- dplyr::tbl(con, DBI::Id(schema = "crsp", table = "dsi"))
+#' tbl_to_pq(qry, "~/pq_data/crsp/dsi.parquet")
+#' DBI::dbDisconnect(con)
+#' }
 #' @export
 tbl_to_pq <- function(tbl, out_file, chunk_size = 100000L, metadata = NULL,
                       col_types = NULL) {
@@ -55,6 +63,14 @@ tbl_to_pq <- function(tbl, out_file, chunk_size = 100000L, metadata = NULL,
 #' @param con An `RPostgres` connection object.
 #'
 #' @return An ADBC connection created by `adbi`.
+#' @examples
+#' \dontrun{
+#' # Requires a PostgreSQL connection and the adbi and adbcpostgresql packages
+#' pg_con <- DBI::dbConnect(RPostgres::Postgres())
+#' adbi_con <- con_to_adbi(pg_con)
+#' DBI::dbDisconnect(adbi_con)
+#' DBI::dbDisconnect(pg_con)
+#' }
 #' @export
 con_to_adbi <- function(con) {
   if (!requireNamespace("adbi", quietly = TRUE)) {
@@ -132,6 +148,14 @@ sql_to_pq_adbc <- function(con, sql, out_file, chunk_size = 100000, metadata = N
 #' @param max_chunks Maximum number of chunks to inspect. Default is `Inf`.
 #'
 #' @return A data frame with one row per attempted chunk.
+#' @examples
+#' \dontrun{
+#' # Requires a PostgreSQL connection and the ADBC driver installed
+#' con <- DBI::dbConnect(RPostgres::Postgres())
+#' qry <- dplyr::tbl(con, DBI::Id(schema = "crsp", table = "dsi"))
+#' tbl_to_pq_debug(qry, max_chunks = 3L)
+#' DBI::dbDisconnect(con)
+#' }
 #' @export
 tbl_to_pq_debug <- function(tbl, max_chunks = Inf) {
   if (!requireNamespace("dbplyr", quietly = TRUE)) {

@@ -56,3 +56,13 @@ Runs SQL against WRDS PostgreSQL and writes the result to a Parquet file
 using the same DBI or ADBC transfer paths as
 \code{\link{wrds_update_pq}}.
 }
+\examples{
+\dontrun{
+# Requires WRDS credentials and network access to WRDS PostgreSQL
+wrds_sql_to_pq(
+  "SELECT * FROM crsp.dsi WHERE date >= '2020-01-01'",
+  table_name = "dsi_recent", schema = "crsp",
+  data_dir = "~/pq_data"
+)
+}
+}

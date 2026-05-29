@@ -89,3 +89,13 @@ Exports a table from PostgreSQL to a Parquet file, with optional row
 filtering, column filtering, column renaming, Arrow type overrides, and
 timestamp normalization.
 }
+\examples{
+\dontrun{
+# Requires a PostgreSQL connection with the target schema and table
+db_to_pq("dsi", "crsp", data_dir = "~/pq_data")
+
+# Limit rows for a quick test
+db_to_pq("dsf", "crsp", data_dir = "~/pq_data",
+          obs = 1000, keep = c("permno", "date", "ret"))
+}
+}

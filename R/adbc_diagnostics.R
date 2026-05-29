@@ -2,6 +2,8 @@
 #'
 #' @return A tibble with installed status and package versions for optional ADBC
 #'   packages used by `db2pq`.
+#' @examples
+#' adbc_diagnostics()
 #' @export
 adbc_diagnostics <- function() {
   packages <- c("adbi", "adbcpostgresql", "adbcdrivermanager", "nanoarrow")

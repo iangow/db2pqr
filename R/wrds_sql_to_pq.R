@@ -20,6 +20,15 @@
 #' @param col_types Optional named list of Arrow output type overrides.
 #'
 #' @return Invisibly returns the output file path.
+#' @examples
+#' \dontrun{
+#' # Requires WRDS credentials and network access to WRDS PostgreSQL
+#' wrds_sql_to_pq(
+#'   "SELECT * FROM crsp.dsi WHERE date >= '2020-01-01'",
+#'   table_name = "dsi_recent", schema = "crsp",
+#'   data_dir = "~/pq_data"
+#' )
+#' }
 #' @export
 wrds_sql_to_pq <- function(sql, table_name, schema, wrds_id = NULL,
                            data_dir = NULL,

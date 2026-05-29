@@ -31,3 +31,11 @@ A character vector of relation names.
 \description{
 List PostgreSQL relations in a schema
 }
+\examples{
+\dontrun{
+# Requires a PostgreSQL connection with the target schema
+con <- DBI::dbConnect(RPostgres::Postgres())
+db_schema_tables("crsp", con = con)
+DBI::dbDisconnect(con)
+}
+}

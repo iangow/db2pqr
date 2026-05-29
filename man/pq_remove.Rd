@@ -47,6 +47,7 @@ provided.
 }
 \examples{
 \dontrun{
+# These examples require an existing local Parquet data repository
 pq_remove("company", "comp")
 pq_remove("company_20251109T072042Z", "comp", archive = TRUE)
 pq_remove(file_name = "~/pq_data/comp/company.parquet")

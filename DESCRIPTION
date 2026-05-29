@@ -1,13 +1,15 @@
 Package: db2pq
 Type: Package
-Title: Export Database Tables to Parquet
+Title: Export Database Tables to 'Parquet'
 Version: 0.0.4
-Description: Tools for exporting PostgreSQL tables to Parquet files, with
+Description: Tools for exporting 'PostgreSQL' tables to 'Parquet' files, with
     support for chunked writes, column type overrides, and timezone-aware
-    timestamp handling. Includes functions for maintaining a local Parquet
-    data library sourced from WRDS (Wharton Research Data Services), with
+    timestamp handling. Includes functions for maintaining a local 'Parquet'
+    data library sourced from 'WRDS' (Wharton Research Data Services), with
     update-checking based on table metadata, and archive management utilities
-    for versioning local data files.
+    for versioning local data files. See Gow and Ding (2024)
+    "Empirical Research in Accounting: Tools and Methods"
+    <doi:10.1201/9781003456230>.
 URL: https://github.com/iangow/db2pqr, https://iangow.github.io/db2pqr/
 BugReports: https://github.com/iangow/db2pqr/issues
 Authors@R: c(

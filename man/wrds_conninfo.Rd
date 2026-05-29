@@ -21,3 +21,7 @@ A character URI or a named list of DBI connection arguments.
 \description{
 Build WRDS PostgreSQL connection information
 }
+\examples{
+wrds_conninfo(wrds_id = "example_user")
+wrds_conninfo(wrds_id = "example_user", format = "dbi")
+}

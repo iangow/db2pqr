@@ -25,6 +25,7 @@
 #'
 #' @examples
 #' \dontrun{
+#' # These examples require an existing local Parquet data repository
 #' pq_remove("company", "comp")
 #' pq_remove("company_20251109T072042Z", "comp", archive = TRUE)
 #' pq_remove(file_name = "~/pq_data/comp/company.parquet")
@@ -95,6 +96,7 @@ pq_remove <- function(table_name = NULL,
 #'
 #' @examples
 #' \dontrun{
+#' # These examples require an existing local Parquet data repository
 #' pq_archive("company", "comp")
 #' pq_archive(file_name = "~/pq_data/comp/company.parquet")
 #' }
@@ -164,6 +166,7 @@ pq_archive <- function(table_name = NULL,
 #'
 #' @examples
 #' \dontrun{
+#' # Requires an existing archived file in a local Parquet data repository
 #' pq_restore("company_20251109T072042Z", "comp")
 #' }
 #'

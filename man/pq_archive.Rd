@@ -42,6 +42,7 @@ provided.
 }
 \examples{
 \dontrun{
+# These examples require an existing local Parquet data repository
 pq_archive("company", "comp")
 pq_archive(file_name = "~/pq_data/comp/company.parquet")
 }

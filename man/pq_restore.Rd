@@ -40,6 +40,7 @@ already exists at the destination, it is archived first (when
 }
 \examples{
 \dontrun{
+# Requires an existing archived file in a local Parquet data repository
 pq_restore("company_20251109T072042Z", "comp")
 }
 

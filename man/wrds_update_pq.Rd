@@ -134,6 +134,7 @@ repeatedly as part of a scheduled data refresh.
 }
 \examples{
 \dontrun{
+# Requires WRDS credentials and network access to WRDS PostgreSQL
 wrds_update_pq("dsi", "crsp")
 wrds_update_pq("feed21_bankruptcy_notification", "audit")
 

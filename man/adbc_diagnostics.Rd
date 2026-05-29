@@ -13,3 +13,6 @@ packages used by \code{db2pq}.
 \description{
 Report optional ADBC dependency status
 }
+\examples{
+adbc_diagnostics()
+}

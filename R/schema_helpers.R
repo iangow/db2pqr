@@ -7,6 +7,13 @@
 #'   used when `con` is not supplied.
 #'
 #' @return A character vector of relation names.
+#' @examples
+#' \dontrun{
+#' # Requires a PostgreSQL connection with the target schema
+#' con <- DBI::dbConnect(RPostgres::Postgres())
+#' db_schema_tables("crsp", con = con)
+#' DBI::dbDisconnect(con)
+#' }
 #' @export
 db_schema_tables <- function(schema, views = FALSE, con = NULL,
                              host = Sys.getenv("PGHOST", "localhost"),
@@ -54,6 +61,11 @@ db_schema_tables <- function(schema, views = FALSE, con = NULL,
 #' @param views If `TRUE`, include views as well as base tables.
 #'
 #' @return A character vector of relation names.
+#' @examples
+#' \dontrun{
+#' # Requires WRDS credentials and network access to WRDS PostgreSQL
+#' wrds_get_tables("crsp")
+#' }
 #' @export
 wrds_get_tables <- function(schema, wrds_id = NULL, views = FALSE) {
   con <- .wrds_connect_dbi(wrds_id = wrds_id)
@@ -77,6 +89,11 @@ wrds_get_tables <- function(schema, wrds_id = NULL, views = FALSE) {
 #' @param ... Additional arguments passed to \code{\link{db_to_pq}}.
 #'
 #' @return Invisibly returns a named list of output paths.
+#' @examples
+#' \dontrun{
+#' # Requires a PostgreSQL connection with the target schema
+#' db_schema_to_pq("crsp", data_dir = "~/pq_data")
+#' }
 #' @export
 db_schema_to_pq <- function(schema, data_dir = NULL,
                             force = FALSE, tables = NULL, chunk_size = 100000L,

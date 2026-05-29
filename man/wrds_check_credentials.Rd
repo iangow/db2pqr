@@ -37,3 +37,9 @@ A one-row tibble with \code{ok}, \code{method}, and \code{message} columns.
 Attempts a small WRDS PostgreSQL connection using \code{RPostgres}. The return
 value is a data frame so it can be printed or inspected in setup scripts.
 }
+\examples{
+\dontrun{
+# Requires WRDS credentials and network access to WRDS PostgreSQL
+wrds_check_credentials()
+}
+}

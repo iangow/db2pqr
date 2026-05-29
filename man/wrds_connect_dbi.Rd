@@ -38,3 +38,10 @@ interactive password prompt when \code{prompt = TRUE}. When a supplied, prompted
 or \code{WRDS_PASSWORD} password is used successfully and \code{save = TRUE}, it is
 saved to \code{.pgpass} for future connections.
 }
+\examples{
+\dontrun{
+# Requires WRDS credentials and network access to WRDS PostgreSQL
+con <- wrds_connect_dbi()
+DBI::dbDisconnect(con)
+}
+}

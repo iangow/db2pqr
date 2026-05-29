@@ -19,3 +19,9 @@ A character vector of relation names.
 \description{
 List WRDS relations in a schema
 }
+\examples{
+\dontrun{
+# Requires WRDS credentials and network access to WRDS PostgreSQL
+wrds_get_tables("crsp")
+}
+}

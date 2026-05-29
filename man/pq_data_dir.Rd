@@ -25,3 +25,7 @@ neither is available, the helper asks the user to choose or enter a
 directory and offers to persist it in either project-level \code{.Renviron} or
 user-level \verb{~/.Renviron}.
 }
+\examples{
+# Resolve an explicit path without prompting
+pq_data_dir("~/pq_data")
+}

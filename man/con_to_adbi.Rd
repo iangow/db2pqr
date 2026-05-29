@@ -21,3 +21,12 @@ connection is separate from the original \code{RPostgres} connection, so using
 this helper requires capacity for an additional concurrent database
 connection.
 }
+\examples{
+\dontrun{
+# Requires a PostgreSQL connection and the adbi and adbcpostgresql packages
+pg_con <- DBI::dbConnect(RPostgres::Postgres())
+adbi_con <- con_to_adbi(pg_con)
+DBI::dbDisconnect(adbi_con)
+DBI::dbDisconnect(pg_con)
+}
+}

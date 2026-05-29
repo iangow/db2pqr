@@ -13,6 +13,9 @@
 #'   or environment value is available.
 #'
 #' @return A directory path as a character string.
+#' @examples
+#' # Resolve an explicit path without prompting
+#' pq_data_dir("~/pq_data")
 #' @export
 pq_data_dir <- function(data_dir = NULL, prompt = interactive(),
                         fallback = ".") {

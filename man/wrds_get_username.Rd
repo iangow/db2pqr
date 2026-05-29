@@ -25,3 +25,6 @@ A non-empty character string.
 Resolves a WRDS username from, in order, an explicit argument, \code{WRDS_ID},
 \code{WRDS_USER}, and the keyring entry written by \code{wrds::wrds_set_credentials()}.
 }
+\examples{
+wrds_get_username(wrds_id = "example_user")
+}

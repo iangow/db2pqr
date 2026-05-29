@@ -13,6 +13,8 @@ WRDS_DB <- "wrds"
 #'   explicit, environment, or keyring username can be resolved.
 #'
 #' @return A non-empty character string.
+#' @examples
+#' wrds_get_username(wrds_id = "example_user")
 #' @export
 wrds_get_username <- function(wrds_id = NULL, user_key = "wrds_user",
                               prompt = interactive()) {
@@ -54,6 +56,9 @@ wrds_get_username <- function(wrds_id = NULL, user_key = "wrds_user",
 #'   `"require"`.
 #'
 #' @return A character URI or a named list of DBI connection arguments.
+#' @examples
+#' wrds_conninfo(wrds_id = "example_user")
+#' wrds_conninfo(wrds_id = "example_user", format = "dbi")
 #' @export
 wrds_conninfo <- function(wrds_id = NULL, format = c("uri", "dbi"),
                           sslmode = "require") {
@@ -98,6 +103,11 @@ wrds_conninfo <- function(wrds_id = NULL, format = c("uri", "dbi"),
 #'   set, otherwise the platform default password-file path.
 #'
 #' @return A one-row tibble with `ok`, `method`, and `message` columns.
+#' @examples
+#' \dontrun{
+#' # Requires WRDS credentials and network access to WRDS PostgreSQL
+#' wrds_check_credentials()
+#' }
 #' @export
 wrds_check_credentials <- function(wrds_id = NULL, password = NULL,
                                    prompt = interactive(), save = TRUE,
@@ -147,6 +157,12 @@ wrds_check_credentials <- function(wrds_id = NULL, password = NULL,
 #' @inheritParams wrds_check_credentials
 #'
 #' @return A `DBIConnection` object.
+#' @examples
+#' \dontrun{
+#' # Requires WRDS credentials and network access to WRDS PostgreSQL
+#' con <- wrds_connect_dbi()
+#' DBI::dbDisconnect(con)
+#' }
 #' @export
 wrds_connect_dbi <- function(wrds_id = NULL, prompt = interactive(),
                              save = TRUE, passfile = NULL) {

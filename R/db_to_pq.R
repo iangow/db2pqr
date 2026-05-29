@@ -38,6 +38,15 @@
 #' @param tz Time zone used to interpret `TIMESTAMP WITHOUT TIME ZONE` columns.
 #'
 #' @return Invisibly returns the output file path.
+#' @examples
+#' \dontrun{
+#' # Requires a PostgreSQL connection with the target schema and table
+#' db_to_pq("dsi", "crsp", data_dir = "~/pq_data")
+#'
+#' # Limit rows for a quick test
+#' db_to_pq("dsf", "crsp", data_dir = "~/pq_data",
+#'           obs = 1000, keep = c("permno", "date", "ret"))
+#' }
 #' @export
 db_to_pq <- function(
     table_name,

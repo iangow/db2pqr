@@ -48,3 +48,9 @@ Invisibly returns a named list of output paths.
 \description{
 Export all tables in a PostgreSQL schema to Parquet
 }
+\examples{
+\dontrun{
+# Requires a PostgreSQL connection with the target schema
+db_schema_to_pq("crsp", data_dir = "~/pq_data")
+}
+}

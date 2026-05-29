@@ -19,3 +19,12 @@ Fetches Arrow chunks one at a time using the experimental ADBC path and
 records where failures occur. This is intended for diagnosing driver or
 result-set issues without writing a Parquet file.
 }
+\examples{
+\dontrun{
+# Requires a PostgreSQL connection and the ADBC driver installed
+con <- DBI::dbConnect(RPostgres::Postgres())
+qry <- dplyr::tbl(con, DBI::Id(schema = "crsp", table = "dsi"))
+tbl_to_pq_debug(qry, max_chunks = 3L)
+DBI::dbDisconnect(con)
+}
+}

@@ -72,3 +72,12 @@ db_schema_to_pq(
 ## Value
 
 Invisibly returns a named list of output paths.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# Requires a PostgreSQL connection with the target schema
+db_schema_to_pq("crsp", data_dir = "~/pq_data")
+} # }
+```

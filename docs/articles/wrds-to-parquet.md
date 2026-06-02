@@ -36,8 +36,8 @@ testing:
 
 wrds_update_pq("company", "comp")
 #> Updated comp.company is available.
-#> Beginning file download at 2026-05-26 13:55:34 UTC.
-#> Completed file download at 2026-05-26 13:55:35 UTC.
+#> Beginning file download at 2026-06-02 18:52:28 UTC.
+#> Completed file download at 2026-06-02 18:52:33 UTC.
 ```
 
 If you run the function above and have not set up your details for a
@@ -72,7 +72,7 @@ library(dplyr, warn.conflicts = FALSE)
 ``` r
 
 read_parquet(company_file) |> select(gvkey, conm, sic)
-#> # A tibble: 57,608 × 3
+#> # A tibble: 57,652 × 3
 #>    gvkey  conm                     sic  
 #>    <chr>  <chr>                    <chr>
 #>  1 001000 A & E PLASTIK PAK INC    3089 
@@ -85,7 +85,7 @@ read_parquet(company_file) |> select(gvkey, conm, sic)
 #>  8 001007 ABKCO INDUSTRIES INC     3652 
 #>  9 001008 ABM COMPUTER SYSTEMS INC 3577 
 #> 10 001009 ABS INDUSTRIES INC       3460 
-#> # ℹ 57,598 more rows
+#> # ℹ 57,642 more rows
 ```
 
 ### Identifying Table Names and Schemas
@@ -130,41 +130,41 @@ there.
 wrds_schema_to_pq("ff", views = TRUE)
 #> Processing 12 table(s) in schema 'ff'.
 #> No comment found for ff.factors_china.
-#> Beginning file download at 2026-05-26 13:55:39 UTC.
-#> Completed file download at 2026-05-26 13:55:39 UTC.
+#> Beginning file download at 2026-06-02 18:52:38 UTC.
+#> Completed file download at 2026-06-02 18:52:39 UTC.
 #> Updated ff.factors_daily is available.
-#> Beginning file download at 2026-05-26 13:55:40 UTC.
-#> Completed file download at 2026-05-26 13:55:40 UTC.
+#> Beginning file download at 2026-06-02 18:52:40 UTC.
+#> Completed file download at 2026-06-02 18:52:41 UTC.
 #> Updated ff.factors_monthly is available.
-#> Beginning file download at 2026-05-26 13:55:41 UTC.
-#> Completed file download at 2026-05-26 13:55:41 UTC.
+#> Beginning file download at 2026-06-02 18:52:41 UTC.
+#> Completed file download at 2026-06-02 18:52:42 UTC.
 #> Updated ff.fivefactors_daily is available.
-#> Beginning file download at 2026-05-26 13:55:42 UTC.
-#> Completed file download at 2026-05-26 13:55:43 UTC.
+#> Beginning file download at 2026-06-02 18:52:43 UTC.
+#> Completed file download at 2026-06-02 18:52:43 UTC.
 #> No comment found for ff.fivefactors_monthly.
-#> Beginning file download at 2026-05-26 13:55:43 UTC.
-#> Completed file download at 2026-05-26 13:55:44 UTC.
+#> Beginning file download at 2026-06-02 18:52:44 UTC.
+#> Completed file download at 2026-06-02 18:52:44 UTC.
 #> Updated ff.industry12 is available.
-#> Beginning file download at 2026-05-26 13:55:44 UTC.
-#> Completed file download at 2026-05-26 13:55:45 UTC.
+#> Beginning file download at 2026-06-02 18:52:46 UTC.
+#> Completed file download at 2026-06-02 18:52:46 UTC.
 #> Updated ff.industry48 is available.
-#> Beginning file download at 2026-05-26 13:55:45 UTC.
-#> Completed file download at 2026-05-26 13:55:46 UTC.
+#> Beginning file download at 2026-06-02 18:52:50 UTC.
+#> Completed file download at 2026-06-02 18:52:50 UTC.
 #> Updated ff.liq_ps is available.
-#> Beginning file download at 2026-05-26 13:55:47 UTC.
-#> Completed file download at 2026-05-26 13:55:47 UTC.
+#> Beginning file download at 2026-06-02 18:52:53 UTC.
+#> Completed file download at 2026-06-02 18:52:54 UTC.
 #> Updated ff.liq_sadka is available.
-#> Beginning file download at 2026-05-26 13:55:48 UTC.
-#> Completed file download at 2026-05-26 13:55:48 UTC.
+#> Beginning file download at 2026-06-02 18:52:54 UTC.
+#> Completed file download at 2026-06-02 18:52:55 UTC.
 #> Updated ff.portfolios is available.
-#> Beginning file download at 2026-05-26 13:55:49 UTC.
-#> Completed file download at 2026-05-26 13:55:49 UTC.
+#> Beginning file download at 2026-06-02 18:52:56 UTC.
+#> Completed file download at 2026-06-02 18:52:56 UTC.
 #> Updated ff.portfolios25 is available.
-#> Beginning file download at 2026-05-26 13:55:50 UTC.
-#> Completed file download at 2026-05-26 13:55:51 UTC.
+#> Beginning file download at 2026-06-02 18:52:57 UTC.
+#> Completed file download at 2026-06-02 18:52:57 UTC.
 #> Updated ff.portfolios_d is available.
-#> Beginning file download at 2026-05-26 13:55:51 UTC.
-#> Completed file download at 2026-05-26 13:55:52 UTC.
+#> Beginning file download at 2026-06-02 18:52:58 UTC.
+#> Completed file download at 2026-06-02 18:52:59 UTC.
 ```
 
 The WRDS web query interface can also be useful for identifying the
@@ -186,8 +186,8 @@ wrds_update_pq(
   col_types = list(lpermno = "int32", lpermco = "int32")
 )
 #> Updated crsp.ccmxpf_lnkhist is available.
-#> Beginning file download at 2026-05-26 13:55:53 UTC.
-#> Completed file download at 2026-05-26 13:55:54 UTC.
+#> Beginning file download at 2026-06-02 18:52:59 UTC.
+#> Completed file download at 2026-06-02 18:53:00 UTC.
 ```
 
 ### Setting Time Zones
@@ -257,8 +257,8 @@ dsf_file = wrds_update_pq(
   keep = c("permno", "date", "^ret$")
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-26 13:55:54 UTC.
-#> Completed file download at 2026-05-26 13:55:55 UTC.
+#> Beginning file download at 2026-06-02 18:53:01 UTC.
+#> Completed file download at 2026-06-02 18:53:01 UTC.
 
 read_parquet(dsf_file)
 #> # A tibble: 100 × 3
@@ -312,12 +312,12 @@ renamed_company_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-26 13:55:56 UTC.
-#> Completed file download at 2026-05-26 13:55:56 UTC.
+#> Beginning file download at 2026-06-02 18:53:02 UTC.
+#> Completed file download at 2026-06-02 18:53:03 UTC.
 
 read_parquet(renamed_company_file) |>
   select(gvkey, company_name, sic)
-#> # A tibble: 57,608 × 3
+#> # A tibble: 57,652 × 3
 #>    gvkey  company_name             sic  
 #>    <chr>  <chr>                    <chr>
 #>  1 001000 A & E PLASTIK PAK INC    3089 
@@ -330,7 +330,7 @@ read_parquet(renamed_company_file) |>
 #>  8 001007 ABKCO INDUSTRIES INC     3652 
 #>  9 001008 ABM COMPUTER SYSTEMS INC 3577 
 #> 10 001009 ABS INDUSTRIES INC       3460 
-#> # ℹ 57,598 more rows
+#> # ℹ 57,642 more rows
 ```
 
 If `rename` and `col_types` are used together, names in `col_types`
@@ -395,8 +395,8 @@ funda_sample_file <- wrds_update_pq(
   force = TRUE
 )
 #> Forcing update based on user request.
-#> Beginning file download at 2026-05-26 13:55:57 UTC.
-#> Completed file download at 2026-05-26 13:55:57 UTC.
+#> Beginning file download at 2026-06-02 18:53:03 UTC.
+#> Completed file download at 2026-06-02 18:53:04 UTC.
 
 read_parquet(funda_sample_file) |> glimpse()
 #> Rows: 1,000
@@ -466,16 +466,16 @@ Archives live under:
 ``` r
 
 archived_company <- pq_archive("company", "comp")
-#> Archived to: db2pq-wrds-to-parquet-examples/comp/archive/company_20260526T060000Z.parquet
+#> Archived to: db2pq-wrds-to-parquet-examples/comp/archive/company_20260602T060000Z.parquet
 basename(archived_company)
-#> [1] "company_20260526T060000Z.parquet"
+#> [1] "company_20260602T060000Z.parquet"
 
 pq_last_modified("company", "comp", archive = TRUE) |>
   select(file_name, last_mod)
 #> # A tibble: 1 × 2
 #>   file_name                last_mod           
 #>   <chr>                    <dttm>             
-#> 1 company_20260526T060000Z 2026-05-26 06:00:00
+#> 1 company_20260602T060000Z 2026-06-02 06:00:00
 ```
 
 The archived copy can be restored, again without touching the main
@@ -493,7 +493,7 @@ pq_restore(
 #> Restored to: db2pq-wrds-to-parquet-examples/comp/company.parquet
 
 pq_last_modified("company", "comp")
-#> [1] "Company (Updated 2026-05-26)"
+#> [1] "Company (Updated 2026-06-02)"
 ```
 
 ## Custom SQL

@@ -59,6 +59,7 @@ Either `file_name` or both `table_name` and `schema` must be provided.
 
 ``` r
 if (FALSE) { # \dontrun{
+# These examples require an existing local Parquet data repository
 pq_archive("company", "comp")
 pq_archive(file_name = "~/pq_data/comp/company.parquet")
 } # }

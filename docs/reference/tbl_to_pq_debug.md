@@ -23,3 +23,15 @@ tbl_to_pq_debug(tbl, max_chunks = Inf)
 ## Value
 
 A data frame with one row per attempted chunk.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# Requires a PostgreSQL connection and the ADBC driver installed
+con <- DBI::dbConnect(RPostgres::Postgres())
+qry <- dplyr::tbl(con, DBI::Id(schema = "crsp", table = "dsi"))
+tbl_to_pq_debug(qry, max_chunks = 3L)
+DBI::dbDisconnect(con)
+} # }
+```

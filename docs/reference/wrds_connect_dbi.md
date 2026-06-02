@@ -49,3 +49,12 @@ Password handling prefers a matching PostgreSQL `.pgpass` entry, then
 `prompt = TRUE`. When a supplied, prompted, or `WRDS_PASSWORD` password
 is used successfully and `save = TRUE`, it is saved to `.pgpass` for
 future connections.
+
+## Examples
+
+``` r
+if (wrds_credentials_available(prompt = FALSE)) {
+  con <- wrds_connect_dbi()
+  DBI::dbDisconnect(con)
+}
+```

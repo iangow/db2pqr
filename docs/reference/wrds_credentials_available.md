@@ -1,17 +1,14 @@
-# Check WRDS PostgreSQL credentials
+# Check whether WRDS credentials are available
 
-Attempts a small WRDS PostgreSQL connection using `RPostgres`. The
-return value is a data frame so it can be printed or inspected in setup
-scripts.
+Check whether WRDS credentials are available
 
 ## Usage
 
 ``` r
-wrds_check_credentials(
+wrds_credentials_available(
   wrds_id = NULL,
   password = NULL,
   prompt = interactive(),
-  save = TRUE,
   passfile = NULL
 )
 ```
@@ -36,11 +33,6 @@ wrds_check_credentials(
   If `TRUE`, prompt interactively for a WRDS PostgreSQL password when no
   password was supplied and no matching `.pgpass` entry exists.
 
-- save:
-
-  If `TRUE`, save a supplied or prompted password to `.pgpass` after a
-  successful WRDS connection test.
-
 - passfile:
 
   PostgreSQL password-file path. Defaults to `PGPASSFILE` when set,
@@ -48,14 +40,13 @@ wrds_check_credentials(
 
 ## Value
 
-A one-row tibble with `ok`, `method`, and `message` columns.
+`TRUE` if
+[`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md)
+can open a WRDS PostgreSQL connection, otherwise `FALSE`.
 
 ## Examples
 
 ``` r
-wrds_check_credentials(prompt = FALSE, save = FALSE)
-#> # A tibble: 1 × 3
-#>   ok    method        message                              
-#>   <lgl> <chr>         <chr>                                
-#> 1 TRUE  .pgpass/libpq WRDS PostgreSQL connection succeeded.
+wrds_credentials_available(prompt = FALSE)
+#> [1] TRUE
 ```

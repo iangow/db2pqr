@@ -23,3 +23,15 @@ con_to_adbi(con)
 ## Value
 
 An ADBC connection created by `adbi`.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# Requires a PostgreSQL connection and the adbi and adbcpostgresql packages
+pg_con <- DBI::dbConnect(RPostgres::Postgres())
+adbi_con <- con_to_adbi(pg_con)
+DBI::dbDisconnect(adbi_con)
+DBI::dbDisconnect(pg_con)
+} # }
+```

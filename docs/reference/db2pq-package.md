@@ -1,16 +1,16 @@
-# db2pq: Export Database Tables to Parquet
+# db2pq: Export Database Tables to 'Parquet'
 
-Tools for exporting PostgreSQL and WRDS data to Apache Parquet files,
-managing a local Parquet data repository, and checking whether local
-files are current against source table metadata.
+Tools for exporting 'PostgreSQL' and 'WRDS' data to 'Apache Parquet'
+files, managing a local 'Parquet' data repository, and checking whether
+local files are current against source table metadata.
 
 ## Configuration
 
-`DATA_DIR` controls the default root directory for Parquet output;
+`DATA_DIR` controls the default root directory for 'Parquet' output;
 [`pq_data_dir`](https://iangow.github.io/db2pqr/reference/pq_data_dir.md)
-shows or resolves the default Parquet repository location. WRDS helpers
-resolve usernames from explicit arguments, `WRDS_ID`, `WRDS_USER`, and
-then the credential store used by the `wrds` package.
+shows or resolves the default 'Parquet' repository location. 'WRDS'
+helpers resolve usernames from explicit arguments, `WRDS_ID`,
+`WRDS_USER`, and then the credential store used by the `wrds` package.
 
 ## See also
 

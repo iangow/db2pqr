@@ -31,3 +31,11 @@ pq_data_dir(data_dir = NULL, prompt = interactive(), fallback = ".")
 ## Value
 
 A directory path as a character string.
+
+## Examples
+
+``` r
+# Resolve an explicit path without prompting
+pq_data_dir("~/pq_data")
+#> [1] "/Users/igow/pq_data"
+```

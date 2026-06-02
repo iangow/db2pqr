@@ -182,14 +182,22 @@ returned.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-wrds_update_pq("dsi", "crsp")
-wrds_update_pq("feed21_bankruptcy_notification", "audit")
+if (wrds_credentials_available(prompt = FALSE)) {
+  wrds_update_pq("dsi", "crsp")
+  wrds_update_pq("feed21_bankruptcy_notification", "audit")
 
-# Force re-download even if local file is current
-wrds_update_pq("dsi", "crsp", force = TRUE)
+  # Force re-download even if local file is current
+  wrds_update_pq("dsi", "crsp", force = TRUE)
 
-# Limit columns and rows (useful for testing)
-wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
-} # }
+  # Limit columns and rows (useful for testing)
+  wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
+}
+#> crsp.dsi already up to date.
+#> Updated audit.feed21_bankruptcy_notification is available.
+#> Beginning file download at 2026-06-02 18:51:47 UTC.
+#> Completed file download at 2026-06-02 18:51:48 UTC.
+#> Forcing update based on user request.
+#> Beginning file download at 2026-06-02 18:51:49 UTC.
+#> Completed file download at 2026-06-02 18:51:49 UTC.
+#> crsp.dsf already up to date.
 ```

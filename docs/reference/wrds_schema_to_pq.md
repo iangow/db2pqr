@@ -70,3 +70,18 @@ wrds_schema_to_pq(
 
 Invisibly returns a named list of output paths or `NULL` values for
 skipped/failed tables.
+
+## Examples
+
+``` r
+if (wrds_credentials_available(prompt = FALSE)) {
+  wrds_schema_to_pq("crsp", data_dir = "~/pq_data")
+
+  # Process a specific subset of tables
+  wrds_schema_to_pq("crsp", data_dir = "~/pq_data",
+                    tables = c("dsi", "dsf"))
+}
+#> No tables to process in schema 'crsp'.
+#> Warning: The following tables were not found in schema 'crsp' and will be skipped: dsi, dsf
+#> No tables to process in schema 'crsp'.
+```

@@ -51,3 +51,15 @@ This is an experimental development path kept separate from
 while we evaluate the ADBC transfer route. The ADBC path opens a second
 PostgreSQL connection for the transfer, so the database must allow an
 additional concurrent connection beyond the one already backing `tbl`.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# Requires a PostgreSQL connection with the ADBC driver installed
+con <- DBI::dbConnect(RPostgres::Postgres())
+qry <- dplyr::tbl(con, DBI::Id(schema = "crsp", table = "dsi"))
+tbl_to_pq(qry, "~/pq_data/crsp/dsi.parquet")
+DBI::dbDisconnect(con)
+} # }
+```

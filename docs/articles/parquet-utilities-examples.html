@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Parquet utility functions • db2pq</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">db2pq</a>
 
@@ -50,6 +50,14 @@
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/iangow/db2pqr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
+<li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
+  </ul>
+</li>
       </ul>
 </div>
 
@@ -119,19 +127,16 @@
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"comp"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 10 × 3</span></span>
-<span><span class="co">#&gt;    file_name     table         last_mod           </span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;         &lt;chr&gt;         &lt;dttm&gt;             </span></span>
-<span><span class="co">#&gt;  1 aco_pnfnda    aco_pnfnda    2026-05-25 06:00:00</span></span>
-<span><span class="co">#&gt;  2 adsprate      adsprate      2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  3 co_adesind    co_adesind    2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  4 co_afnd2      co_afnd2      2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  5 co_filedate   co_filedate   2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  6 co_hgic       co_hgic       2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  7 co_ifndq      co_ifndq      2026-04-09 06:00:00</span></span>
-<span><span class="co">#&gt;  8 company       company       2026-05-26 06:00:00</span></span>
-<span><span class="co">#&gt;  9 company_names company_names 2026-05-26 06:00:00</span></span>
-<span><span class="co">#&gt; 10 funda         funda         2026-05-25 06:00:00</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 7 × 3</span></span>
+<span><span class="co">#&gt;   file_name  table      last_mod           </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;      &lt;dttm&gt;             </span></span>
+<span><span class="co">#&gt; 1 aco_pnfnda aco_pnfnda 2026-06-02 06:00:00</span></span>
+<span><span class="co">#&gt; 2 company    company    2026-06-02 06:00:00</span></span>
+<span><span class="co">#&gt; 3 funda      funda      2026-06-02 06:00:00</span></span>
+<span><span class="co">#&gt; 4 funda_fncd funda_fncd 2026-06-02 06:00:00</span></span>
+<span><span class="co">#&gt; 5 fundq      fundq      2026-06-02 06:00:00</span></span>
+<span><span class="co">#&gt; 6 idx_daily  idx_daily  2026-06-02 06:00:00</span></span>
+<span><span class="co">#&gt; 7 r_auditors r_auditors 2026-06-02 06:00:00</span></span></code></pre></div>
 </div>
 <p>If you want to inspect archived files instead:</p>
 <div class="cell">
@@ -139,19 +144,10 @@
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 10 × 3</span></span>
-<span><span class="co">#&gt;    file_name                   table      last_mod           </span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;                       &lt;chr&gt;      &lt;dttm&gt;             </span></span>
-<span><span class="co">#&gt;  1 aco_pnfnda_20260330T060000Z aco_pnfnda 2026-03-30 06:00:00</span></span>
-<span><span class="co">#&gt;  2 company_20260105T070000Z    company    2026-01-05 07:00:00</span></span>
-<span><span class="co">#&gt;  3 company_20260107T070000Z    company    2026-01-07 07:00:00</span></span>
-<span><span class="co">#&gt;  4 company_20260209T070000Z    company    2026-02-09 07:00:00</span></span>
-<span><span class="co">#&gt;  5 company_20260218T070000Z    company    2026-02-18 07:00:00</span></span>
-<span><span class="co">#&gt;  6 company_20260224T070000Z    company    2026-02-24 07:00:00</span></span>
-<span><span class="co">#&gt;  7 company_20260225T000000Z    company    2026-02-24 07:00:00</span></span>
-<span><span class="co">#&gt;  8 company_20260225T070000Z    company    2026-02-25 07:00:00</span></span>
-<span><span class="co">#&gt;  9 company_20260226T070000Z    company    2026-02-26 07:00:00</span></span>
-<span><span class="co">#&gt; 10 company_20260303T070000Z    company    2026-03-03 07:00:00</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
+<span><span class="co">#&gt;   file_name              table last_mod           </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;                  &lt;chr&gt; &lt;dttm&gt;             </span></span>
+<span><span class="co">#&gt; 1 funda_20260406T060000Z funda 2026-04-06 06:00:00</span></span></code></pre></div>
 </div>
 <p>If your project uses a repository outside the default <code>DATA_DIR</code>, pass <code>data_dir</code> explicitly:</p>
 <div class="cell">
@@ -160,13 +156,13 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 5 × 3</span></span>
-<span><span class="co">#&gt;   file_name        table            last_mod           </span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;            &lt;chr&gt;            &lt;dttm&gt;             </span></span>
-<span><span class="co">#&gt; 1 ccmxpf_linktable ccmxpf_linktable 2026-02-06 07:00:00</span></span>
-<span><span class="co">#&gt; 2 ccmxpf_lnkhist   ccmxpf_lnkhist   2026-02-06 07:00:00</span></span>
-<span><span class="co">#&gt; 3 ccmxpf_lnkused   ccmxpf_lnkused   2026-02-06 07:00:00</span></span>
-<span><span class="co">#&gt; 4 comphist         comphist         2026-02-06 07:00:00</span></span>
-<span><span class="co">#&gt; 5 dse              dse              2025-02-08 07:00:00</span></span></code></pre></div>
+<span><span class="co">#&gt;   file_name      table          last_mod           </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;          &lt;chr&gt;          &lt;dttm&gt;             </span></span>
+<span><span class="co">#&gt; 1 ccmxpf_lnkhist ccmxpf_lnkhist 2026-02-06 07:00:00</span></span>
+<span><span class="co">#&gt; 2 comphist       comphist       2026-02-06 07:00:00</span></span>
+<span><span class="co">#&gt; 3 dsedelist      dsedelist      2025-02-08 07:00:00</span></span>
+<span><span class="co">#&gt; 4 dsedist        dsedist        2025-02-08 07:00:00</span></span>
+<span><span class="co">#&gt; 5 dseexchdates   dseexchdates   NA</span></span></code></pre></div>
 </div>
 </section><section class="level2"><h2 id="check-the-current-active-vintage">Check the Current Active Vintage<a class="anchor" aria-label="anchor" href="#check-the-current-active-vintage"></a>
 </h2>
@@ -185,19 +181,9 @@
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"company"</span>, schema <span class="op">=</span> <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span>, <span class="va">last_mod_str</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 10 × 4</span></span>
-<span><span class="co">#&gt;    file_name                table   last_mod            last_mod_str            </span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;                    &lt;chr&gt;   &lt;dttm&gt;              &lt;chr&gt;                   </span></span>
-<span><span class="co">#&gt;  1 company_20260225T000000Z company 2026-02-24 07:00:00 Company (Updated 2026-0…</span></span>
-<span><span class="co">#&gt;  2 company_20260225T070000Z company 2026-02-25 07:00:00 Company (Updated 2026-0…</span></span>
-<span><span class="co">#&gt;  3 company_20260226T070000Z company 2026-02-26 07:00:00 Company (Updated 2026-0…</span></span>
-<span><span class="co">#&gt;  4 company_20260303T070000Z company 2026-03-03 07:00:00 Company (Updated 2026-0…</span></span>
-<span><span class="co">#&gt;  5 company_20260315T060000Z company 2026-03-15 06:00:00 Company (Updated 2026-0…</span></span>
-<span><span class="co">#&gt;  6 company_20260322T060000Z company 2026-03-22 06:00:00 Company (Updated 2026-0…</span></span>
-<span><span class="co">#&gt;  7 company_20260323T060000Z company 2026-03-23 06:00:00 Company (Updated 2026-0…</span></span>
-<span><span class="co">#&gt;  8 company_20260331T060000Z company 2026-03-31 06:00:00 Company (Updated 2026-0…</span></span>
-<span><span class="co">#&gt;  9 company_20260402T060000Z company 2026-04-02 06:00:00 Company (Updated 2026-0…</span></span>
-<span><span class="co">#&gt; 10 company_20260407T060000Z company 2026-04-07 06:00:00 Company (Updated 2026-0…</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 0 × 4</span></span>
+<span><span class="co">#&gt; # ℹ 4 variables: file_name &lt;chr&gt;, table &lt;chr&gt;, last_mod &lt;dttm&gt;,</span></span>
+<span><span class="co">#&gt; #   last_mod_str &lt;chr&gt;</span></span></code></pre></div>
 </div>
 <p>That returns a table-like summary of the archived vintages for the requested dataset. To inspect archived files for a whole schema, use <code>schema</code> without <code>table_name</code>:</p>
 <div class="cell">
@@ -205,19 +191,10 @@
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"comp"</span>, archive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">table</span>, <span class="va">last_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 10 × 3</span></span>
-<span><span class="co">#&gt;    file_name                   table      last_mod           </span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;                       &lt;chr&gt;      &lt;dttm&gt;             </span></span>
-<span><span class="co">#&gt;  1 aco_pnfnda_20260330T060000Z aco_pnfnda 2026-03-30 06:00:00</span></span>
-<span><span class="co">#&gt;  2 company_20260105T070000Z    company    2026-01-05 07:00:00</span></span>
-<span><span class="co">#&gt;  3 company_20260107T070000Z    company    2026-01-07 07:00:00</span></span>
-<span><span class="co">#&gt;  4 company_20260209T070000Z    company    2026-02-09 07:00:00</span></span>
-<span><span class="co">#&gt;  5 company_20260218T070000Z    company    2026-02-18 07:00:00</span></span>
-<span><span class="co">#&gt;  6 company_20260224T070000Z    company    2026-02-24 07:00:00</span></span>
-<span><span class="co">#&gt;  7 company_20260225T000000Z    company    2026-02-24 07:00:00</span></span>
-<span><span class="co">#&gt;  8 company_20260225T070000Z    company    2026-02-25 07:00:00</span></span>
-<span><span class="co">#&gt;  9 company_20260226T070000Z    company    2026-02-26 07:00:00</span></span>
-<span><span class="co">#&gt; 10 company_20260303T070000Z    company    2026-03-03 07:00:00</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
+<span><span class="co">#&gt;   file_name              table last_mod           </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;                  &lt;chr&gt; &lt;dttm&gt;             </span></span>
+<span><span class="co">#&gt; 1 funda_20260406T060000Z funda 2026-04-06 06:00:00</span></span></code></pre></div>
 </div>
 </section><section class="level2"><h2 id="archive-the-currently-active-file">Archive the Currently Active File<a class="anchor" aria-label="anchor" href="#archive-the-currently-active-file"></a>
 </h2>
@@ -231,7 +208,7 @@
 <div class="sourceCode cell-code" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">company_archive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pq_archive.html">pq_archive</a></span><span class="op">(</span>file_name <span class="op">=</span> <span class="va">company_file</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">company_archive</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "company_20260526T060000Z.parquet"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "company_20260602T060000Z.parquet"</span></span></code></pre></div>
 </div>
 <p>This is useful when you want to preserve the current active vintage before running an experimental refresh or downstream transformation.</p>
 </section><section class="level2"><h2 id="restore-an-archived-vintage">Restore an Archived Vintage<a class="anchor" aria-label="anchor" href="#restore-an-archived-vintage"></a>
@@ -251,7 +228,7 @@
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pq_last_modified.html">pq_last_modified</a></span><span class="op">(</span>table_name <span class="op">=</span> <span class="st">"company"</span>, schema <span class="op">=</span> <span class="st">"comp"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Company (Updated 2026-05-26)"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Company (Updated 2026-06-02)"</span></span></code></pre></div>
 </div>
 </section><section class="level2"><h2 id="remove-a-file-explicitly">Remove a File Explicitly<a class="anchor" aria-label="anchor" href="#remove-a-file-explicitly"></a>
 </h2>

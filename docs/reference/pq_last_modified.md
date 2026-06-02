@@ -75,6 +75,7 @@ Behaviour depends on the arguments supplied:
 
 ``` r
 if (FALSE) { # \dontrun{
+# These examples require an existing local Parquet data repository
 # Raw metadata string for a single table
 pq_last_modified("dsi", "crsp")
 

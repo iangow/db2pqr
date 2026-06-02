@@ -2,11 +2,12 @@ url: https://iangow.github.io/db2pqr/
 
 template:
   bootstrap: 5
+  light-switch: true
 
 navbar:
   structure:
     left: [intro, reference, articles, news]
-    right: [github]
+    right: [github, lightswitch]
 
 reference:
   - title: PostgreSQL to Parquet
@@ -32,6 +33,7 @@ reference:
       - wrds_conninfo
       - wrds_connect_dbi
       - wrds_check_credentials
+      - wrds_credentials_available
   - title: Parquet file utilities
     desc: >
       Some useful functions for managing Parquet data repositories.

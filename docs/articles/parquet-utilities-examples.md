@@ -71,19 +71,16 @@ without `table_name` to summarize the active Parquet files in a schema:
 pq_last_modified(schema = "comp") |>
   select(file_name, table, last_mod) |>
   head(10)
-#> # A tibble: 10 × 3
-#>    file_name     table         last_mod           
-#>    <chr>         <chr>         <dttm>             
-#>  1 aco_pnfnda    aco_pnfnda    2026-05-25 06:00:00
-#>  2 adsprate      adsprate      2026-04-09 06:00:00
-#>  3 co_adesind    co_adesind    2026-04-09 06:00:00
-#>  4 co_afnd2      co_afnd2      2026-04-09 06:00:00
-#>  5 co_filedate   co_filedate   2026-04-09 06:00:00
-#>  6 co_hgic       co_hgic       2026-04-09 06:00:00
-#>  7 co_ifndq      co_ifndq      2026-04-09 06:00:00
-#>  8 company       company       2026-05-26 06:00:00
-#>  9 company_names company_names 2026-05-26 06:00:00
-#> 10 funda         funda         2026-05-25 06:00:00
+#> # A tibble: 7 × 3
+#>   file_name  table      last_mod           
+#>   <chr>      <chr>      <dttm>             
+#> 1 aco_pnfnda aco_pnfnda 2026-06-02 06:00:00
+#> 2 company    company    2026-06-02 06:00:00
+#> 3 funda      funda      2026-06-02 06:00:00
+#> 4 funda_fncd funda_fncd 2026-06-02 06:00:00
+#> 5 fundq      fundq      2026-06-02 06:00:00
+#> 6 idx_daily  idx_daily  2026-06-02 06:00:00
+#> 7 r_auditors r_auditors 2026-06-02 06:00:00
 ```
 
 If you want to inspect archived files instead:
@@ -93,19 +90,10 @@ If you want to inspect archived files instead:
 pq_last_modified(schema = "comp", archive = TRUE) |>
   select(file_name, table, last_mod) |>
   head(10)
-#> # A tibble: 10 × 3
-#>    file_name                   table      last_mod           
-#>    <chr>                       <chr>      <dttm>             
-#>  1 aco_pnfnda_20260330T060000Z aco_pnfnda 2026-03-30 06:00:00
-#>  2 company_20260105T070000Z    company    2026-01-05 07:00:00
-#>  3 company_20260107T070000Z    company    2026-01-07 07:00:00
-#>  4 company_20260209T070000Z    company    2026-02-09 07:00:00
-#>  5 company_20260218T070000Z    company    2026-02-18 07:00:00
-#>  6 company_20260224T070000Z    company    2026-02-24 07:00:00
-#>  7 company_20260225T000000Z    company    2026-02-24 07:00:00
-#>  8 company_20260225T070000Z    company    2026-02-25 07:00:00
-#>  9 company_20260226T070000Z    company    2026-02-26 07:00:00
-#> 10 company_20260303T070000Z    company    2026-03-03 07:00:00
+#> # A tibble: 1 × 3
+#>   file_name              table last_mod           
+#>   <chr>                  <chr> <dttm>             
+#> 1 funda_20260406T060000Z funda 2026-04-06 06:00:00
 ```
 
 If your project uses a repository outside the default `DATA_DIR`, pass
@@ -117,13 +105,13 @@ pq_last_modified(schema = "crsp", data_dir = Sys.getenv("DATA_DIR")) |>
   select(file_name, table, last_mod) |>
   head(5)
 #> # A tibble: 5 × 3
-#>   file_name        table            last_mod           
-#>   <chr>            <chr>            <dttm>             
-#> 1 ccmxpf_linktable ccmxpf_linktable 2026-02-06 07:00:00
-#> 2 ccmxpf_lnkhist   ccmxpf_lnkhist   2026-02-06 07:00:00
-#> 3 ccmxpf_lnkused   ccmxpf_lnkused   2026-02-06 07:00:00
-#> 4 comphist         comphist         2026-02-06 07:00:00
-#> 5 dse              dse              2025-02-08 07:00:00
+#>   file_name      table          last_mod           
+#>   <chr>          <chr>          <dttm>             
+#> 1 ccmxpf_lnkhist ccmxpf_lnkhist 2026-02-06 07:00:00
+#> 2 comphist       comphist       2026-02-06 07:00:00
+#> 3 dsedelist      dsedelist      2025-02-08 07:00:00
+#> 4 dsedist        dsedist        2025-02-08 07:00:00
+#> 5 dseexchdates   dseexchdates   NA
 ```
 
 ## Check the Current Active Vintage
@@ -152,19 +140,9 @@ a table:
 pq_last_modified(table_name = "company", schema = "comp", archive = TRUE) |>
   select(file_name, table, last_mod, last_mod_str) |>
   tail(10)
-#> # A tibble: 10 × 4
-#>    file_name                table   last_mod            last_mod_str            
-#>    <chr>                    <chr>   <dttm>              <chr>                   
-#>  1 company_20260225T000000Z company 2026-02-24 07:00:00 Company (Updated 2026-0…
-#>  2 company_20260225T070000Z company 2026-02-25 07:00:00 Company (Updated 2026-0…
-#>  3 company_20260226T070000Z company 2026-02-26 07:00:00 Company (Updated 2026-0…
-#>  4 company_20260303T070000Z company 2026-03-03 07:00:00 Company (Updated 2026-0…
-#>  5 company_20260315T060000Z company 2026-03-15 06:00:00 Company (Updated 2026-0…
-#>  6 company_20260322T060000Z company 2026-03-22 06:00:00 Company (Updated 2026-0…
-#>  7 company_20260323T060000Z company 2026-03-23 06:00:00 Company (Updated 2026-0…
-#>  8 company_20260331T060000Z company 2026-03-31 06:00:00 Company (Updated 2026-0…
-#>  9 company_20260402T060000Z company 2026-04-02 06:00:00 Company (Updated 2026-0…
-#> 10 company_20260407T060000Z company 2026-04-07 06:00:00 Company (Updated 2026-0…
+#> # A tibble: 0 × 4
+#> # ℹ 4 variables: file_name <chr>, table <chr>, last_mod <dttm>,
+#> #   last_mod_str <chr>
 ```
 
 That returns a table-like summary of the archived vintages for the
@@ -176,19 +154,10 @@ requested dataset. To inspect archived files for a whole schema, use
 pq_last_modified(schema = "comp", archive = TRUE) |>
   select(file_name, table, last_mod) |>
   head(10)
-#> # A tibble: 10 × 3
-#>    file_name                   table      last_mod           
-#>    <chr>                       <chr>      <dttm>             
-#>  1 aco_pnfnda_20260330T060000Z aco_pnfnda 2026-03-30 06:00:00
-#>  2 company_20260105T070000Z    company    2026-01-05 07:00:00
-#>  3 company_20260107T070000Z    company    2026-01-07 07:00:00
-#>  4 company_20260209T070000Z    company    2026-02-09 07:00:00
-#>  5 company_20260218T070000Z    company    2026-02-18 07:00:00
-#>  6 company_20260224T070000Z    company    2026-02-24 07:00:00
-#>  7 company_20260225T000000Z    company    2026-02-24 07:00:00
-#>  8 company_20260225T070000Z    company    2026-02-25 07:00:00
-#>  9 company_20260226T070000Z    company    2026-02-26 07:00:00
-#> 10 company_20260303T070000Z    company    2026-03-03 07:00:00
+#> # A tibble: 1 × 3
+#>   file_name              table last_mod           
+#>   <chr>                  <chr> <dttm>             
+#> 1 funda_20260406T060000Z funda 2026-04-06 06:00:00
 ```
 
 ## Archive the Currently Active File
@@ -207,7 +176,7 @@ current `comp.company` file into its archive directory:
 
 company_archive <- pq_archive(file_name = company_file)
 basename(company_archive)
-#> [1] "company_20260526T060000Z.parquet"
+#> [1] "company_20260602T060000Z.parquet"
 ```
 
 This is useful when you want to preserve the current active vintage
@@ -236,7 +205,7 @@ can archive that file first with its default `archive = TRUE`.
 ``` r
 
 pq_last_modified(table_name = "company", schema = "comp")
-#> [1] "Company (Updated 2026-05-26)"
+#> [1] "Company (Updated 2026-06-02)"
 ```
 
 ## Remove a File Explicitly

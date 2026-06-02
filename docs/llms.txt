@@ -293,6 +293,8 @@ Functions for creating Parquet data from WRDS.
   : Connect to WRDS PostgreSQL with DBI
 - [`wrds_check_credentials()`](https://iangow.github.io/db2pqr/reference/wrds_check_credentials.md)
   : Check WRDS PostgreSQL credentials
+- [`wrds_credentials_available()`](https://iangow.github.io/db2pqr/reference/wrds_credentials_available.md)
+  : Check whether WRDS credentials are available
 
 ## Parquet file utilities
 

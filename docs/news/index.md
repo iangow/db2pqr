@@ -2,6 +2,8 @@
 
 ## db2pq 0.0.4
 
+CRAN release: 2026-06-02
+
 - Added first-class WRDS credential helpers:
   [`wrds_get_username()`](https://iangow.github.io/db2pqr/reference/wrds_get_username.md),
   [`wrds_conninfo()`](https://iangow.github.io/db2pqr/reference/wrds_conninfo.md),

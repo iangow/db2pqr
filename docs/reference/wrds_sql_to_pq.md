@@ -81,3 +81,15 @@ wrds_sql_to_pq(
 ## Value
 
 Invisibly returns the output file path.
+
+## Examples
+
+``` r
+if (wrds_credentials_available(prompt = FALSE)) {
+  wrds_sql_to_pq(
+    "SELECT * FROM crsp.dsi WHERE date >= '2020-01-01'",
+    table_name = "dsi_recent", schema = "crsp",
+    data_dir = "~/pq_data"
+  )
+}
+```

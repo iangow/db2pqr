@@ -25,3 +25,12 @@ wrds_get_tables(schema, wrds_id = NULL, views = FALSE)
 ## Value
 
 A character vector of relation names.
+
+## Examples
+
+``` r
+if (wrds_credentials_available(prompt = FALSE)) {
+  wrds_get_tables("crsp")
+}
+#> character(0)
+```

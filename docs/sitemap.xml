@@ -38,6 +38,7 @@
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_check_credentials.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_connect_dbi.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_conninfo.html</loc></url>
+<url><loc>https://iangow.github.io/db2pqr/reference/wrds_credentials_available.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_get_tables.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_get_username.html</loc></url>
 <url><loc>https://iangow.github.io/db2pqr/reference/wrds_schema_to_pq.html</loc></url>

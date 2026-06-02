@@ -32,3 +32,10 @@ wrds_get_username(
 ## Value
 
 A non-empty character string.
+
+## Examples
+
+``` r
+wrds_get_username(wrds_id = "example_user")
+#> [1] "example_user"
+```

@@ -195,7 +195,7 @@ if (wrds_credentials_available(prompt = FALSE)) {
 #> crsp.dsi already up to date.
 #> audit.feed21_bankruptcy_notification already up to date.
 #> Forcing update based on user request.
-#> Beginning file download at 2026-06-02 20:50:59 UTC.
-#> Completed file download at 2026-06-02 20:51:00 UTC.
+#> Beginning file download at 2026-06-02 21:24:02 UTC.
+#> Completed file download at 2026-06-02 21:24:02 UTC.
 #> crsp.dsf already up to date.
 ```

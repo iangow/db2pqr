@@ -1,5 +1,8 @@
 :root {
   --db2pq-code-radius: 0.375rem;
+  --db2pq-reference-surface: #2a2f34;
+  --db2pq-reference-surface-muted: #252a2f;
+  --db2pq-reference-border: #46505a;
 }
 
 p code {
@@ -53,7 +56,6 @@ html[data-bs-theme="dark"] .text-muted {
   color: #abb4be !important;
 }
 
-html[data-bs-theme="dark"] main code:not(.sourceCode),
 html[data-bs-theme="dark"] main p code,
 html[data-bs-theme="dark"] main li code,
 html[data-bs-theme="dark"] main dd code,
@@ -150,4 +152,57 @@ html[data-bs-theme="dark"] table {
 html[data-bs-theme="dark"] footer {
   border-top-color: #4c545d;
   color: #abb4be;
+}
+
+html[data-bs-theme="dark"] .template-reference-topic .ref-description,
+html[data-bs-theme="dark"] .template-reference-topic #arguments dl,
+html[data-bs-theme="dark"] .template-reference-index main > .section.level2 {
+  color: var(--bs-body-color);
+}
+
+html[data-bs-theme="dark"] .template-reference-index main > .section.level2:has(dl:not(:empty)),
+html[data-bs-theme="dark"] .template-reference-topic #arguments dl {
+  background-color: var(--db2pq-reference-surface-muted);
+  border: 1px solid var(--db2pq-reference-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+html[data-bs-theme="dark"] .template-reference-index dt,
+html[data-bs-theme="dark"] .template-reference-topic dt {
+  color: #f2f4f6;
+}
+
+html[data-bs-theme="dark"] .template-reference-index dd,
+html[data-bs-theme="dark"] .template-reference-topic dd {
+  color: #cbd3da;
+}
+
+html[data-bs-theme="dark"] .template-reference-topic dt:not(:first-child),
+html[data-bs-theme="dark"] .template-reference-index dt:not(:first-child) {
+  border-top: 1px solid #3b444d;
+  padding-top: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+html[data-bs-theme="dark"] .template-reference-topic .ref-description {
+  background-color: var(--db2pq-reference-surface);
+  border-left: 0.25rem solid #75b8ff;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+}
+
+html[data-bs-theme="dark"] .template-reference-topic .ref-description p:last-child,
+html[data-bs-theme="dark"] .template-reference-topic dd p:last-child {
+  margin-bottom: 0;
+}
+
+html[data-bs-theme="dark"] .template-reference-topic .sourceCode {
+  background-color: #252a2f;
+}
+
+html[data-bs-theme="dark"] .template-reference-topic pre code {
+  color: inherit;
+  background-color: transparent;
+  border: 0;
 }

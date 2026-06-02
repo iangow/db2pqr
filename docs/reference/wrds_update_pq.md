@@ -193,11 +193,9 @@ if (wrds_credentials_available(prompt = FALSE)) {
   wrds_update_pq("dsf", "crsp", obs = 1000, keep = c("permno", "date", "ret"))
 }
 #> crsp.dsi already up to date.
-#> Updated audit.feed21_bankruptcy_notification is available.
-#> Beginning file download at 2026-06-02 18:51:47 UTC.
-#> Completed file download at 2026-06-02 18:51:48 UTC.
+#> audit.feed21_bankruptcy_notification already up to date.
 #> Forcing update based on user request.
-#> Beginning file download at 2026-06-02 18:51:49 UTC.
-#> Completed file download at 2026-06-02 18:51:49 UTC.
+#> Beginning file download at 2026-06-02 20:50:59 UTC.
+#> Completed file download at 2026-06-02 20:51:00 UTC.
 #> crsp.dsf already up to date.
 ```

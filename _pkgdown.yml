@@ -3,6 +3,8 @@ url: https://iangow.github.io/db2pqr/
 template:
   bootstrap: 5
   light-switch: true
+  theme: arrow-light
+  theme-dark: arrow-dark
 
 navbar:
   structure:
